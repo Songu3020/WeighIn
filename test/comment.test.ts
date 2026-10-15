@@ -98,4 +98,55 @@ describe("renderComment", () => {
     expect(comment).toContain("new-fn");
     expect(comment).toContain("old-fn");
   });
+
+  it("escapes adversarial markdown content and preserves original diff data", () => {
+    const diff = createMockDiff(true);
+    const fixtureId = "fixture`|<details>\nlevel-1";
+    const logicalId = "logical`|<!-- weighin-report -->\nmode";
+    const caseId = "case`|</summary>\nvalue";
+    const functionName = "hello`|<summary>\nvalue";
+    const reason = "missing`|</details><!-- weighin-report -->\nline";
+    diff.contracts[0].fixture_id = fixtureId;
+    diff.contracts[0].logical_id = logicalId;
+    diff.contracts[0].contract_id = "contract-a";
+    diff.contracts[0].functions[0].function_name = functionName;
+    diff.contracts[0].functions[0].case_id = caseId;
+    diff.contracts[0].functions[0].metrics[0].reason = reason;
+    diff.contracts[0].functions[0].metrics[0].head.limit_reason =
+      "limit`|</details>\nboom";
+
+    const comment = renderComment(
+      diff,
+      [
+        {
+          contract_id: "contract-a",
+          function_name: functionName,
+          case_id: caseId,
+          metric: "cpu_instructions",
+          delta: 10,
+          pct: 10,
+          rule: "strict_zero_tolerance",
+          message: "Violation `|</details><!-- weighin-report -->\nboom",
+        },
+      ],
+      "main",
+      "abcdef123",
+    );
+
+    expect(comment.match(/<!-- weighin-report -->/g)).toHaveLength(1);
+    expect(comment).toContain("fixture\\`|&lt;details&gt;\\nlevel-1");
+    expect(comment).toContain(
+      "logical\\`|&lt;!-- weighin-report --&gt;\\nmode",
+    );
+    expect(comment).toContain("hello\\`|&lt;summary&gt;\\nvalue");
+    expect(comment).toContain(
+      "Violation \\`\\|&lt;/details&gt;&lt;!-- weighin-report --&gt; boom",
+    );
+    expect(comment).not.toContain("<!-- weighin-report -->\nline");
+    expect(diff.contracts[0].fixture_id).toBe(fixtureId);
+    expect(diff.contracts[0].logical_id).toBe(logicalId);
+    expect(diff.contracts[0].functions[0].function_name).toBe(functionName);
+    expect(diff.contracts[0].functions[0].case_id).toBe(caseId);
+    expect(diff.contracts[0].functions[0].metrics[0].reason).toBe(reason);
+  });
 });

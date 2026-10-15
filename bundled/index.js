@@ -53699,6 +53699,12 @@ function metricLabel(metric) {
   }
   return METRIC_LABELS[metric.key];
 }
+function escapeMarkdownText(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\r?\n/g, " ").replace(/`/g, "\\`");
+}
+function codeSpan(value) {
+  return `\`${String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\r?\n/g, "\\n")}\``;
+}
 function fmt(n) {
   if (n === null) return "Unavailable";
   return n.toLocaleString("en-US");
@@ -53723,10 +53729,10 @@ function benchmarkLabel(fn) {
 function renderFunctionTable(fn) {
   const rows = fn.metrics.map((m) => {
     if (m.availability === "unavailable") {
-      return `| \u26AA | ${metricLabel(m)} | ${fmt(m.base.consumed)} | ${fmt(m.head.consumed)} | Unavailable | \u2014 | ${fmt(m.head.limit)} |`;
+      return `| \u26AA | ${escapeMarkdownText(metricLabel(m))} | ${fmt(m.base.consumed)} | ${fmt(m.head.consumed)} | Unavailable | \u2014 | ${fmt(m.head.limit)} |`;
     }
     const t = trend(m.delta);
-    const label = metricLabel(m);
+    const label = escapeMarkdownText(metricLabel(m));
     const base = fmt(m.base.consumed);
     const head = fmt(m.head.consumed);
     const delta = fmtDelta(m.delta);
@@ -53735,14 +53741,14 @@ function renderFunctionTable(fn) {
     return `| ${t} | ${label} | ${base} | ${head} | ${delta} | ${pct} | ${limit} |`;
   });
   return [
-    `#### \`${benchmarkLabel(fn)}\``,
+    `#### ${codeSpan(benchmarkLabel(fn))}`,
     "",
     ...fn.head_provenance ? [
-      `Compute source: ${fn.head_provenance.source} ${fn.head_provenance.source_version}; protocol ${fn.head_provenance.protocol}.`,
-      `Snapshot ledgers: BASE ${fn.base_provenance?.ledger} \u2192 HEAD ${fn.head_provenance.ledger}; compute config SHA256: \`${fn.head_provenance.compute_config_sha256}\`.`,
-      `Full config SHA256: BASE \`${fn.base_provenance?.config_sha256}\` \u2192 HEAD \`${fn.head_provenance.config_sha256}\`.`,
+      `Compute source: ${escapeMarkdownText(fn.head_provenance.source)} ${escapeMarkdownText(fn.head_provenance.source_version)}; protocol ${escapeMarkdownText(fn.head_provenance.protocol)}.`,
+      `Snapshot ledgers: BASE ${escapeMarkdownText(fn.base_provenance?.ledger)} \u2192 HEAD ${escapeMarkdownText(fn.head_provenance.ledger)}; compute config SHA256: ${codeSpan(fn.head_provenance.compute_config_sha256)}.`,
+      `Full config SHA256: BASE ${codeSpan(fn.base_provenance?.config_sha256)} \u2192 HEAD ${codeSpan(fn.head_provenance.config_sha256)}.`,
       ...fn.head_provenance.resource_limits_sha256 ? [
-        `Resource limits SHA256: \`${fn.head_provenance.resource_limits_sha256}\`.`
+        `Resource limits SHA256: ${codeSpan(fn.head_provenance.resource_limits_sha256)}.`
       ] : [],
       ""
     ] : [],
@@ -53750,9 +53756,11 @@ function renderFunctionTable(fn) {
     "|---|---|---|---|---|---|---|",
     ...rows,
     "",
-    ...fn.metrics.filter((m) => m.availability === "unavailable").map((m) => `- **${metricLabel(m)} unavailable**: ${m.reason}`),
+    ...fn.metrics.filter((m) => m.availability === "unavailable").map(
+      (m) => `- **${escapeMarkdownText(metricLabel(m))} unavailable**: ${escapeMarkdownText(m.reason)}`
+    ),
     ...fn.metrics.filter((m) => m.head.limit_source || m.head.limit_reason).map(
-      (m) => `- **${METRIC_LABELS[m.key]}** source: \`${m.head.source}\`; limit: ${m.head.limit_source ? `\`${m.head.limit_source}\`` : m.head.limit_reason}.`
+      (m) => `- **${escapeMarkdownText(METRIC_LABELS[m.key])}** source: ${codeSpan(m.head.source)}; limit: ${m.head.limit_source ? codeSpan(m.head.limit_source) : escapeMarkdownText(m.head.limit_reason)}.`
     )
   ].join("\n");
 }
@@ -53763,7 +53771,7 @@ function renderComment(diff, violations, baseRef, headSha) {
   lines.push(`## ${statusEmoji} WeighIn Benchmark Report`);
   lines.push("");
   lines.push(
-    `${statusText} \u2014 comparing \`${baseRef}\` \u2192 \`${headSha.slice(0, 8)}\``
+    `${statusText} \u2014 comparing ${codeSpan(baseRef)} \u2192 ${codeSpan(headSha.slice(0, 8))}`
   );
   lines.push("");
   if (violations.length > 0) {
@@ -53774,39 +53782,39 @@ function renderComment(diff, violations, baseRef, headSha) {
         (fn) => fn.function_name === v.function_name && fn.case_id === v.case_id
       )?.metrics.find((m) => m.key === v.metric);
       lines.push(
-        `- **\`${contractLabel(v)} / ${benchmarkLabel(v)}\` / ${measured ? metricLabel(measured) : METRIC_LABELS[v.metric]}**: ${v.message}`
+        `- **${codeSpan(`${contractLabel(v)} / ${benchmarkLabel(v)}`)} / ${measured ? codeSpan(metricLabel(measured)) : codeSpan(METRIC_LABELS[v.metric])}**: ${escapeMarkdownText(v.message)}`
       );
     }
     lines.push("");
   }
   if (diff.newContracts.length > 0) {
     lines.push(
-      `> **New contracts** (no baseline): ${diff.newContracts.map((c) => `\`${c}\``).join(", ")}`
+      `> **New contracts** (no baseline): ${diff.newContracts.map((c) => codeSpan(c)).join(", ")}`
     );
     lines.push("");
   }
   if (diff.removedContracts.length > 0) {
     lines.push(
-      `> **Removed contracts**: ${diff.removedContracts.map((c) => `\`${c}\``).join(", ")}`
+      `> **Removed contracts**: ${diff.removedContracts.map((c) => codeSpan(c)).join(", ")}`
     );
     lines.push("");
   }
   for (const contract of diff.contracts) {
-    lines.push(`### Contract \`${contractLabel(contract)}\``);
+    lines.push(`### Contract ${codeSpan(contractLabel(contract))}`);
     lines.push("");
     lines.push(
-      `Runtime addresses: BASE \`${contract.base_contract_id}\` \u2192 HEAD \`${contract.head_contract_id}\``
+      `Runtime addresses: BASE ${codeSpan(contract.base_contract_id)} \u2192 HEAD ${codeSpan(contract.head_contract_id)}`
     );
     lines.push("");
     if (contract.newBenchmarks.length > 0) {
       lines.push(
-        `> New benchmarks (no baseline): ${contract.newBenchmarks.map((f) => `\`${benchmarkLabel(f)}\``).join(", ")}`
+        `> New benchmarks (no baseline): ${contract.newBenchmarks.map((f) => codeSpan(benchmarkLabel(f))).join(", ")}`
       );
       lines.push("");
     }
     if (contract.removedBenchmarks.length > 0) {
       lines.push(
-        `> Removed benchmarks: ${contract.removedBenchmarks.map((f) => `\`${benchmarkLabel(f)}\``).join(", ")}`
+        `> Removed benchmarks: ${contract.removedBenchmarks.map((f) => codeSpan(benchmarkLabel(f))).join(", ")}`
       );
       lines.push("");
     }
