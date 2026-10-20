@@ -53666,13 +53666,46 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
       },
       signal
     );
-    const error2 = raw.error;
-    if (error2) throw new Error(`RPC simulation failed: ${error2}`);
-    const simulation = simulationSchema.parse(raw);
-    const resources = types.SorobanTransactionData.fromXDR(
-      simulation.transactionData,
-      "base64"
-    ).resources();
+    const context3 = options?.functionName ? options?.caseId ? `${options.functionName} (${options.caseId})` : options.functionName : void 0;
+    const error2 = raw?.error;
+    if (error2) {
+      throw new Error(
+        context3 ? `Simulation failed for ${context3}: ${error2}` : `RPC simulation failed: ${error2}`
+      );
+    }
+    if (typeof raw !== "object" || raw === null || !("transactionData" in raw) || !raw.transactionData) {
+      throw new Error(
+        context3 ? `Simulation did not return transaction data for ${context3}` : "Simulation did not return transaction data"
+      );
+    }
+    const parseResult = simulationSchema.safeParse(raw);
+    if (!parseResult.success) {
+      const details = parseResult.error.issues.map((issue) => `${issue.path.join(".") || "root"}: ${issue.message}`).join("; ");
+      throw new Error(
+        context3 ? `Simulation returned unsupported result shape for ${context3}: ${details}` : `Simulation returned unsupported result shape: ${details}`
+      );
+    }
+    const simulation = parseResult.data;
+    try {
+      types.ScVal.fromXDR(simulation.results[0].xdr, "base64");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context3 ? `Simulation returned unsupported result shape for ${context3}: invalid return value XDR (${detail})` : `Simulation returned unsupported result shape: invalid return value XDR (${detail})`
+      );
+    }
+    let resources;
+    try {
+      resources = types.SorobanTransactionData.fromXDR(
+        simulation.transactionData,
+        "base64"
+      ).resources();
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context3 ? `Simulation returned invalid transaction data for ${context3}: ${detail}` : `Simulation returned invalid transaction data: ${detail}`
+      );
+    }
     for (const key of [
       ...resources.footprint().readOnly(),
       ...resources.footprint().readWrite()
@@ -54405,23 +54438,16 @@ Build the contract before running measurements.`
           args: argsSc
         })
       ).setTimeout(30).build();
-      const simRes = await server.simulateTransaction(invokeTx);
-      if (rpc_exports.Api.isSimulationError(simRes)) {
-        throw new Error(
-          `Simulation failed for ${invokeSpec.function_name}: ${simRes.error}`
-        );
-      }
-      if (!rpc_exports.Api.isSimulationSuccess(simRes)) {
-        throw new Error(
-          `Simulation did not return transaction data for ${invokeSpec.function_name}`
-        );
-      }
       const helperPath = await resolveSimulationHelper(opts.helperPath);
       const { output, provenance, limits } = await measureInvocation(
         effectiveRpcUrl,
         invokeTx,
         helperPath,
-        { signal: opts.signal }
+        {
+          signal: opts.signal,
+          functionName: invokeSpec.function_name,
+          caseId: invokeSpec.case_id
+        }
       );
       const metrics = metricsFromSimulation(output, limits);
       benchmarks.push({
