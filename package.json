@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Resource-Cost Benchmarking & CI Regression Toolkit for Soroban",
   "main": "dist/measurement.js",
+  "types": "dist/measurement.d.ts",
   "bin": {
     "weighin": "dist/cli.js"
   },
