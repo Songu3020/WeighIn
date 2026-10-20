@@ -5,6 +5,8 @@
   "tools": {
     "node": "v22.22.2",
     "npm": "10.9.7"
+    "node": "v22.17.1",
+    "npm": "10.9.2"
   },
   "inputs": [
     {
@@ -37,7 +39,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "b29af98a2f2b49d00b0cd88ab4e025e1c7679ea03abbf4c066c2e21a5f7b8186"
+      "sha256": "e2b8b3253ac8920648171b0193453ba8d69d1d1bdde55a71c7fd1ba4db3fbbf9"
     },
     {
       "path": "src/account.ts",
@@ -113,7 +115,7 @@
     },
     {
       "path": "src/simulation.ts",
-      "sha256": "08b1769aa54744b8c0baf5bcc2df94b012cc8d36001e9053dd4da13f239955df"
+      "sha256": "4b59fc70fc25811e3c25f86739f7cb29d2d62f9f495995be4a308f20f95d663a"
     },
     {
       "path": "src/threshold.ts",

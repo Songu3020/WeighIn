@@ -292,7 +292,10 @@ function parseHelperFailure(error: unknown): HelperFailureEnvelope | null {
 
 let provisioned: Promise<string> | undefined;
 
-/** Reset helper provisioning state (used for testing failure and recovery). */
+/**
+ * Reset helper provisioning state (used for testing failure and recovery).
+ * @internal Test-only; omitted from the published declarations.
+ */
 export function _resetSimulationHelperState(): void {
   provisioned = undefined;
 }

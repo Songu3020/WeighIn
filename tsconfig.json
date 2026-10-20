@@ -5,6 +5,8 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
+    "declaration": true,
+    "stripInternal": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

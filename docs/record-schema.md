@@ -32,7 +32,8 @@ declared envelope without silent conversion or retroactive digest hardening.
 ## Public standalone validation API
 
 The validator and schema generator are exported from `weighin`
-(`dist/measurement.js`), `dist/record-schema.js`, and `dist/diff.js`:
+(`dist/measurement.js`), `dist/record-schema.js`, and `dist/diff.js`, with
+matching TypeScript declarations (`.d.ts`) beside each module:
 
 - `validateMeasurementRecord(value, index?)`: validates one `ContractBenchmark`
   record and returns it, or throws `MeasurementRecordValidationError`.

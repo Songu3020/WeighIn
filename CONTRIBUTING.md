@@ -77,8 +77,12 @@ and provenance mismatches must remain errors, not invented zero measurements.
 npm pack --dry-run --json
 ```
 
-The package includes JavaScript outputs, both Action bundles and native helper
-sources/lockfile. It does not include a precompiled helper. A dry run proves
+The package includes JavaScript outputs with TypeScript declarations, both
+Action bundles and native helper sources/lockfile. `package.json` `types` points
+to `dist/measurement.d.ts`. Mark test-only exports `/** @internal */`; the build's
+`stripInternal` omits them from declarations while keeping them in JavaScript.
+`tests/type-declarations.test.cjs` packs the tarball and compiles an external
+TypeScript consumer against it. It does not include a precompiled helper. A dry run proves
 inclusion, not installation or live behavior. Experimental archives are available
 in the Git repository. See [dependency review](docs/DEPENDENCY_SECURITY.md) before
 upgrading libraries; do not apply forced blanket upgrades.
