@@ -12,6 +12,35 @@ import { PolicyOrigin } from "./threshold";
 
 export const COMMENT_MARKER = "<!-- weighin-report -->";
 
+export interface CommentInfo {
+  id: number;
+  body?: string | null;
+}
+
+export async function findReportComment(
+  octokit: any,
+  owner: string,
+  repo: string,
+  issueNumber: number,
+  marker: string = COMMENT_MARKER,
+): Promise<CommentInfo | undefined> {
+  for await (const response of octokit.paginate.iterator(
+    octokit.rest.issues.listComments,
+    {
+      owner,
+      repo,
+      issue_number: issueNumber,
+    },
+  )) {
+    const comments: CommentInfo[] = response.data;
+    const match = comments.find((comment) => comment.body?.includes(marker));
+    if (match) {
+      return match;
+    }
+  }
+  return undefined;
+}
+
 export async function upsertPrComment(
   token: string,
   body: string,
@@ -39,15 +68,7 @@ export async function upsertPrComment(
   }
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber,
-  });
-  const existing = comments.find(
-    (comment: { id: number; body?: string | null }) =>
-      comment.body?.includes(COMMENT_MARKER),
-  );
+  const existing = await findReportComment(octokit, owner, repo, prNumber);
   if (existing) {
     await octokit.rest.issues.updateComment({
       owner,

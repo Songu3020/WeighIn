@@ -26079,6 +26079,11 @@ var init_utils2 = __esm({
 });
 
 // node_modules/@actions/github/lib/github.js
+var github_exports = {};
+__export(github_exports, {
+  context: () => context2,
+  getOctokit: () => getOctokit
+});
 function getOctokit(token, options, ...additionalPlugins) {
   const GitHubWithPlugins = GitHub.plugin(...additionalPlugins);
   return new GitHubWithPlugins(getOctokitOptions(token, options));
@@ -54665,6 +54670,53 @@ function enforceThresholds(diff, config2) {
 
 // src/comment.ts
 var COMMENT_MARKER = "<!-- weighin-report -->";
+async function findReportComment(octokit, owner, repo, issueNumber, marker = COMMENT_MARKER) {
+  for await (const response of octokit.paginate.iterator(
+    octokit.rest.issues.listComments,
+    {
+      owner,
+      repo,
+      issue_number: issueNumber
+    }
+  )) {
+    const comments = response.data;
+    const match = comments.find((comment) => comment.body?.includes(marker));
+    if (match) {
+      return match;
+    }
+  }
+  return void 0;
+}
+async function upsertPrComment(token, numberOrBody, explicitBody) {
+  const github = await Promise.resolve().then(() => (init_github(), github_exports));
+  const core4 = await Promise.resolve().then(() => __toESM(require_core()));
+  const body = typeof numberOrBody === "string" ? numberOrBody : explicitBody;
+  const prNumber = typeof numberOrBody === "number" ? numberOrBody : github.context.payload.pull_request?.number;
+  if (!prNumber) {
+    core4.warning("Not in a pull_request context; skipping PR comment.");
+    return;
+  }
+  const octokit = github.getOctokit(token);
+  const { owner, repo } = github.context.repo;
+  const existing = await findReportComment(octokit, owner, repo, prNumber);
+  if (existing) {
+    await octokit.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: existing.id,
+      body
+    });
+    core4.info(`Updated PR comment #${existing.id}`);
+  } else {
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body
+    });
+    core4.info("Created new PR comment");
+  }
+}
 var METRIC_LABELS = {
   cpu_instructions: "CPU Instructions",
   memory_bytes: "Memory Bytes",
@@ -55414,41 +55466,6 @@ async function removeWorktree(repoRoot, dir) {
     });
   } catch {
     core3.warning(`Could not remove git worktree at ${dir}`);
-  }
-}
-var COMMENT_MARKER2 = "<!-- weighin-report -->";
-async function upsertPrComment(token, body) {
-  const octokit = getOctokit(token);
-  const { owner, repo } = context2.repo;
-  const prNumber = context2.payload.pull_request?.number;
-  if (!prNumber) {
-    core3.warning("Not in a pull_request context; skipping PR comment.");
-    return;
-  }
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber
-  });
-  const existing = comments.find(
-    (c) => c.body?.includes(COMMENT_MARKER2)
-  );
-  if (existing) {
-    await octokit.rest.issues.updateComment({
-      owner,
-      repo,
-      comment_id: existing.id,
-      body
-    });
-    core3.info(`Updated PR comment #${existing.id}`);
-  } else {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body
-    });
-    core3.info("Created new PR comment");
   }
 }
 async function run() {

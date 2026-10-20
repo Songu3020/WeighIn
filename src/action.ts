@@ -16,7 +16,7 @@ import {
   PolicyOrigin,
 } from "./threshold";
 
-import { renderComment } from "./comment";
+import { renderComment, upsertPrComment } from "./comment";
 import { buildForRevision, parseOptionalBooleanInput } from "./build-selection";
 import { writeReportFile, generateFailureReport } from "./report";
 import { buildPrMetadata } from "./pr-metadata";
@@ -363,51 +363,6 @@ async function removeWorktree(repoRoot: string, dir: string): Promise<void> {
   } catch {
     // Non-fatal; runner will clean up temp dirs anyway
     core.warning(`Could not remove git worktree at ${dir}`);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// PR comment management
-// ---------------------------------------------------------------------------
-
-const COMMENT_MARKER = "<!-- weighin-report -->";
-
-async function upsertPrComment(token: string, body: string): Promise<void> {
-  const octokit = github.getOctokit(token);
-  const { owner, repo } = github.context.repo;
-  const prNumber = github.context.payload.pull_request?.number;
-
-  if (!prNumber) {
-    core.warning("Not in a pull_request context; skipping PR comment.");
-    return;
-  }
-
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber,
-  });
-
-  const existing = comments.find((c: { id: number; body?: string | null }) =>
-    c.body?.includes(COMMENT_MARKER),
-  );
-
-  if (existing) {
-    await octokit.rest.issues.updateComment({
-      owner,
-      repo,
-      comment_id: existing.id,
-      body,
-    });
-    core.info(`Updated PR comment #${existing.id}`);
-  } else {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body,
-    });
-    core.info("Created new PR comment");
   }
 }
 
