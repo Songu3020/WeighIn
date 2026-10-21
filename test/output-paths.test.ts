@@ -85,3 +85,10 @@ describe("assertDistinctOutputPaths", () => {
     );
   });
 });
+
+describe("assertDistinctOutputPaths with a blocked parent", () => {
+  it("lets the original write error surface when a parent is a file", () => {
+    fs.writeFileSync(path.join(ws, "blocked"), "x");
+    expect(() => check("blocked/report.md", "m.json")).not.toThrow();
+  });
+});

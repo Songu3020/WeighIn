@@ -8,7 +8,7 @@ function realTarget(p: string): string {
     try {
       return path.join(fs.realpathSync.native(head), ...tail.reverse());
     } catch (e: any) {
-      if (e.code !== "ENOENT") throw e;
+      if (e.code !== "ENOENT" && e.code !== "ENOTDIR") throw e;
       const parent = path.dirname(head);
       if (parent === head) return path.resolve(p);
       tail.push(path.basename(head));
@@ -56,7 +56,7 @@ export function assertDistinctOutputPaths(check: OutputPathCheck): void {
       if (fs.lstatSync(e.abs).isSymbolicLink())
         throw new Error(`${e.label} must not be a symbolic link`);
     } catch (err: any) {
-      if (err.code !== "ENOENT") throw err;
+      if (err.code !== "ENOENT" && err.code !== "ENOTDIR") throw err;
     }
   }
   for (let i = 0; i < all.length; i++) {

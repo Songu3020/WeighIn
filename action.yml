@@ -71,6 +71,8 @@ inputs:
     description: >
       Optional path where the action should write a JSON file containing the PR
       number and HEAD SHA (e.g. pr-metadata.json). Used for split workflows.
+      Must not resolve to the same file as report-path, fixtures-path or
+      config-path.
     required: false
     default: ''
 
@@ -93,7 +95,7 @@ inputs:
     default: ''
 
   report-path:
-    description: "Optional path where the generated Markdown benchmark report should be written. The report is written to an owned temporary file in the destination directory and renamed into place, so an interrupted write keeps a previously published report unchanged."
+    description: "Optional path where the generated Markdown benchmark report should be written. The report is written to an owned temporary file in the destination directory and renamed into place, so an interrupted write keeps a previously published report unchanged. Must not resolve to the same file as metadata-path, fixtures-path or config-path."
     required: false
     default: ''
 
