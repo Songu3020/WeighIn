@@ -203,7 +203,7 @@ var require_file_command = __commonJS({
     exports2.issueFileCommand = issueFileCommand;
     exports2.prepareKeyValueMessage = prepareKeyValueMessage;
     var crypto6 = __importStar(require("crypto"));
-    var fs6 = __importStar(require("fs"));
+    var fs7 = __importStar(require("fs"));
     var os3 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -211,10 +211,10 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs6.existsSync(filePath)) {
+      if (!fs7.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs6.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
+      fs7.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -1352,14 +1352,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol || ""}//${url.hostname || ""}:${port}`;
-        let path7 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path8 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path7 && path7[0] !== "/") {
-          path7 = `/${path7}`;
+        if (path8 && path8[0] !== "/") {
+          path8 = `/${path8}`;
         }
-        return new URL(`${origin}${path7}`);
+        return new URL(`${origin}${path8}`);
       }
       if (!isHttpOrHttpsPrefixed(url.origin || url.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -1810,39 +1810,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin }
+          request: { method, path: path8, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path7);
+        debuglog("sending request to %s %s/%s", method, origin, path8);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin },
+          request: { method, path: path8, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path7,
+          path8,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin }
+          request: { method, path: path8, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path7);
+        debuglog("trailers received from %s %s/%s", method, origin, path8);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin },
+          request: { method, path: path8, origin },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path7,
+          path8,
           error2.message
         );
       });
@@ -1891,9 +1891,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path7, origin }
+            request: { method, path: path8, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path7);
+          debuglog("sending request to %s %s/%s", method, origin, path8);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -1956,7 +1956,7 @@ var require_request = __commonJS({
     var kHandler = Symbol("handler");
     var Request2 = class {
       constructor(origin, {
-        path: path7,
+        path: path8,
         method,
         body,
         headers,
@@ -1971,11 +1971,11 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler2) {
-        if (typeof path7 !== "string") {
+        if (typeof path8 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path7[0] !== "/" && !(path7.startsWith("http://") || path7.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path8[0] !== "/" && !(path8.startsWith("http://") || path8.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path7)) {
+        } else if (invalidPathRegex.test(path8)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2041,7 +2041,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL2(path7, query) : path7;
+        this.path = query ? buildURL2(path8, query) : path8;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -2374,9 +2374,9 @@ var require_dispatcher_base = __commonJS({
       }
       close(callback) {
         if (callback === void 0) {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             this.close((err, data) => {
-              return err ? reject(err) : resolve6(data);
+              return err ? reject(err) : resolve7(data);
             });
           });
         }
@@ -2414,12 +2414,12 @@ var require_dispatcher_base = __commonJS({
           err = null;
         }
         if (callback === void 0) {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             this.destroy(err, (err2, data) => {
               return err2 ? (
                 /* istanbul ignore next: should never error */
                 reject(err2)
-              ) : resolve6(data);
+              ) : resolve7(data);
             });
           });
         }
@@ -4686,8 +4686,8 @@ var require_util2 = __commonJS({
     function createDeferredPromise() {
       let res;
       let rej;
-      const promise = new Promise((resolve6, reject) => {
-        res = resolve6;
+      const promise = new Promise((resolve7, reject) => {
+        res = resolve7;
         rej = reject;
       });
       return { promise, resolve: res, reject: rej };
@@ -6670,7 +6670,7 @@ var require_client_h1 = __commonJS({
       return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
     }
     function writeH1(client, request3) {
-      const { method, path: path7, host, upgrade, blocking, reset } = request3;
+      const { method, path: path8, host, upgrade, blocking, reset } = request3;
       let { body, headers, contentLength } = request3;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method === "PROPFIND" || method === "PROPPATCH";
       if (util2.isFormDataLike(body)) {
@@ -6745,7 +6745,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path7} HTTP/1.1\r
+      let header = `${method} ${path8} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -6932,12 +6932,12 @@ upgrade: ${upgrade}\r
           cb();
         }
       }
-      const waitForDrain = () => new Promise((resolve6, reject) => {
+      const waitForDrain = () => new Promise((resolve7, reject) => {
         assert(callback === null);
         if (socket[kError]) {
           reject(socket[kError]);
         } else {
-          callback = resolve6;
+          callback = resolve7;
         }
       });
       socket.on("close", onDrain).on("drain", onDrain);
@@ -7271,7 +7271,7 @@ var require_client_h2 = __commonJS({
     }
     function writeH2(client, request3) {
       const session = client[kHTTP2Session];
-      const { method, path: path7, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
+      const { method, path: path8, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
       let { body } = request3;
       if (upgrade) {
         util2.errorRequest(client, request3, new Error("Upgrade not supported for H2"));
@@ -7338,7 +7338,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path7;
+      headers[HTTP2_HEADER_PATH] = path8;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -7574,12 +7574,12 @@ var require_client_h2 = __commonJS({
           cb();
         }
       }
-      const waitForDrain = () => new Promise((resolve6, reject) => {
+      const waitForDrain = () => new Promise((resolve7, reject) => {
         assert(callback === null);
         if (socket[kError]) {
           reject(socket[kError]);
         } else {
-          callback = resolve6;
+          callback = resolve7;
         }
       });
       h2stream.on("close", onDrain).on("drain", onDrain);
@@ -7691,9 +7691,9 @@ var require_redirect_handler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util2.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path7 = search ? `${pathname}${search}` : pathname;
+        const path8 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path7;
+        this.opts.path = path8;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -8057,16 +8057,16 @@ var require_client = __commonJS({
         return this[kNeedDrain] < 2;
       }
       async [kClose]() {
-        return new Promise((resolve6) => {
+        return new Promise((resolve7) => {
           if (this[kSize]) {
-            this[kClosedResolve] = resolve6;
+            this[kClosedResolve] = resolve7;
           } else {
-            resolve6(null);
+            resolve7(null);
           }
         });
       }
       async [kDestroy](err) {
-        return new Promise((resolve6) => {
+        return new Promise((resolve7) => {
           const requests = this[kQueue].splice(this[kPendingIdx]);
           for (let i = 0; i < requests.length; i++) {
             const request3 = requests[i];
@@ -8077,7 +8077,7 @@ var require_client = __commonJS({
               this[kClosedResolve]();
               this[kClosedResolve] = null;
             }
-            resolve6(null);
+            resolve7(null);
           };
           if (this[kHTTPContext]) {
             this[kHTTPContext].destroy(err, callback);
@@ -8128,7 +8128,7 @@ var require_client = __commonJS({
         });
       }
       try {
-        const socket = await new Promise((resolve6, reject) => {
+        const socket = await new Promise((resolve7, reject) => {
           client[kConnector]({
             host,
             hostname,
@@ -8140,7 +8140,7 @@ var require_client = __commonJS({
             if (err) {
               reject(err);
             } else {
-              resolve6(socket2);
+              resolve7(socket2);
             }
           });
         });
@@ -8476,8 +8476,8 @@ var require_pool_base = __commonJS({
         if (this[kQueue].isEmpty()) {
           await Promise.all(this[kClients].map((c) => c.close()));
         } else {
-          await new Promise((resolve6) => {
-            this[kClosedResolve] = resolve6;
+          await new Promise((resolve7) => {
+            this[kClosedResolve] = resolve7;
           });
         }
       }
@@ -8928,10 +8928,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path7 = "/",
+          path: path8 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path7;
+        opts.path = origin + path8;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -9743,7 +9743,7 @@ var require_readable = __commonJS({
         if (this._readableState.closeEmitted) {
           return null;
         }
-        return await new Promise((resolve6, reject) => {
+        return await new Promise((resolve7, reject) => {
           if (this[kContentLength] > limit) {
             this.destroy(new AbortError());
           }
@@ -9756,7 +9756,7 @@ var require_readable = __commonJS({
             if (signal?.aborted) {
               reject(signal.reason ?? new AbortError());
             } else {
-              resolve6(null);
+              resolve7(null);
             }
           }).on("error", noop3).on("data", function(chunk) {
             limit -= chunk.length;
@@ -9775,7 +9775,7 @@ var require_readable = __commonJS({
     }
     async function consume(stream, type) {
       assert(!stream[kConsume]);
-      return new Promise((resolve6, reject) => {
+      return new Promise((resolve7, reject) => {
         if (isUnusable(stream)) {
           const rState = stream._readableState;
           if (rState.destroyed && rState.closeEmitted === false) {
@@ -9792,7 +9792,7 @@ var require_readable = __commonJS({
             stream[kConsume] = {
               type,
               stream,
-              resolve: resolve6,
+              resolve: resolve7,
               reject,
               length: 0,
               body: []
@@ -9862,18 +9862,18 @@ var require_readable = __commonJS({
       return buffer;
     }
     function consumeEnd(consume2) {
-      const { type, body, resolve: resolve6, stream, length } = consume2;
+      const { type, body, resolve: resolve7, stream, length } = consume2;
       try {
         if (type === "text") {
-          resolve6(chunksDecode(body, length));
+          resolve7(chunksDecode(body, length));
         } else if (type === "json") {
-          resolve6(JSON.parse(chunksDecode(body, length)));
+          resolve7(JSON.parse(chunksDecode(body, length)));
         } else if (type === "arrayBuffer") {
-          resolve6(chunksConcat(body, length).buffer);
+          resolve7(chunksConcat(body, length).buffer);
         } else if (type === "blob") {
-          resolve6(new Blob(body, { type: stream[kContentType] }));
+          resolve7(new Blob(body, { type: stream[kContentType] }));
         } else if (type === "bytes") {
-          resolve6(chunksConcat(body, length));
+          resolve7(chunksConcat(body, length));
         }
         consumeFinish(consume2);
       } catch (err) {
@@ -10130,9 +10130,9 @@ var require_api_request = __commonJS({
     };
     function request3(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           request3.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10355,9 +10355,9 @@ var require_api_stream = __commonJS({
     };
     function stream(opts, factory, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           stream.call(this, opts, factory, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10642,9 +10642,9 @@ var require_api_upgrade = __commonJS({
     };
     function upgrade(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           upgrade.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10736,9 +10736,9 @@ var require_api_connect = __commonJS({
     };
     function connect(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           connect.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10903,20 +10903,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path7) {
-      if (typeof path7 !== "string") {
-        return path7;
+    function safeUrl(path8) {
+      if (typeof path8 !== "string") {
+        return path8;
       }
-      const pathSegments = path7.split("?");
+      const pathSegments = path8.split("?");
       if (pathSegments.length !== 2) {
-        return path7;
+        return path8;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path7, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path7);
+    function matchKey(mockDispatch2, { path: path8, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path8);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10938,7 +10938,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL2(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path7 }) => matchValue(safeUrl(path7), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path8 }) => matchValue(safeUrl(path8), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10976,9 +10976,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path7, method, body, headers, query } = opts;
+      const { path: path8, method, body, headers, query } = opts;
       return {
-        path: path7,
+        path: path8,
         method,
         body,
         headers,
@@ -11441,10 +11441,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path7, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path8, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path7,
+            Path: path8,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -14600,7 +14600,7 @@ var require_fetch = __commonJS({
       function dispatch({ body }) {
         const url = requestCurrentURL(request3);
         const agent = fetchParams.controller.dispatcher;
-        return new Promise((resolve6, reject) => agent.dispatch(
+        return new Promise((resolve7, reject) => agent.dispatch(
           {
             path: url.pathname + url.search,
             origin: url.origin,
@@ -14676,7 +14676,7 @@ var require_fetch = __commonJS({
                 }
               }
               const onError = this.onError.bind(this);
-              resolve6({
+              resolve7({
                 status,
                 statusText,
                 headersList,
@@ -14722,7 +14722,7 @@ var require_fetch = __commonJS({
               for (let i = 0; i < rawHeaders.length; i += 2) {
                 headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i]), rawHeaders[i + 1].toString("latin1"), true);
               }
-              resolve6({
+              resolve7({
                 status,
                 statusText: STATUS_CODES[status],
                 headersList,
@@ -16325,9 +16325,9 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path7) {
-      for (let i = 0; i < path7.length; ++i) {
-        const code = path7.charCodeAt(i);
+    function validateCookiePath(path8) {
+      for (let i = 0; i < path8.length; ++i) {
+        const code = path8.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -18453,8 +18453,8 @@ var require_util8 = __commonJS({
       return true;
     }
     function delay(ms) {
-      return new Promise((resolve6) => {
-        setTimeout(resolve6, ms).unref();
+      return new Promise((resolve7) => {
+        setTimeout(resolve7, ms).unref();
       });
     }
     module2.exports = {
@@ -19169,11 +19169,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path7 = opts.path;
+          let path8 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path7 = `/${path7}`;
+            path8 = `/${path8}`;
           }
-          url = new URL(util2.parseOrigin(url).origin + path7);
+          url = new URL(util2.parseOrigin(url).origin + path8);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -19287,11 +19287,11 @@ var require_lib = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19307,7 +19307,7 @@ var require_lib = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -19394,26 +19394,26 @@ var require_lib = __commonJS({
       }
       readBody() {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7) => __awaiter2(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
             });
             this.message.on("end", () => {
-              resolve6(output.toString());
+              resolve7(output.toString());
             });
           }));
         });
       }
       readBodyBuffer() {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7) => __awaiter2(this, void 0, void 0, function* () {
             const chunks = [];
             this.message.on("data", (chunk) => {
               chunks.push(chunk);
             });
             this.message.on("end", () => {
-              resolve6(Buffer.concat(chunks));
+              resolve7(Buffer.concat(chunks));
             });
           }));
         });
@@ -19621,14 +19621,14 @@ var require_lib = __commonJS({
        */
       requestRaw(info4, data) {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             function callbackForResult(err, res) {
               if (err) {
                 reject(err);
               } else if (!res) {
                 reject(new Error("Unknown error"));
               } else {
-                resolve6(res);
+                resolve7(res);
               }
             }
             this.requestRawWithCallback(info4, data, callbackForResult);
@@ -19872,12 +19872,12 @@ var require_lib = __commonJS({
         return __awaiter2(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-          return new Promise((resolve6) => setTimeout(() => resolve6(), ms));
+          return new Promise((resolve7) => setTimeout(() => resolve7(), ms));
         });
       }
       _processResponse(res, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6, reject) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7, reject) => __awaiter2(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -19885,7 +19885,7 @@ var require_lib = __commonJS({
               headers: {}
             };
             if (statusCode === HttpCodes.NotFound) {
-              resolve6(response);
+              resolve7(response);
             }
             function dateTimeDeserializer(key, value) {
               if (typeof value === "string") {
@@ -19924,7 +19924,7 @@ var require_lib = __commonJS({
               err.result = response.result;
               reject(err);
             } else {
-              resolve6(response);
+              resolve7(response);
             }
           }));
         });
@@ -19941,11 +19941,11 @@ var require_auth = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19961,7 +19961,7 @@ var require_auth = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20045,11 +20045,11 @@ var require_oidc_utils = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20065,7 +20065,7 @@ var require_oidc_utils = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20143,11 +20143,11 @@ var require_summary = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20163,7 +20163,7 @@ var require_summary = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20476,7 +20476,7 @@ var require_path_utils = __commonJS({
     exports2.toPosixPath = toPosixPath;
     exports2.toWin32Path = toWin32Path;
     exports2.toPlatformPath = toPlatformPath;
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -20484,7 +20484,7 @@ var require_path_utils = __commonJS({
       return pth.replace(/[/]/g, "\\");
     }
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path7.sep);
+      return pth.replace(/[/\\]/g, path8.sep);
     }
   }
 });
@@ -20518,11 +20518,11 @@ var require_io_util = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20538,7 +20538,7 @@ var require_io_util = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20546,12 +20546,12 @@ var require_io_util = __commonJS({
     var _a2;
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
-    var fs6 = __importStar(require("fs"));
-    var path7 = __importStar(require("path"));
-    _a2 = fs6.promises, exports2.chmod = _a2.chmod, exports2.copyFile = _a2.copyFile, exports2.lstat = _a2.lstat, exports2.mkdir = _a2.mkdir, exports2.open = _a2.open, exports2.readdir = _a2.readdir, exports2.readlink = _a2.readlink, exports2.rename = _a2.rename, exports2.rm = _a2.rm, exports2.rmdir = _a2.rmdir, exports2.stat = _a2.stat, exports2.symlink = _a2.symlink, exports2.unlink = _a2.unlink;
+    var fs7 = __importStar(require("fs"));
+    var path8 = __importStar(require("path"));
+    _a2 = fs7.promises, exports2.chmod = _a2.chmod, exports2.copyFile = _a2.copyFile, exports2.lstat = _a2.lstat, exports2.mkdir = _a2.mkdir, exports2.open = _a2.open, exports2.readdir = _a2.readdir, exports2.readlink = _a2.readlink, exports2.rename = _a2.rename, exports2.rm = _a2.rm, exports2.rmdir = _a2.rmdir, exports2.stat = _a2.stat, exports2.symlink = _a2.symlink, exports2.unlink = _a2.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
-    exports2.READONLY = fs6.constants.O_RDONLY;
+    exports2.READONLY = fs7.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -20596,7 +20596,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports2.IS_WINDOWS) {
-            const upperExt = path7.extname(filePath).toUpperCase();
+            const upperExt = path8.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -20620,11 +20620,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports2.IS_WINDOWS) {
               try {
-                const directory = path7.dirname(filePath);
-                const upperName = path7.basename(filePath).toUpperCase();
+                const directory = path8.dirname(filePath);
+                const upperName = path8.basename(filePath).toUpperCase();
                 for (const actualName of yield exports2.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path7.join(directory, actualName);
+                    filePath = path8.join(directory, actualName);
                     break;
                   }
                 }
@@ -20691,11 +20691,11 @@ var require_io = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20711,7 +20711,7 @@ var require_io = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20719,7 +20719,7 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter2(this, void 0, void 0, function* () {
@@ -20728,7 +20728,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path7.join(dest, path7.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path8.join(dest, path8.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -20740,7 +20740,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path7.relative(source, newDest) === "") {
+          if (path8.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -20753,7 +20753,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path7.join(dest, path7.basename(source));
+            dest = path8.join(dest, path8.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -20764,7 +20764,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path7.dirname(dest));
+        yield mkdirP(path8.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -20827,7 +20827,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path7.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path8.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -20840,12 +20840,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path7.sep)) {
+        if (tool.includes(path8.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path7.delimiter)) {
+          for (const p of process.env.PATH.split(path8.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -20853,7 +20853,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path7.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path8.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -20939,11 +20939,11 @@ var require_toolrunner = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20959,7 +20959,7 @@ var require_toolrunner = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20969,7 +20969,7 @@ var require_toolrunner = __commonJS({
     var os3 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = require("timers");
@@ -21184,10 +21184,10 @@ var require_toolrunner = __commonJS({
       exec() {
         return __awaiter2(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path7.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path8.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
-          return new Promise((resolve6, reject) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7, reject) => __awaiter2(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
             for (const arg of this.args) {
@@ -21270,7 +21270,7 @@ var require_toolrunner = __commonJS({
               if (error2) {
                 reject(error2);
               } else {
-                resolve6(exitCode);
+                resolve7(exitCode);
               }
             });
             if (this.options.input) {
@@ -21423,11 +21423,11 @@ var require_exec = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21443,7 +21443,7 @@ var require_exec = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21544,11 +21544,11 @@ var require_platform = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21564,7 +21564,7 @@ var require_platform = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21673,11 +21673,11 @@ var require_core = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21693,7 +21693,7 @@ var require_core = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21725,7 +21725,7 @@ var require_core = __commonJS({
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
     var os3 = __importStar(require("os"));
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -21751,7 +21751,7 @@ var require_core = __commonJS({
       } else {
         (0, command_1.issueCommand)("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path7.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path8.delimiter}${process.env["PATH"]}`;
     }
     function getInput3(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
@@ -21886,8 +21886,8 @@ var init_context = __esm({
           if ((0, import_fs.existsSync)(process.env.GITHUB_EVENT_PATH)) {
             this.payload = JSON.parse((0, import_fs.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
           } else {
-            const path7 = process.env.GITHUB_EVENT_PATH;
-            process.stdout.write(`GITHUB_EVENT_PATH ${path7} does not exist${import_os.EOL}`);
+            const path8 = process.env.GITHUB_EVENT_PATH;
+            process.stdout.write(`GITHUB_EVENT_PATH ${path8} does not exist${import_os.EOL}`);
           }
         }
         this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -21972,11 +21972,11 @@ var init_utils = __esm({
     import_undici = __toESM(require_undici(), 1);
     __awaiter = function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21992,7 +21992,7 @@ var init_utils = __esm({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -30995,20 +30995,20 @@ var require_compiler = __commonJS({
         obj[lastKey] = value;
       }
       function setPath(node) {
-        var path7 = node.value;
-        var quotedPath = path7.map(quoteDottedString).join(".");
+        var path8 = node.value;
+        var quotedPath = path8.map(quoteDottedString).join(".");
         var off = node.offset;
         if (assignedPaths.has(quotedPath)) {
-          genError("Cannot redefine existing key '" + path7 + "'.", off);
+          genError("Cannot redefine existing key '" + path8 + "'.", off);
         }
         assignedPaths.add(quotedPath);
         explicitTablePaths.add(quotedPath);
-        context3 = deepRef(data, path7, createTable(), off);
-        currentPath = path7;
+        context3 = deepRef(data, path8, createTable(), off);
+        currentPath = path8;
       }
       function addTableArray(node) {
-        var path7 = node.value;
-        var quotedPath = path7.map(quoteDottedString).join(".");
+        var path8 = node.value;
+        var quotedPath = path8.map(quoteDottedString).join(".");
         var off = node.offset;
         if (valueAssignments.has(quotedPath)) {
           genError("Cannot append to statically defined array '" + quotedPath + "'.", off);
@@ -31020,14 +31020,14 @@ var require_compiler = __commonJS({
           if (isSameOrSubPath(p, quotedPath)) valueAssignments.delete(p);
         });
         assignedPaths.add(quotedPath);
-        context3 = deepRef(data, path7, createTableArray(), off);
-        currentPath = path7;
+        context3 = deepRef(data, path8, createTableArray(), off);
+        currentPath = path8;
         if (context3 instanceof Array) {
           var newObj = createTable();
           context3.push(newObj);
           context3 = newObj;
         } else {
-          genError("Cannot redefine existing key '" + path7 + "'.", off);
+          genError("Cannot redefine existing key '" + path8 + "'.", off);
         }
       }
       function deepRef(start, keys, value, off) {
@@ -31091,8 +31091,8 @@ var require_compiler = __commonJS({
       function makeFullPath(keys) {
         return pathKey(currentPath.concat(keys));
       }
-      function isSameOrSubPath(path7, prefix) {
-        return path7 === prefix || path7.indexOf(prefix + ".") === 0;
+      function isSameOrSubPath(path8, prefix) {
+        return path8 === prefix || path8.indexOf(prefix + ".") === 0;
       }
     }
     module2.exports = {
@@ -31120,8 +31120,8 @@ var require_toml = __commonJS({
 var core3 = __toESM(require_core());
 var exec7 = __toESM(require_exec());
 init_github();
-var fs5 = __toESM(require("fs"));
-var path6 = __toESM(require("path"));
+var fs6 = __toESM(require("fs"));
+var path7 = __toESM(require("path"));
 var os2 = __toESM(require("os"));
 
 // src/measurement.ts
@@ -31610,8 +31610,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path7, errorMaps, issueData } = params;
-  const fullPath = [...path7, ...issueData.path || []];
+  const { data, path: path8, errorMaps, issueData } = params;
+  const fullPath = [...path8, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -31727,11 +31727,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path7, key) {
+  constructor(parent, value, path8, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path7;
+    this._path = path8;
     this._key = key;
   }
   get path() {
@@ -36416,8 +36416,8 @@ var FixturesSpecSchema = external_exports.object({
 function formatZodError(error2, fileName) {
   const lines = [`Invalid WeighIn configuration in ${fileName}:`];
   for (const issue of error2.issues) {
-    const path7 = issue.path.join(".");
-    lines.push(`- ${path7 || "root"}: ${issue.message}`);
+    const path8 = issue.path.join(".");
+    lines.push(`- ${path8 || "root"}: ${issue.message}`);
   }
   return lines.join("\n");
 }
@@ -36502,7 +36502,7 @@ var Utils = class {
     return now >= Number.parseInt(minTime, 10) - gracePeriod && now <= Number.parseInt(maxTime, 10) + gracePeriod;
   }
   static sleep(ms) {
-    return new Promise((resolve6) => setTimeout(resolve6, ms));
+    return new Promise((resolve7) => setTimeout(resolve7, ms));
   }
 };
 
@@ -36825,8 +36825,8 @@ var CancelToken = class {
   }
   constructor(executor) {
     let resolvePromise;
-    this.promise = new Promise((resolve6) => {
-      resolvePromise = resolve6;
+    this.promise = new Promise((resolve7) => {
+      resolvePromise = resolve7;
     });
     executor((reason) => {
       this.reason = reason;
@@ -37136,7 +37136,7 @@ function createFetchClient(fetchConfig = {}) {
       return createFetchClient({ ...this.defaults, ...config2 });
     },
     makeRequest(config2) {
-      return new Promise((resolve6, reject) => {
+      return new Promise((resolve7, reject) => {
         function processRequest(finalConfig, res, rej) {
           const adapter = finalConfig.adapter || this.defaults.adapter;
           if (!adapter) {
@@ -37205,11 +37205,11 @@ function createFetchClient(fetchConfig = {}) {
             );
           }
           configPromise.then((resolvedConfig) => {
-            processRequest.call(this, resolvedConfig, resolve6, reject);
+            processRequest.call(this, resolvedConfig, resolve7, reject);
           }).catch(reject);
           return;
         }
-        processRequest.call(this, modifiedConfig, resolve6, reject);
+        processRequest.call(this, modifiedConfig, resolve7, reject);
       });
     },
     get(url, config2) {
@@ -47691,14 +47691,14 @@ function pathPaymentStrictReceive(opts) {
   } catch {
     throw new Error("destination is invalid");
   }
-  const path7 = opts.path ? opts.path : [];
+  const path8 = opts.path ? opts.path : [];
   const paymentOp = new types.PathPaymentStrictReceiveOp({
     sendAsset: opts.sendAsset.toXDRObject(),
     sendMax: toXDRAmount(opts.sendMax),
     destination,
     destAsset: opts.destAsset.toXDRObject(),
     destAmount: toXDRAmount(opts.destAmount),
-    path: path7.map((x) => x.toXDRObject())
+    path: path8.map((x) => x.toXDRObject())
   });
   const opAttributes = {
     sourceAccount: null,
@@ -47732,14 +47732,14 @@ function pathPaymentStrictSend(opts) {
   }
   const destAsset = opts.destAsset.toXDRObject();
   const destMin = toXDRAmount(opts.destMin);
-  const path7 = (opts.path ?? []).map((x) => x.toXDRObject());
+  const path8 = (opts.path ?? []).map((x) => x.toXDRObject());
   const payment2 = new types.PathPaymentStrictSendOp({
     sendAsset,
     sendAmount,
     destination,
     destAsset,
     destMin,
-    path: path7
+    path: path8
   });
   const opAttributes = {
     sourceAccount: null,
@@ -48658,9 +48658,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destAmount = fromXDRAmount(attrs.destAmount());
         result.path = [];
-        const path7 = attrs.path();
-        Object.keys(path7).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path7[pathKey]));
+        const path8 = attrs.path();
+        Object.keys(path8).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path8[pathKey]));
         });
         break;
       }
@@ -48672,9 +48672,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destMin = fromXDRAmount(attrs.destMin());
         result.path = [];
-        const path7 = attrs.path();
-        Object.keys(path7).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path7[pathKey]));
+        const path8 = attrs.path();
+        Object.keys(path8).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path8[pathKey]));
         });
         break;
       }
@@ -53472,8 +53472,8 @@ async function ensureAccountReady(rpcUrl, publicKey, signal) {
       throw signal.reason || new Error("Account readiness cancelled");
     const remaining = deadline - Date.now();
     if (remaining > 0)
-      await new Promise((resolve6, reject) => {
-        const timer = setTimeout(resolve6, Math.min(RETRY_MS, remaining));
+      await new Promise((resolve7, reject) => {
+        const timer = setTimeout(resolve7, Math.min(RETRY_MS, remaining));
         if (signal) {
           const onAbort = () => {
             clearTimeout(timer);
@@ -53631,7 +53631,7 @@ function validateLedgerKeyEntryCorrespondence(keyXdr, dataXdr) {
   }
 }
 function execute(file, args, input, cwd, signal) {
-  return new Promise((resolve6, reject) => {
+  return new Promise((resolve7, reject) => {
     if (signal?.aborted) {
       return reject(
         signal.reason || new Error("Simulation helper execution cancelled")
@@ -53664,7 +53664,7 @@ function execute(file, args, input, cwd, signal) {
             failure.exitCode = typeof error2.code === "number" ? error2.code : void 0;
             reject(failure);
           }
-        } else resolve6(stdout);
+        } else resolve7(stdout);
       }
     );
     child.stdin?.on("error", () => {
@@ -54064,8 +54064,8 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
         console.warn(
           `Transient captive-core ledger-read failure; discarding snapshot and retrying capture (${transientReadFailures}/3, ${delay}ms): ${failure instanceof Error ? failure.message : failure}`
         );
-        await new Promise((resolve6, reject) => {
-          const timer = setTimeout(resolve6, delay);
+        await new Promise((resolve7, reject) => {
+          const timer = setTimeout(resolve7, delay);
           if (signal) {
             const onAbort = () => {
               clearTimeout(timer);
@@ -54559,8 +54559,8 @@ async function waitForTransaction(server, txHash, signal) {
     if (tx.status !== "NOT_FOUND") {
       return tx;
     }
-    await new Promise((resolve6, reject) => {
-      const timer = setTimeout(resolve6, 1e3);
+    await new Promise((resolve7, reject) => {
+      const timer = setTimeout(resolve7, 1e3);
       if (signal) {
         const onAbort = () => {
           clearTimeout(timer);
@@ -56475,6 +56475,65 @@ function generateFailureReport(errorMessage) {
   ].join("\n");
 }
 
+// src/output-paths.ts
+var fs5 = __toESM(require("fs"));
+var path6 = __toESM(require("path"));
+function realTarget(p) {
+  let head = path6.resolve(p);
+  const tail = [];
+  for (; ; ) {
+    try {
+      return path6.join(fs5.realpathSync.native(head), ...tail.reverse());
+    } catch (e) {
+      if (e.code !== "ENOENT" && e.code !== "ENOTDIR") throw e;
+      const parent = path6.dirname(head);
+      if (parent === head) return path6.resolve(p);
+      tail.push(path6.basename(head));
+      head = parent;
+    }
+  }
+}
+var fold = (p) => process.platform === "win32" || process.platform === "darwin" ? p.toLowerCase() : p;
+function sameInode(a, b) {
+  try {
+    const sa = fs5.statSync(a);
+    const sb = fs5.statSync(b);
+    return sa.ino !== 0 && sa.dev === sb.dev && sa.ino === sb.ino;
+  } catch {
+    return false;
+  }
+}
+function assertDistinctOutputPaths(check) {
+  const entry = (label, raw, output) => {
+    const abs = path6.resolve(check.workspace, raw);
+    return { label, abs, output, real: fold(realTarget(abs)) };
+  };
+  const all = [
+    ...Object.entries(check.outputs).filter(([, v]) => v).map(([k, v]) => entry(k, v, true)),
+    ...Object.entries(check.inputs).filter(([, v]) => v).map(([k, v]) => entry(k, v, false))
+  ];
+  for (const e of all.filter((x) => x.output)) {
+    try {
+      if (fs5.lstatSync(e.abs).isSymbolicLink())
+        throw new Error(`${e.label} must not be a symbolic link`);
+    } catch (err) {
+      if (err.code !== "ENOENT" && err.code !== "ENOTDIR") throw err;
+    }
+  }
+  for (let i = 0; i < all.length; i++) {
+    for (let j = i + 1; j < all.length; j++) {
+      const a = all[i];
+      const b = all[j];
+      if (!a.output && !b.output) continue;
+      if (a.real === b.real || a.real.startsWith(b.real + path6.sep) || b.real.startsWith(a.real + path6.sep) || sameInode(a.abs, b.abs)) {
+        throw new Error(
+          `${a.label} and ${b.label} must not resolve to the same path`
+        );
+      }
+    }
+  }
+}
+
 // src/pr-metadata.ts
 var PR_METADATA_SCHEMA_VERSION = 1;
 function buildPrMetadata(repository, prNumber, headSha) {
@@ -56540,6 +56599,7 @@ async function getHeadSha(dir) {
 
 // src/action.ts
 var configuredRpcUrl = "";
+var outputPathsRejected = false;
 var validatedDiffJson = null;
 var RpcCompatibilityError = class extends Error {
 };
@@ -56623,31 +56683,31 @@ async function validateBaseRef(repoRoot, ref) {
   }
 }
 function isPathWithin(root, candidate) {
-  const relative4 = path6.relative(root, candidate);
-  return relative4 === "" || relative4 !== ".." && !relative4.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relative4);
+  const relative4 = path7.relative(root, candidate);
+  return relative4 === "" || relative4 !== ".." && !relative4.startsWith(`..${path7.sep}`) && !path7.isAbsolute(relative4);
 }
 function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) {
   const invalidPathMessage = `fixtures-path for ${revision} must be a relative path inside the ${revision} worktree`;
-  if (!fixturesPathInput.trim() || path6.isAbsolute(fixturesPathInput) || path6.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
+  if (!fixturesPathInput.trim() || path7.isAbsolute(fixturesPathInput) || path7.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
     throw new Error(invalidPathMessage);
   }
-  const root = path6.resolve(worktreeRoot);
-  const resolved = path6.resolve(root, fixturesPathInput);
+  const root = path7.resolve(worktreeRoot);
+  const resolved = path7.resolve(root, fixturesPathInput);
   if (!isPathWithin(root, resolved)) throw new Error(invalidPathMessage);
   try {
-    const realRoot = fs5.realpathSync(root);
+    const realRoot = fs6.realpathSync(root);
     let current = root;
-    for (const segment of path6.relative(root, resolved).split(path6.sep)) {
+    for (const segment of path7.relative(root, resolved).split(path7.sep)) {
       if (!segment) continue;
-      current = path6.join(current, segment);
+      current = path7.join(current, segment);
       let currentStats;
       try {
-        currentStats = fs5.lstatSync(current);
+        currentStats = fs6.lstatSync(current);
       } catch (error2) {
         if (error2.code === "ENOENT") break;
         throw error2;
       }
-      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs5.realpathSync(current))) {
+      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs6.realpathSync(current))) {
         throw new Error(invalidPathMessage);
       }
     }
@@ -56660,13 +56720,13 @@ function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) 
 }
 async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
   if (!trustedRef && !trustedPath) {
-    const configPath = path6.resolve(repoDir, configPathRel || "weighin.toml");
-    const content2 = fs5.existsSync(configPath) ? fs5.readFileSync(configPath, "utf8") : "";
+    const configPath = path7.resolve(repoDir, configPathRel || "weighin.toml");
+    const content2 = fs6.existsSync(configPath) ? fs6.readFileSync(configPath, "utf8") : "";
     return {
       config: content2 ? loadConfigContent(content2, configPath) : null,
       origin: {
         mode: "head",
-        path: path6.relative(repoDir, configPath),
+        path: path7.relative(repoDir, configPath),
         revision: await getHeadSha(repoDir),
         content_sha256: policyContentSha256(content2)
       }
@@ -56704,10 +56764,10 @@ async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
 }
 function getSdkVersion(repoDir) {
   for (const rel of ["Cargo.lock", "contract/Cargo.lock"]) {
-    const lockPath = path6.join(repoDir, rel);
+    const lockPath = path7.join(repoDir, rel);
     try {
-      if (fs5.existsSync(lockPath)) {
-        const lock = fs5.readFileSync(lockPath, "utf8");
+      if (fs6.existsSync(lockPath)) {
+        const lock = fs6.readFileSync(lockPath, "utf8");
         const m = lock.match(/name = "soroban-sdk"\nversion = "([^"]+)"/);
         if (m) return m[1];
       }
@@ -56720,7 +56780,7 @@ async function checkoutRef(repoRoot, ref, label) {
   await exec7.exec("git", ["fetch", "--depth=1", "origin", ref], {
     cwd: repoRoot
   });
-  const dir = fs5.mkdtempSync(path6.join(os2.tmpdir(), `weighin-${label}-`));
+  const dir = fs6.mkdtempSync(path7.join(os2.tmpdir(), `weighin-${label}-`));
   core3.info(`Checking out ${ref} into ${dir}`);
   try {
     await exec7.exec("git", ["worktree", "add", "--detach", dir, "FETCH_HEAD"], {
@@ -56783,9 +56843,9 @@ async function run() {
     }
     const baseRef = baseRefInput.trim() || context2.payload.pull_request?.base?.ref || "main";
     await validateBaseRef(headWorkspace, baseRef);
-    keyDir = fs5.mkdtempSync(path6.join(os2.tmpdir(), "weighin-key-"));
-    fs5.chmodSync(keyDir, 448);
-    sharedKeyFile = path6.join(keyDir, "weighin-deployer.key");
+    keyDir = fs6.mkdtempSync(path7.join(os2.tmpdir(), "weighin-key-"));
+    fs6.chmodSync(keyDir, 448);
+    sharedKeyFile = path7.join(keyDir, "weighin-deployer.key");
     core3.info(`Base ref:   ${baseRef}`);
     core3.info(`RPC URL:    ${sanitizeEndpoint(rpcUrl)}`);
     core3.info(`Fixtures:   ${fixturesPathRel}`);
@@ -56796,7 +56856,20 @@ async function run() {
       fixturesPathRel,
       "HEAD"
     );
-    const fixtureId = path6.relative(path6.resolve(headWorkspace), headFixturesPath).split(path6.sep).join("/");
+    const fixtureId = path7.relative(path7.resolve(headWorkspace), headFixturesPath).split(path7.sep).join("/");
+    outputPathsRejected = true;
+    assertDistinctOutputPaths({
+      workspace: headWorkspace,
+      outputs: {
+        "report-path": reportPathInput,
+        "metadata-path": metadataPathInput
+      },
+      inputs: {
+        "fixtures-path": headFixturesPath,
+        "config-path": configPathRel
+      }
+    });
+    outputPathsRejected = false;
     const policy = await loadPolicy(
       headWorkspace,
       configPathRel,
@@ -56804,7 +56877,7 @@ async function run() {
       trustedPolicyPath
     );
     const config2 = policy.config;
-    if (!fs5.existsSync(headFixturesPath)) {
+    if (!fs6.existsSync(headFixturesPath)) {
       throw new Error(`fixtures-path not found: ${headFixturesPath}`);
     }
     core3.startGroup("Building + measuring HEAD");
@@ -56863,7 +56936,7 @@ Commit or stash changes before running benchmarks.`
         fixturesPathRel,
         "BASE"
       );
-      if (!fs5.existsSync(baseFixturesPath)) {
+      if (!fs6.existsSync(baseFixturesPath)) {
         throw new Error("fixtures-path not found in base ref");
       } else {
         await buildForRevision(
@@ -56947,11 +57020,11 @@ Commit or stash changes before running benchmarks.`
     if (metadataPathInput) {
       const prNumber = context2.payload.pull_request?.number;
       if (prNumber) {
-        const destination = path6.resolve(headWorkspace, metadataPathInput);
-        fs5.mkdirSync(path6.dirname(destination), { recursive: true });
+        const destination = path7.resolve(headWorkspace, metadataPathInput);
+        fs6.mkdirSync(path7.dirname(destination), { recursive: true });
         const { owner, repo } = context2.repo;
         const metadata = buildPrMetadata(`${owner}/${repo}`, prNumber, headSha);
-        fs5.writeFileSync(
+        fs6.writeFileSync(
           destination,
           JSON.stringify(metadata, null, 2),
           "utf8"
@@ -56976,7 +57049,7 @@ Commit or stash changes before running benchmarks.`
   } finally {
     if (keyDir) {
       try {
-        fs5.rmSync(keyDir, { recursive: true, force: true });
+        fs6.rmSync(keyDir, { recursive: true, force: true });
         core3.info(`Removed owned deployer key directory: ${keyDir}`);
       } catch (err) {
         core3.warning(
@@ -56996,7 +57069,7 @@ run().catch(async (error2) => {
   core3.setFailed(message);
   const reportPathInput = core3.getInput("report-path");
   const headWorkspace = process.env["GITHUB_WORKSPACE"] ?? process.cwd();
-  if (reportPathInput) {
+  if (reportPathInput && !outputPathsRejected) {
     try {
       const failureReport = generateFailureReport(message);
       writeReportFile(reportPathInput, headWorkspace, failureReport);
