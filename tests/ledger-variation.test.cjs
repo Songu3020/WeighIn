@@ -100,7 +100,14 @@ test('all five controlled ledger-progression samples replay through public measu
     const replayedMetrics = metricsFromSimulation(replayed.output, replayed.limits);
     const savedBenchmark = run.reference_measurements[0].benchmarks[0];
 
-    assert.deepEqual(replayed.provenance, savedBenchmark.provenance);
+    // The retained archive predates the optional `source_account` provenance field, so the
+    // replay is compared on every archived provenance field and the recorded source account
+    // is asserted separately against the invoking account of the archived transaction.
+    const { source_account: replayedSourceAccount, ...replayedProvenance } = replayed.provenance;
+    const { source_account: savedSourceAccount, ...savedProvenance } = savedBenchmark.provenance;
+    assert.deepEqual(replayedProvenance, savedProvenance);
+    assert.equal(savedSourceAccount, undefined);
+    assert.equal(replayedSourceAccount, tx.source);
     assert.deepEqual(replayedMetrics, savedBenchmark.metrics);
   }
 });

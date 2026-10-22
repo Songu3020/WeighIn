@@ -1,0 +1,16 @@
+{
+  "id": "nested-invocation-suite",
+  "contracts": [
+    {
+      "id": "callee",
+      "wasm_path": "{{NESTED_BUILD_DIR}}/wasm/nested_callee.wasm",
+      "invocations": [
+        {
+          "id": "work-once",
+          "function_name": "work",
+          "args": [{ "type": "u32", "value": 1 }]
+        }
+      ]
+    }
+  ]
+}

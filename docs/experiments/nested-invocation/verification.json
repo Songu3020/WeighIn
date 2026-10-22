@@ -1,0 +1,98 @@
+{
+  "status": "LIVE_NESTED_INVOCATION_PROOF_PASS",
+  "real_build_deployment_rpc_and_native": true,
+  "nested_host_call": true,
+  "independent_invocation_substitute": false,
+  "measurement_schema": 4,
+  "identities": {
+    "fixture_id": "id:nested-invocation-suite",
+    "callee_logical_id": "id:callee",
+    "caller_logical_id": "id:caller",
+    "callee_case_id": "id:work-once",
+    "caller_case_id": "id:nested-work"
+  },
+  "wasm_sha256": {
+    "callee": "7a88993498d15bb50f16e36e8b8ead51b5a38eea1e933a65430edd6986ebc070",
+    "caller": "de34030d12b0162b67b86b9b2d637af9c3996c3583e7a2455677b4c075043f75",
+    "callee_regression": "67c62ccf6860cfbbafa22c804d8a9e6f33717420948a50674a7f30e62084083b"
+  },
+  "runtime_contract_ids": {
+    "base_callee": "CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X",
+    "base_caller": "CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO",
+    "head_callee": "CCLVGBBKV335I43BSSKHABHBJNC3BEUTNME343HTJFYFJ37QKLQULIHZ",
+    "head_caller": "CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO"
+  },
+  "rpc_native_parity": {
+    "transaction_data": true,
+    "return_value": true,
+    "ordered_charged_events": true,
+    "promoted_metrics_verified_against_raw_rpc": [
+      "ledger_read_entries",
+      "ledger_read_bytes",
+      "ledger_write_entries",
+      "ledger_write_bytes",
+      "events_count",
+      "event_data_bytes"
+    ],
+    "cpu_memory_direct_rpc_consumption_available": false
+  },
+  "combined_footprint": {
+    "callee_footprint_keys_reused": 3,
+    "caller_contributed_keys": 3,
+    "nested_read_entries": 6,
+    "nested_write_entries": 2,
+    "callee_read_entries": 3,
+    "callee_write_entries": 1,
+    "measured_zero_disk_read_bytes": true
+  },
+  "event_attribution": {
+    "charged_events": 2,
+    "callee_event_matches_standalone_measurement": true,
+    "event_order": [
+      "callee",
+      "caller"
+    ],
+    "event_data_bytes_includes_events_and_return": true,
+    "events_count_limit_is_null_not_zero": true
+  },
+  "unavailable_metrics_remain_null": [
+    "historical_data_read_bytes",
+    "contract_data_hard_limit",
+    "tx_size_bytes"
+  ],
+  "identity_stability": {
+    "address_swapped_control_paired": true,
+    "address_swapped_control_zero_deltas": true,
+    "runtime_addresses_differ": true,
+    "explicit_invocation_ids_required_for_pairing": true
+  },
+  "callee_only_regression": {
+    "detected": true,
+    "caller_wasm_unchanged": true,
+    "caller_runtime_address_unchanged": true,
+    "nested_cpu_delta": 29329,
+    "nested_write_bytes_delta": 80,
+    "policy_violations": 2
+  },
+  "archive_control": {
+    "rejected": true,
+    "message": "archived ledger state is unsupported"
+  },
+  "failure_classification": {
+    "application_failure": {
+      "message": "Simulation failed for run_failing: HostError: Error(WasmVm, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[error, Error(WasmVm, InvalidAction)], data:\"escalating error to VM trap from failed host function call: call\"\n   1: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[error, Error(WasmVm, InvalidAction)], data:[\"contract call failed\", boom, []]\n   2: [Failed Diagnostic Event (not emitted)] contract:CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X, topics:[error, Error(WasmVm, InvalidAction)], data:[\"VM call trapped: UnreachableCodeReached\", boom]\n   3: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[fn_call, CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X, boom], data:Void\n   4: [Diagnostic Event] topics:[fn_call, CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, run_failing], data:CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X\n",
+      "source": "RPC simulation error surfaced by the nested caller/callee invocation"
+    },
+    "invalid_input": {
+      "message": "Invalid value for address: Unsupported address type: CNOTAREALCONTRACTADDRESS",
+      "detected_before_simulation": true
+    },
+    "infrastructure_failure": {
+      "message": "Simulation helper missing or not executable: /tmp/weighin-nested-SqgeJm/missing-helper",
+      "source": "native helper provisioning"
+    },
+    "distinct_classes": true
+  },
+  "state_mutations_are_simulated_only": true,
+  "public_github_ci_proven": false
+}

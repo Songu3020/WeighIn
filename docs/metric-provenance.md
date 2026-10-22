@@ -90,11 +90,14 @@ see the separate [repeatability experiment](repeatability.md).
 
 ## Explicit schema migration
 
-Schema 4 introduced audited consumption and cap provenance. Current measurements
-emit `ContractBenchmark.schema_version: 5`, which preserves the same logical
-tuple and runtime diagnostics and adds an allowlist binding every metric to its
-audited semantic mapping. The helper input/output transport remains schema 1:
-its existing footprint/IO/event fields are sufficient for this audit.
+Schema 4 introduced audited consumption and cap provenance: measured metrics add
+`limit_source`, or `limit_reason` when there is no independent cap, and provenance
+adds `resource_limits_sha256` and the optional `source_account`, the account that
+invoked the measured call. Current measurements emit
+`ContractBenchmark.schema_version: 5`, which preserves the same logical tuple and
+runtime diagnostics and adds an allowlist binding every metric to its audited
+semantic mapping. The helper input/output transport remains schema 1: its
+existing footprint/IO/event fields are sufficient for this audit.
 
 These exact labels are part of the schema-5 contract; a nonblank label is not
 evidence by itself. Runtime validation and the generated JSON Schema enforce
@@ -109,94 +112,4 @@ compared, including unmatched records:
 | `ledger_read_bytes` | `SorobanResources.diskReadBytes (identity adjustment)` | `ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes` |
 | `ledger_write_entries` | `SorobanResources.footprint.readWrite.length` | `ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries` |
 | `ledger_write_bytes` | `SorobanResources.writeBytes (identity adjustment)` | `ConfigSettingContractLedgerCostV0.txMaxWriteBytes` |
-| `events_count` | `successful non-diagnostic ContractEvents.length` | `Protocol 28 has no independent event-count cap` (`limit: null`) |
-| `event_data_bytes` | `sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes` | `ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes` |
-| `historical_data_read_bytes` | Unavailable; reason: `Protocol 28 exposes historical-data fees, not a historical read consumption resource` | No cap (`limit: null`) |
-| `contract_data_hard_limit` | Unavailable; reason: `No verified instance-only post-invocation size and corresponding limit mapping` | No cap (`limit: null`) |
-| `tx_size_bytes` | Unavailable; reason: `Simulation estimates a maximum envelope; no signed benchmark transaction is submitted` | No cap (`limit: null`) |
-
-The legacy key `event_data_bytes` is retained for configured policies, but schema
-4 explicitly defines it as **Events + Return XDR Bytes**, not payload-only bytes.
-The report labels `ledger_read_entries` as **Footprint Entries (RO + RW)**,
-`ledger_read_bytes` as **Disk Read Bytes**, and `ledger_write_entries` as
-**Write Footprint Entries**. They must not be silently relabeled as host call
-counts or physical IO. Historical reports retain their old numeric labels.
-
-Schema 3's other nine names were unavailable. Schema 4 promoted six; three stay
-unavailable. Schema 5 pins the exact labels above. Mixed schema comparisons fail
-explicitly. Legacy/schema-2/schema-3/schema-4 records remain validated under
-their original rules and comparable only within their own schema. Generate both
-BASE and HEAD with the current producer to use schema 5; do not rewrite or
-relabel archived records or replace unavailable values with zero. Unknown,
-missing, or merely matching fabricated source mappings and changed caps fail
-closed even on unmatched records.
-Global all-metric policies still fail on the three unsupported names unless
-explicitly ignored. Targeted policies for supported metrics work normally.
-
-## Evidence and reproduction
-
-[Live verification](experiments/metric-provenance/verification.json),
-[measurements](experiments/metric-provenance/measurements.json),
-[raw RPC](experiments/metric-provenance/rpc-captures.json),
-[native inputs/outputs](experiments/metric-provenance/native-replays.json) and
-[report](experiments/metric-provenance/report.md) record the actual experiment.
-
-Measured examples: repeated reads plus absence yield 4 footprint keys and zero
-disk bytes; no-op write yields 1 RW entry / 80 bytes; deletion yields 1 RW entry /
-zero bytes; SAC balance reads 144 classic Account XDR bytes; one event plus return
-yields 96 bytes, while a larger return without events yields 652 bytes. These
-values apply to the saved fixture/environment, not every Soroban project.
-
-The explicit experiment `tests/experiments/verify-metric-provenance.cjs` builds
-an isolated SDK-28 contract with the official Stellar build path, deploys it and
-a native Stellar Asset Contract, runs production measurement, and records raw
-RPC and native input/output. Observers forward the original IO unchanged.
-The production reference contract is not edited.
-
-Run from a repository checkout with the verified Stellar CLI on PATH and an isolated pinned quickstart
-network on port 18000:
-
-```bash
-npm ci
-npm run build
-npm run build:helper
-node tests/experiments/verify-metric-provenance.cjs /tmp/weighin-metric-evidence
-npm test
-npm run test:native
-npm run bundle
-node tests/experiments/verify-build-path.cjs /tmp/weighin-full-action-evidence
-```
-
-The live fixture covers repeated reads and queried absence, no-op writes,
-deletion, positive classic-account disk reads through SAC balance, events, and
-a larger return with no events. It verifies all six promoted consumption fields
-directly against the parity-accepted raw simulateTransaction response and checks
-the loaded caps. Private deployer keys remain in temporary directories.
-Frozen-evidence tests independently replay the captured helper inputs; frozen
-replay establishes snapshot repeatability, not broader live/build determinism.
-
-## Final Action and CLI proof
-
-[Final Action verification](experiments/metric-provenance/action/verification.json)
-uses real Git fetch/worktrees and source builds with a strict write-byte policy.
-Control exits 0. Temporary persistent-write HEAD changes WASM/runtime address,
-still matches the configured benchmark, increases write bytes 0 → 88 and exits 1.
-CPU also increases 266842 → 309171. The Action uses a shared build cache; this is
-not five-clean-build or public GitHub CI proof.
-
-```bash
-WEIGHIN_EXPERIMENT_POLICY_METRIC=ledger_write_bytes node tests/experiments/verify-build-path.cjs /tmp/weighin-write-policy-proof
-```
-
-[CLI results](experiments/metric-provenance/cli-results.json) and
-[process capture](experiments/metric-provenance/cli-process.json) show the production
-CLI exits 0 and emitted six schema-4 measurements with SDK 28.0.0 on the real network.
-[Validation](experiments/metric-provenance/validation.json) records final gates;
-[operational/test failures](experiments/metric-provenance/validation-failures.json)
-record failed attempts and recovery. The proof network was stopped afterward.
-
-These original source/build/data records are local evidence. Subsequent
-[repeatability](repeatability.md), [fixture migration](fixture-migration.md),
-[local external-project evidence](external-soroban-forge.md) and
-[hosted comparison proof](EVIDENCE.md) are recorded separately with their own
-producer identities. They do not change the provenance of these earlier records.
+| `events_count` |

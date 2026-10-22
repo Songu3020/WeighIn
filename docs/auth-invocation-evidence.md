@@ -1,6 +1,6 @@
 # Authorization-Required Invocation Evidence (Schema 4)
 
-This document and the retained evidence in [`docs/experiments/auth-invocation`](../experiments/auth-invocation/) validate invocation measurement behavior for a Soroban smart contract function that requires explicit caller authorization via `caller.require_auth()`.
+This document and the retained evidence in [`docs/experiments/auth-invocation`](experiments/auth-invocation/) validate invocation measurement behavior for a Soroban smart contract function that requires explicit caller authorization via `caller.require_auth()`.
 
 ## Reference Contract Fixture
 

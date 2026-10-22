@@ -100,6 +100,14 @@ The archive in [`docs/experiments/ledger-variation/`](experiments/ledger-variati
 - [`control-diff.json`](experiments/ledger-variation/control-diff.json), [`variation-diff.json`](experiments/ledger-variation/variation-diff.json), [`policy.json`](experiments/ledger-variation/policy.json), [`violations.json`](experiments/ledger-variation/violations.json), & [`summary.md`](experiments/ledger-variation/summary.md): Diff, policy evaluation, and rendered markdown report.
 - [`verification.json`](experiments/ledger-variation/verification.json) & [`sha256.json`](experiments/ledger-variation/sha256.json): Verification record and SHA-256 manifest verified by [`tests/ledger-variation.test.cjs`](../tests/ledger-variation.test.cjs).
 
+The archived `summary.md` is retained historical evidence: it is the report the
+renderer of this experiment revision produced, and its bytes and recorded
+SHA-256 are never rewritten. Because the renderer later moved its provenance
+block into a `<details>` section and expanded it, the verification compares the
+archived report on the facts it states — metric rows, violations, unavailable
+reasons, metric sources and the recorded ledger endpoints and digests — instead
+of on byte equality with the current renderer.
+
 To regenerate and verify the controlled experiment archive:
 
 ```bash

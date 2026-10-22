@@ -198,6 +198,23 @@ export function metricsFromSimulation(
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** Validate a public account key used as an invocation source.
+ *  Only Ed25519 account identifiers are accepted; muxed and contract
+ *  addresses are not transaction sources.
+ */
+export function normalizeSourceAccount(publicKey: string): string {
+  if (typeof publicKey !== "string" || !publicKey.trim()) {
+    throw new Error("Invalid invocation source account: expected a public key");
+  }
+  const trimmed = publicKey.trim();
+  if (!StrKey.isValidEd25519PublicKey(trimmed)) {
+    throw new Error(
+      "Invalid invocation source account: expected an Ed25519 account public key (G...)",
+    );
+  }
+  return trimmed;
+}
+
 // Convert native type/value to ScVal
 export function toScVal(arg: InvocationArg): xdr.ScVal {
   const type = arg.type.toLowerCase();
@@ -280,7 +297,10 @@ export function toScVal(arg: InvocationArg): xdr.ScVal {
 }
 
 // Deterministically calculate contract ID
-function calculateContractId(deployerAddress: string, salt: Buffer): string {
+export function calculateContractId(
+  deployerAddress: string,
+  salt: Buffer,
+): string {
   const addressSc = Address.fromString(deployerAddress).toScAddress();
   const preimage = xdr.ContractIdPreimage.contractIdPreimageFromAddress(
     new xdr.ContractIdPreimageFromAddress({
@@ -308,7 +328,7 @@ function calculateContractId(deployerAddress: string, salt: Buffer): string {
  *                 runs so both measurements use the same on-chain account.
  * @param rpcUrl   Used to derive the friendbot URL for initial funding.
  */
-async function getOrInitAccount(
+export async function getOrInitAccount(
   keyFile: string,
   rpcUrl: string,
   signal?: AbortSignal,
@@ -452,24 +472,270 @@ async function submitAndConfirm(
 }
 
 // Check if contract is already deployed
-async function isContractDeployed(
+export async function isContractDeployed(
   server: rpc.Server,
   contractId: string,
 ): Promise<boolean> {
+  const contractScAddress = Address.fromString(contractId).toScAddress();
+  const ledgerKey = xdr.LedgerKey.contractData(
+    new xdr.LedgerKeyContractData({
+      contract: contractScAddress,
+      key: xdr.ScVal.scvLedgerKeyContractInstance(),
+      durability: xdr.ContractDataDurability.persistent(),
+    }),
+  );
+
   try {
-    const contractScAddress = Address.fromString(contractId).toScAddress();
-    const ledgerKey = xdr.LedgerKey.contractData(
-      new xdr.LedgerKeyContractData({
-        contract: contractScAddress,
-        key: xdr.ScVal.scvLedgerKeyContractInstance(),
-        durability: xdr.ContractDataDurability.persistent(),
-      }),
-    );
     const res = await server.getLedgerEntries(ledgerKey);
-    return !!(res.entries && res.entries.length > 0);
-  } catch {
-    return false;
+    if (
+      !res ||
+      typeof res !== "object" ||
+      !Array.isArray((res as any).entries)
+    ) {
+      throw new Error(
+        `Deployment probe returned an invalid ledger response: ${JSON.stringify(res)}`,
+      );
+    }
+
+    if (res.entries.length === 0) return false;
+    if (res.entries.length > 1) {
+      throw new Error(
+        `Deployment probe returned ${res.entries.length} entries for ${contractId}; expected at most one matching contract instance`,
+      );
+    }
+
+    const entry = res.entries[0] as any;
+    if (!entry || typeof entry !== "object") {
+      throw new Error(
+        `Deployment probe returned a malformed entry for ${contractId}: ${JSON.stringify(entry)}`,
+      );
+    }
+    const entryKey =
+      typeof entry.key === "string"
+        ? entry.key
+        : typeof entry.key?.toXDR === "function"
+          ? entry.key.toXDR("base64")
+          : undefined;
+    const entryValue = entry.xdr ?? entry.val;
+    const entryXdr =
+      typeof entryValue === "string"
+        ? entryValue
+        : typeof entryValue?.toXDR === "function"
+          ? entryValue.toXDR("base64")
+          : undefined;
+    if (typeof entryKey !== "string" || typeof entryXdr !== "string") {
+      throw new Error(
+        `Deployment probe returned a missing key/xdr payload for ${contractId}: ${JSON.stringify(entry)}`,
+      );
+    }
+    if (entryKey !== ledgerKey.toXDR("base64")) {
+      throw new Error(
+        `Deployment probe returned an unrelated ledger entry for ${contractId}; expected instance key ${ledgerKey.toXDR("base64")}, got ${entryKey}`,
+      );
+    }
+
+    let ledgerEntry: xdr.LedgerEntryData;
+    try {
+      ledgerEntry = xdr.LedgerEntryData.fromXDR(entryXdr, "base64");
+    } catch (error: any) {
+      throw new Error(
+        `Deployment probe returned invalid XDR for ${contractId}: ${error.message}`,
+      );
+    }
+
+    if (ledgerEntry.switch().name !== "contractData") {
+      throw new Error(
+        `Deployment probe returned ${ledgerEntry.switch().name} for ${contractId}; expected contractData`,
+      );
+    }
+
+    const contractData = ledgerEntry.contractData();
+    if (!contractData) {
+      throw new Error(
+        `Deployment probe returned a contractData record without payload for ${contractId}`,
+      );
+    }
+    const instanceKey = contractData.key();
+    if (
+      instanceKey.toXDR("base64") !==
+      xdr.ScVal.scvLedgerKeyContractInstance().toXDR("base64")
+    ) {
+      throw new Error(
+        `Deployment probe returned a non-instance contractData entry for ${contractId}`,
+      );
+    }
+    if (
+      contractData.contract().toXDR("base64") !==
+      contractScAddress.toXDR("base64")
+    ) {
+      throw new Error(
+        `Deployment probe returned a different contract for ${contractId}; expected ${contractScAddress.toXDR("base64")}`,
+      );
+    }
+
+    return true;
+  } catch (error: any) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith("Deployment probe")
+    ) {
+      throw error;
+    }
+    throw new Error(
+      `Deployment probe failed for contract ${contractId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
+}
+
+/** Resolve a declared wasm_path against the fixtures directory.
+ *  Falls back to the sibling target directory when a workspace renamed its
+ *  target triple, and fails before any network side effect otherwise.
+ */
+export function resolveContractWasmPath(
+  fixturesDir: string,
+  wasmPath: string,
+): string {
+  let resolved = path.resolve(fixturesDir, wasmPath);
+  if (!fs.existsSync(resolved)) {
+    let altPath = "";
+    if (resolved.includes("wasm32-unknown-unknown")) {
+      altPath = resolved.replace("wasm32-unknown-unknown", "wasm32v1-none");
+    } else if (resolved.includes("wasm32v1-none")) {
+      altPath = resolved.replace("wasm32v1-none", "wasm32-unknown-unknown");
+    }
+    if (altPath && fs.existsSync(altPath)) {
+      resolved = altPath;
+    } else {
+      throw new Error(
+        `WASM not found: ${resolved}\nBuild the contract before running measurements.`,
+      );
+    }
+  }
+  return resolved;
+}
+
+/** Upload the WASM and create the contract instance when it is not deployed.
+ *  Deployment always uses the deployer account, never an invocation source.
+ */
+export async function ensureContractDeployed(options: {
+  server: rpc.Server;
+  deployer: Keypair;
+  deployerAddress: Address;
+  wasmBytes: Buffer;
+  wasmHash: Buffer;
+  salt: Buffer;
+  contractId: string;
+  rpcUrl: string;
+  signal?: AbortSignal;
+}): Promise<void> {
+  const { server, deployer, deployerAddress, wasmBytes, wasmHash, salt } =
+    options;
+  const deployed = await isContractDeployed(server, options.contractId);
+  if (deployed) {
+    console.log(`Already deployed at ${options.contractId}`);
+    return;
+  }
+
+  console.log(`Installing WASM...`);
+  let account = await server.getAccount(deployer.publicKey());
+
+  // 1. Upload WASM
+  const uploadTx = new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
+  })
+    .addOperation(Operation.uploadContractWasm({ wasm: wasmBytes }))
+    .setTimeout(30)
+    .build();
+
+  let preparedUpload;
+  try {
+    preparedUpload = await server.prepareTransaction(uploadTx);
+  } catch (err: any) {
+    console.error(
+      `WASM upload preparation failed at ${sanitizeEndpoint(options.rpcUrl)}: ${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)}`,
+    );
+    throw err;
+  }
+  preparedUpload.sign(deployer);
+  await submitAndConfirm(
+    server,
+    preparedUpload,
+    "WASM upload",
+    options.rpcUrl,
+    options.signal,
+  );
+
+  console.log(`WASM installed. Deploying contract instance...`);
+  account = await server.getAccount(deployer.publicKey());
+
+  // 2. Create contract instance
+  const createTx = new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
+  })
+    .addOperation(
+      Operation.createCustomContract({
+        wasmHash,
+        address: deployerAddress,
+        salt,
+      }),
+    )
+    .setTimeout(30)
+    .build();
+
+  const preparedCreate = await server.prepareTransaction(createTx);
+  preparedCreate.sign(deployer);
+  await submitAndConfirm(
+    server,
+    preparedCreate,
+    "contract creation",
+    options.rpcUrl,
+    options.signal,
+  );
+  console.log(`Deployed at ${options.contractId}`);
+}
+
+/** Build the simulated invocation transaction for one contract case.
+ *  The transaction source account selects the invoking identity; it is never
+ *  a signing key, because benchmark invocations are simulated, not submitted.
+ */
+export async function buildInvocationTransaction(options: {
+  server: rpc.Server;
+  sourceAccount: string;
+  contractId: string;
+  invocation: InvocationSpec;
+  rpcUrl: string;
+  signal?: AbortSignal;
+}): Promise<Transaction> {
+  const { server, sourceAccount, contractId, invocation } = options;
+  if (options.signal?.aborted) {
+    throw options.signal.reason || new Error("Measurement cancelled");
+  }
+  let account;
+  try {
+    account = await server.getAccount(sourceAccount);
+  } catch (err: any) {
+    throw new Error(
+      `Invocation source account is not available on the network: ${sourceAccount} (${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)})`,
+    );
+  }
+  const argsSc = invocation.args.map(toScVal);
+  return new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
+  })
+    .addOperation(
+      Operation.invokeContractFunction({
+        contract: contractId,
+        function: invocation.function_name,
+        args: argsSc,
+      }),
+    )
+    .setTimeout(30)
+    .build();
 }
 
 // ---------------------------------------------------------------------------
@@ -497,6 +763,14 @@ export interface RunMeasurementOptions {
   keyFile?: string;
   /** Executable override; otherwise build the bundled pinned helper on Linux x64. */
   helperPath?: string;
+  /**
+   * Public key of the account that invokes the measured contract calls.
+   * Defaults to the deployer account. The account only selects the invoking
+   * identity of a simulated call: no key material is required and nothing is
+   * signed, but the account must exist on the network. Deployment always uses
+   * the deployer account.
+   */
+  invocationSourceAccount?: string;
   /** Optional cancellation signal. */
   signal?: AbortSignal;
 }
@@ -543,25 +817,25 @@ export async function runMeasurement(
   );
   const deployerAddress = Address.fromString(deployer.publicKey());
 
+  // The invoking identity may differ from the deployer. It is validated
+  // before any measurement so an invalid account fails before a snapshot.
+  let invocationSourceAccount = deployer.publicKey();
+  if (opts.invocationSourceAccount !== undefined) {
+    invocationSourceAccount = normalizeSourceAccount(
+      opts.invocationSourceAccount,
+    );
+    if (invocationSourceAccount !== deployer.publicKey()) {
+      console.log(`Invocation source account: ${invocationSourceAccount}`);
+    }
+  }
+
   const results: ContractBenchmark[] = [];
 
   for (const contractSpec of fixturesSpec.contracts) {
-    let wasmPath = path.resolve(fixturesDir, contractSpec.wasm_path);
-    if (!fs.existsSync(wasmPath)) {
-      let altPath = "";
-      if (wasmPath.includes("wasm32-unknown-unknown")) {
-        altPath = wasmPath.replace("wasm32-unknown-unknown", "wasm32v1-none");
-      } else if (wasmPath.includes("wasm32v1-none")) {
-        altPath = wasmPath.replace("wasm32v1-none", "wasm32-unknown-unknown");
-      }
-      if (altPath && fs.existsSync(altPath)) {
-        wasmPath = altPath;
-      } else {
-        throw new Error(
-          `WASM not found: ${wasmPath}\nBuild the contract before running measurements.`,
-        );
-      }
-    }
+    const wasmPath = resolveContractWasmPath(
+      fixturesDir,
+      contractSpec.wasm_path,
+    );
 
     const wasmBytes = fs.readFileSync(wasmPath);
     const wasmHash = crypto.createHash("sha256").update(wasmBytes).digest();
@@ -575,70 +849,17 @@ export async function runMeasurement(
     const contractId = calculateContractId(deployer.publicKey(), salt);
 
     console.log(`Contract ID: ${contractId}`);
-    const deployed = await isContractDeployed(server, contractId);
-
-    if (!deployed) {
-      console.log(`Installing WASM...`);
-      let account = await server.getAccount(deployer.publicKey());
-
-      // 1. Upload WASM
-      const uploadTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
-      })
-        .addOperation(Operation.uploadContractWasm({ wasm: wasmBytes }))
-        .setTimeout(30)
-        .build();
-
-      let preparedUpload;
-      try {
-        preparedUpload = await server.prepareTransaction(uploadTx);
-      } catch (err: any) {
-        console.error(
-          `WASM upload preparation failed at ${sanitizeEndpoint(effectiveRpcUrl)}: ${redactEndpointSecrets(String(err?.message ?? err), effectiveRpcUrl)}`,
-        );
-        throw err;
-      }
-      preparedUpload.sign(deployer);
-      await submitAndConfirm(
-        server,
-        preparedUpload,
-        "WASM upload",
-        effectiveRpcUrl,
-        opts.signal,
-      );
-
-      console.log(`WASM installed. Deploying contract instance...`);
-      account = await server.getAccount(deployer.publicKey());
-
-      // 2. Create contract instance
-      const createTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
-      })
-        .addOperation(
-          Operation.createCustomContract({
-            wasmHash,
-            address: deployerAddress,
-            salt,
-          }),
-        )
-        .setTimeout(30)
-        .build();
-
-      const preparedCreate = await server.prepareTransaction(createTx);
-      preparedCreate.sign(deployer);
-      await submitAndConfirm(
-        server,
-        preparedCreate,
-        "contract creation",
-        effectiveRpcUrl,
-        opts.signal,
-      );
-      console.log(`Deployed at ${contractId}`);
-    } else {
-      console.log(`Already deployed at ${contractId}`);
-    }
+    await ensureContractDeployed({
+      server,
+      deployer,
+      deployerAddress,
+      wasmBytes,
+      wasmHash,
+      salt,
+      contractId,
+      rpcUrl: effectiveRpcUrl,
+      signal: opts.signal,
+    });
 
     const benchmarks: BenchmarkResult[] = [];
 
@@ -650,22 +871,14 @@ export async function runMeasurement(
         );
       }
       console.log(`Simulating ${invokeSpec.function_name}...`);
-      const account = await server.getAccount(deployer.publicKey());
-      const argsSc = invokeSpec.args.map(toScVal);
-
-      const invokeTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
-      })
-        .addOperation(
-          Operation.invokeContractFunction({
-            contract: contractId,
-            function: invokeSpec.function_name,
-            args: argsSc,
-          }),
-        )
-        .setTimeout(30)
-        .build();
+      const invokeTx = await buildInvocationTransaction({
+        server,
+        sourceAccount: invocationSourceAccount,
+        contractId,
+        invocation: invokeSpec,
+        rpcUrl: effectiveRpcUrl,
+        signal: opts.signal,
+      });
 
       const simRes = await server.simulateTransaction(invokeTx);
       if (rpc.Api.isSimulationError(simRes)) {

@@ -30,7 +30,7 @@ test('real helper rejects missing config, uncaptured state, failed calls, protoc
   const badFunction = xdr.HostFunction.fromXDR(base.host_function_xdr, 'base64'); badFunction.invokeContract().functionName('missing');
   const cases = [
     [{ ...base, entries: [] }, /network configuration/],
-    [{ ...base, entries: base.entries.filter(row => !['contractCode', 'contractData'].includes(xdr.LedgerKey.fromXDR(row.key, 'base64').switch().name)) }, /UNCAPTURED_KEY/],
+    [{ ...base, entries: base.entries.filter(row => !['contractCode', 'contractData'].includes(xdr.LedgerKey.fromXDR(row.key, 'base64').switch().name)) }, /Native helper uncaptured: snapshot is missing ledger keys/],
     [{ ...base, host_function_xdr: badFunction.toXDR('base64') }, /host invocation failed/],
     [{ ...base, header_xdr: alteredHeader.toXDR('base64') }, /unsupported protocol/],
     [{ ...base, seed: [0] }, /32 bytes/],

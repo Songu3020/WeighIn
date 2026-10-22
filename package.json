@@ -20,6 +20,7 @@
     "test:native": "npm run build && npm run build:helper && node --test tests/native/*.test.cjs",
     "build:helper": "cargo +1.95.0 build --release --locked --manifest-path native/simulation/Cargo.toml --target-dir native/simulation/target --target x86_64-unknown-linux-gnu",
     "typecheck": "tsc --noEmit",
+    "docs:check": "node scripts/check-markdown-links.cjs",
     "lint": "prettier --check src test",
     "format": "prettier --write src test"
   },

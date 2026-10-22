@@ -70,7 +70,8 @@ if (mode === "funding-exhausted") {
 Module._load = function (name, parent, ...args) {
   if (
     parent?.filename.endsWith("/dist/action.js") ||
-    parent?.filename.endsWith("/dist/build.js")
+    parent?.filename.endsWith("/dist/build.js") ||
+    parent?.filename.endsWith("/dist/git-utils.js")
   ) {
     if (name === "@actions/core" && parent?.filename.endsWith("/dist/action.js")) {
       const core = load.call(this, name, parent, ...args);
@@ -107,6 +108,10 @@ Module._load = function (name, parent, ...args) {
           if (command === "git" && argv[0] === "check-ref-format") {
             const result = spawnSync("git", argv, { encoding: "utf8" });
             return result.status ?? 1;
+          }
+          if (command === "git" && argv[0] === "status") {
+            options.listeners?.stdout?.(Buffer.from(""));
+            return 0;
           }
           const isBase = !(
             options.cwd === process.env.GITHUB_WORKSPACE ||

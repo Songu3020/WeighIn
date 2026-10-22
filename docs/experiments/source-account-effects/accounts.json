@@ -1,0 +1,20 @@
+{
+  "accounts": [
+    {
+      "label": "source-1",
+      "public_key": "GAEOEOY72JOJQSTF4VIR3DTL47JTJSQJABC2D2IWUJPWT3SLN7NGYV4P",
+      "sequence": "sequenceNumber() {\n    return this.sequence.toString();\n  }"
+    },
+    {
+      "label": "source-2",
+      "public_key": "GAR44GTS47JE4YFECH4KG2D3PY3TVIAQP6LG3A2NFW2RJ23S2OPKJ2MB",
+      "sequence": "sequenceNumber() {\n    return this.sequence.toString();\n  }"
+    },
+    {
+      "label": "source-3",
+      "public_key": "GCVEHH2XDDAA3CDEYHJ5HSMXCBI34MTEFKGV7GS6NRRMBPTNJTGEFKWH",
+      "sequence": "sequenceNumber() {\n    return this.sequence.toString();\n  }"
+    }
+  ],
+  "note": "Disposable local-network accounts; public keys only, no key material retained."
+}

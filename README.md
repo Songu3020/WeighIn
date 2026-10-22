@@ -19,7 +19,8 @@ These are Soroban simulation resources, not hardware performance or fee estimate
 ## How It Works
 
 ```text
-HEAD checkout + fetched BASE worktree
+HEAD checkout (must have no uncommitted changes) + fetched BASE worktree
+  → verify HEAD workspace is clean
   → build each revision's configured contracts
   → deploy WASM and simulate each revision's fixtures
   → capture RPC state and measure with protocol-matched native simulation
@@ -163,7 +164,7 @@ All supported inputs are declared in [action.yml](action.yml):
 | `rust-toolchain` | Contract-build Rustup override; does not change pinned native-helper toolchain |
 | `build-command` | Custom shell build command in each revision; replaces default build guarantees |
 | `skip-build` | `true` uses prebuilt fixture WASMs in both revisions; incompatible with `build-command`. Accepts YAML 1.2 boolean spellings (`true`, `True`, `TRUE`, `false`, `False`, `FALSE`); defaults to `false`. Non-boolean values are rejected |
-| `report-path` | Optional Markdown report destination |
+| `report-path` | Optional Markdown report destination; replaced atomically, so an interrupted write keeps the previously published report |
 | `metadata-path` | Optional versioned PR-number/HEAD-SHA JSON destination; emitted only in a PR context |
 | `github-token` | Optional direct PR-comment token; omit for the separate comment workflow |
 
@@ -172,6 +173,15 @@ An unsuccessful comparison emits `fail` and `{}`. A valid comparison with policy
 violations emits its real diff, writes the report, then fails the Action. If a
 later report or job-summary write fails after a valid comparison, the Action
 still fails with that delivery diagnostic while retaining the computed diff.
+
+The Markdown report is delivered atomically. It is written to a temporary file
+this run owns, in the destination directory, and renamed over the destination
+only after the complete report was written. A failed or interrupted write
+therefore leaves an already published report unchanged instead of truncating
+it, and never publishes a partial report. Only the temporary file created by
+the failing run is cleaned up; a concurrent writer's temporary file is left
+untouched. The replacement is a same-filesystem rename, so the content is not
+fsynced before it becomes visible.
 
 See [policy and package provenance](docs/policy-and-package-provenance.md) for
 the trusted-policy boundary, package manifest verification, and signing
@@ -240,6 +250,15 @@ revisions, enforce thresholds or post comments. Provision the native helper/RPC,
 then run `node dist/cli.js <fixtures.json> --rpc-url <standalone-rpc> --output <results.json>`
 from a built checkout. See [native provisioning](docs/native-measurement.md).
 
+## Source Accounts
+
+The account that invokes a measured call is recorded in
+`provenance.source_account`, and `measureSourceAccountEffects` from
+`weighin/dist/source-account` measures one case under several source accounts
+while code, arguments, protocol, calibration and resource limits stay fixed.
+It reports the per-metric effect and whether results stay comparable across
+accounts. See [source-account effects](docs/source-account-effects.md).
+
 ## Evidence
 
 [WeighIn Evidence](docs/EVIDENCE.md) links hosted control/regression/threshold
@@ -248,6 +267,9 @@ Evidence conclusions are bounded by the recorded environment.
 [Hosted Soroban Forge validation](docs/hosted-soroban-forge.md) additionally proves
 one real escrow query: changed WASM/address pairing, +14,234 CPU and verified
 strict-policy failure in a permitted isolated fork.
+[Cross-contract nested invocation attribution](docs/nested-invocation.md) proves a
+real caller→callee host call charging one combined footprint with per-contract
+event and return attribution.
 
 ## Known Limitations
 

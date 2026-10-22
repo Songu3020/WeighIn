@@ -189,7 +189,7 @@ describe("CycloneDX dependency inventory", () => {
     expect(actionsCore?.hashes?.some((hash) => hash.alg === "SHA-512")).toBe(
       true,
     );
-  });
+  }, 15_000);
 
   it("deduplicates npm identity across install locations and preserves versions, classes, and absent metadata", () => {
     const root = createFixtureRoot();

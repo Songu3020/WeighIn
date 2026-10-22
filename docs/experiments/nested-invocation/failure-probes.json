@@ -1,0 +1,16 @@
+{
+  "applicationFailure": {
+    "message": "Simulation failed for run_failing: HostError: Error(WasmVm, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[error, Error(WasmVm, InvalidAction)], data:\"escalating error to VM trap from failed host function call: call\"\n   1: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[error, Error(WasmVm, InvalidAction)], data:[\"contract call failed\", boom, []]\n   2: [Failed Diagnostic Event (not emitted)] contract:CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X, topics:[error, Error(WasmVm, InvalidAction)], data:[\"VM call trapped: UnreachableCodeReached\", boom]\n   3: [Diagnostic Event] contract:CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, topics:[fn_call, CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X, boom], data:Void\n   4: [Diagnostic Event] topics:[fn_call, CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO, run_failing], data:CC4CPMMFFM46DREYMNFUZPUBMY7VL4NDBWQE2UEPSROBZI4WSGUJGX3X\n",
+    "classification": "application_failure",
+    "rpc_simulation_error": true
+  },
+  "invalidInput": {
+    "message": "Invalid value for address: Unsupported address type: CNOTAREALCONTRACTADDRESS",
+    "classification": "invalid_input",
+    "detected_before_simulation": true
+  },
+  "infrastructureFailure": {
+    "message": "Simulation helper missing or not executable: /tmp/weighin-nested-SqgeJm/missing-helper",
+    "classification": "infrastructure_failure"
+  }
+}

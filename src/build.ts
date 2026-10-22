@@ -14,6 +14,105 @@ export interface BuiltContract {
   rust_version: string;
 }
 
+export interface ContractInputSnapshot {
+  packageDir: string;
+  hashes: Map<string, string>;
+}
+
+/**
+ * Snapshot selected manifests, lockfiles, and tracked contract source inputs
+ * before the build begins.
+ */
+export function snapshotContractInputs(
+  packageDir: string,
+): ContractInputSnapshot {
+  const hashes = new Map<string, string>();
+
+  function scanDir(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (
+        entry.name === "target" ||
+        entry.name === "node_modules" ||
+        entry.name === ".git"
+      ) {
+        continue;
+      }
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scanDir(fullPath);
+      } else if (entry.isFile()) {
+        if (
+          entry.name === "Cargo.toml" ||
+          entry.name === "Cargo.lock" ||
+          entry.name.endsWith(".rs")
+        ) {
+          try {
+            const hash = createHash("sha256")
+              .update(fs.readFileSync(fullPath))
+              .digest("hex");
+            hashes.set(fullPath, hash);
+          } catch {
+            // Ignore unreadable
+          }
+        }
+      }
+    }
+  }
+
+  scanDir(packageDir);
+
+  // Traverse upward to capture workspace root Cargo.toml and Cargo.lock if present
+  let current = path.dirname(packageDir);
+  while (current && current !== packageDir) {
+    const parentToml = path.join(current, "Cargo.toml");
+    const parentLock = path.join(current, "Cargo.lock");
+    if (fs.existsSync(parentToml)) {
+      hashes.set(
+        parentToml,
+        createHash("sha256").update(fs.readFileSync(parentToml)).digest("hex"),
+      );
+    }
+    if (fs.existsSync(parentLock)) {
+      hashes.set(
+        parentLock,
+        createHash("sha256").update(fs.readFileSync(parentLock)).digest("hex"),
+      );
+    }
+    if (fs.existsSync(path.join(current, ".git"))) break;
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return { packageDir, hashes };
+}
+
+/**
+ * Assert that manifests, lockfiles, and tracked contract inputs were not mutated
+ * during the default contract build.
+ */
+export function assertContractInputsNotMutated(
+  snapshot: ContractInputSnapshot,
+): void {
+  for (const [filePath, expectedHash] of snapshot.hashes.entries()) {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(
+        `Default contract build mutated tracked inputs: input file was deleted during build: ${filePath}`,
+      );
+    }
+    const currentHash = createHash("sha256")
+      .update(fs.readFileSync(filePath))
+      .digest("hex");
+    if (currentHash !== expectedHash) {
+      throw new Error(
+        `Default contract build mutated tracked inputs: ${path.basename(filePath)} was modified during build at ${filePath}`,
+      );
+    }
+  }
+}
+
 interface CargoPackage {
   id: string;
   name: string;
@@ -207,6 +306,9 @@ export async function buildContracts(
       }
       try {
         verifyBuildStorage(outputDir);
+        const inputSnapshot = snapshotContractInputs(
+          path.dirname(pkg.manifest_path),
+        );
         await command(
           "stellar",
           [
@@ -224,6 +326,7 @@ export async function buildContracts(
           path.dirname(pkg.manifest_path),
           { ...env, TMPDIR: outputDir, TMP: outputDir, TEMP: outputDir },
         );
+        assertContractInputsNotMutated(inputSnapshot);
         wasm = fs.readFileSync(
           path.join(outputDir, `${targetName.replace(/-/g, "_")}.wasm`),
         );

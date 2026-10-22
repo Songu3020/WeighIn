@@ -74,6 +74,11 @@ export interface ComputeProvenance {
   seed: number[];
   auth_mode: string;
   host_features: string[];
+  /** Public key of the account that invoked the measured transaction.
+   *  Absent only in records produced before source-account identity was
+   *  recorded; comparisons require both sides to agree on it.
+   */
+  source_account?: string;
   /** Schema 4: audited resource caps only, excluding fee settings and metadata. */
   resource_limits_sha256?: string;
 }
@@ -453,13 +458,24 @@ export async function simulateSnapshot(
   helperPath: string,
   signal?: AbortSignal,
 ): Promise<SimulationOutput> {
-  const stdout = await execute(
-    helperPath,
-    [],
-    JSON.stringify(input),
-    undefined,
-    signal,
-  );
+  let stdout: string;
+  try {
+    stdout = await execute(
+      helperPath,
+      [],
+      JSON.stringify(input),
+      undefined,
+      signal,
+    );
+  } catch (failure) {
+    // The helper reports a structured failure envelope on stdout. Surface its
+    // status and message instead of the generic helper error text.
+    const envelope = parseHelperFailure(failure);
+    if (envelope) {
+      throw new Error(`Native helper ${envelope.status}: ${envelope.message}`);
+    }
+    throw failure;
+  }
   let output: SimulationOutput;
   try {
     output = outputSchema.parse(JSON.parse(stdout));
@@ -1096,6 +1112,7 @@ export async function measureInvocation(
         seed: input.seed,
         auth_mode: output.auth_mode,
         host_features: output.host_features,
+        source_account: transaction.source,
       },
     };
   }

@@ -1,0 +1,15 @@
+{
+  "node": "v24.14.0",
+  "platform": "linux-x64",
+  "stellar_cli": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)\nstellar-xdr 28.0.0 (d0f1330e43c3a2c0c616da30698b24140d4eea72)\nxdr (9c9c145953e80990d6ff1ae3a6a973a0ce6d0694)",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "quickstart_image": "stellar/quickstart@sha256:4c8bad1ef7341205b898f83d9489321da80c7bd74183100fc8e2a39a5938c7d5",
+  "rpc_url": "http://localhost:8000/rpc",
+  "network_passphrase": "Standalone Network ; February 2017",
+  "protocol_version": 28,
+  "helper_path": "/home/semicolon/Desktop/DRIP/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+  "helper_sha256": "60e51c7b7f528e76d17e6fc285b7d2bbd0b14b967b0b58ffa8c4f55300ed64a7",
+  "repository_commit": "68a43f237f7ddbf7822567f5a4f4f85719ce19c9",
+  "contract_sdk": "28.0.0",
+  "soroban_simulation": "28.0.1"
+}

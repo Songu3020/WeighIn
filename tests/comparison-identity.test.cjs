@@ -271,3 +271,75 @@ test('reports show logical identity, both runtime addresses, independent cases, 
   assert.match(report, /New benchmarks/);
   assert.match(report, /Removed benchmarks/);
 });
+
+// ---------------------------------------------------------------------------
+// Unknown declaration field rejection and valid payload passthrough
+// ---------------------------------------------------------------------------
+
+test('misspelled optional id at any declaration level throws rather than falling back', () => {
+  // Fixture root: "idenitifer" is not "id" — must reject, not fall back to path: identity
+  assert.throws(
+    () => parseFixtures(
+      JSON.stringify({
+        idenitifer: 'my-suite',
+        contracts: [{ wasm_path: 'contract.wasm', invocations: [{ function_name: 'hello', args: [] }] }],
+      }),
+      'weighin-fixtures.json',
+    ),
+    (err) => { assert.match(err.message, /idenitifer/); return true; },
+  );
+
+  // Contract: "iD" is not "id" — must reject, not fall back to wasm: identity
+  assert.throws(
+    () => parseFixtures(
+      JSON.stringify({
+        contracts: [{ iD: 'my-contract', wasm_path: 'contract.wasm', invocations: [{ function_name: 'hello', args: [] }] }],
+      }),
+      'weighin-fixtures.json',
+    ),
+    (err) => { assert.match(err.message, /iD/); return true; },
+  );
+
+  // Invocation: "iD" is not "id" — must reject, not fall back to args: identity
+  assert.throws(
+    () => parseFixtures(
+      JSON.stringify({
+        contracts: [{
+          wasm_path: 'contract.wasm',
+          invocations: [{ iD: 'my-case', function_name: 'hello', args: [] }],
+        }],
+      }),
+      'weighin-fixtures.json',
+    ),
+    (err) => { assert.match(err.message, /iD/); return true; },
+  );
+});
+
+test('vec and map payloads with valid typed-argument contents parse successfully', () => {
+  const vecFixture = JSON.stringify({
+    contracts: [{
+      wasm_path: 'contract.wasm',
+      invocations: [{
+        function_name: 'hello',
+        args: [{ type: 'vec', value: [{ type: 'symbol', value: 'a' }] }],
+      }],
+    }],
+  });
+  const vecResult = parseFixtures(vecFixture, 'weighin-fixtures.json');
+  assert.ok(vecResult.contracts[0], 'vec fixture should parse to a contract');
+
+  const mapFixture = JSON.stringify({
+    contracts: [{
+      wasm_path: 'contract.wasm',
+      invocations: [{
+        function_name: 'hello',
+        args: [{
+          type: 'map',
+          value: [{ key: { type: 'u32', value: 1 }, value: { type: 'string', value: 'x' } }],
+        }],
+      }],
+    }],
+  });
+  const mapResult = parseFixtures(mapFixture, 'weighin-fixtures.json');
+  assert.ok(mapResult.contracts[0], 'map fixture should parse to a contract');
+});

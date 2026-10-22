@@ -1,0 +1,788 @@
+{
+  "schema_version": 1,
+  "fixture_id": "id:source-account-suite",
+  "logical_id": "id:source-account-proof",
+  "contract_id": "CDB5NK42ZBCQFIEU2ITCE7ABKZWXHWF7LKO4S6C772I4A7YPUBRYV6ID",
+  "function_name": "constant_probe",
+  "case_id": "id:constant",
+  "wasm_sha256": "d9fa9bf6c3457ce028198871fabaf3dd71c267a06b53b89918d17f37477e8028",
+  "baseline": {
+    "label": "source-1",
+    "source_account": "GAEOEOY72JOJQSTF4VIR3DTL47JTJSQJABC2D2IWUJPWT3SLN7NGYV4P",
+    "auth_mode": "recording(true,true)",
+    "host_features": [
+      "recording_mode",
+      "testutils"
+    ],
+    "seed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "protocol": 28,
+    "ledger": 2191,
+    "metrics": {
+      "cpu_instructions": {
+        "availability": "measured",
+        "consumed": 264852,
+        "limit": 400000000,
+        "source": "soroban-simulation.simulated_instructions",
+        "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+      },
+      "memory_bytes": {
+        "availability": "measured",
+        "consumed": 1124030,
+        "limit": 41943040,
+        "source": "soroban-simulation.simulated_memory",
+        "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+      },
+      "ledger_read_entries": {
+        "availability": "measured",
+        "consumed": 2,
+        "limit": 400,
+        "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+        "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+      },
+      "ledger_read_bytes": {
+        "availability": "measured",
+        "consumed": 0,
+        "limit": 200000,
+        "source": "SorobanResources.diskReadBytes (identity adjustment)",
+        "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+      },
+      "ledger_write_entries": {
+        "availability": "measured",
+        "consumed": 0,
+        "limit": 200,
+        "source": "SorobanResources.footprint.readWrite.length",
+        "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+      },
+      "ledger_write_bytes": {
+        "availability": "measured",
+        "consumed": 0,
+        "limit": 132096,
+        "source": "SorobanResources.writeBytes (identity adjustment)",
+        "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+      },
+      "historical_data_read_bytes": {
+        "availability": "unavailable",
+        "consumed": null,
+        "limit": null,
+        "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+      },
+      "contract_data_hard_limit": {
+        "availability": "unavailable",
+        "consumed": null,
+        "limit": null,
+        "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+      },
+      "tx_size_bytes": {
+        "availability": "unavailable",
+        "consumed": null,
+        "limit": null,
+        "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+      },
+      "events_count": {
+        "availability": "measured",
+        "consumed": 0,
+        "limit": null,
+        "source": "successful non-diagnostic ContractEvents.length",
+        "limit_reason": "Protocol 28 has no independent event-count cap"
+      },
+      "event_data_bytes": {
+        "availability": "measured",
+        "consumed": 8,
+        "limit": 16384,
+        "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+        "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+      }
+    },
+    "resource_limits": {
+      "cpu_instructions": 400000000,
+      "memory_bytes": 41943040,
+      "footprint_entries": 400,
+      "disk_read_bytes": 200000,
+      "write_entries": 200,
+      "write_bytes": 132096,
+      "events_and_return_bytes": 16384
+    },
+    "provenance": {
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "protocol": 28,
+      "helper_sha256": "60e51c7b7f528e76d17e6fc285b7d2bbd0b14b967b0b58ffa8c4f55300ed64a7",
+      "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+      "ledger": 2191,
+      "header_sha256": "5c4b0f4f97e695ad8faa784e90da42b3afe4c5ee8438de6734c920a6d077ad3a",
+      "snapshot_sha256": "c49963b1ccc9330850bd8d9c8e02313923e4cb0abc103824b82a6b7ddef90b11",
+      "config_sha256": "fe7b8d01b4533b87cf227810d82d950295b321b51987d1e05e74bb69788822e2",
+      "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+      "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+      "input_sha256": "1187c87cff95768a6930f1e5bc0e056514f187c222fea43397ff92aca1c522cb",
+      "seed": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "auth_mode": "recording(true,true)",
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "source_account": "GAEOEOY72JOJQSTF4VIR3DTL47JTJSQJABC2D2IWUJPWT3SLN7NGYV4P"
+    }
+  },
+  "variants": [
+    {
+      "label": "source-2",
+      "source_account": "GAR44GTS47JE4YFECH4KG2D3PY3TVIAQP6LG3A2NFW2RJ23S2OPKJ2MB",
+      "auth_mode": "recording(true,true)",
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "seed": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "protocol": 28,
+      "ledger": 2191,
+      "metrics": {
+        "cpu_instructions": {
+          "availability": "measured",
+          "consumed": 264852,
+          "limit": 400000000,
+          "source": "soroban-simulation.simulated_instructions",
+          "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+        },
+        "memory_bytes": {
+          "availability": "measured",
+          "consumed": 1124030,
+          "limit": 41943040,
+          "source": "soroban-simulation.simulated_memory",
+          "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+        },
+        "ledger_read_entries": {
+          "availability": "measured",
+          "consumed": 2,
+          "limit": 400,
+          "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+          "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+        },
+        "ledger_read_bytes": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 200000,
+          "source": "SorobanResources.diskReadBytes (identity adjustment)",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+        },
+        "ledger_write_entries": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 200,
+          "source": "SorobanResources.footprint.readWrite.length",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+        },
+        "ledger_write_bytes": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 132096,
+          "source": "SorobanResources.writeBytes (identity adjustment)",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+        },
+        "historical_data_read_bytes": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+        },
+        "contract_data_hard_limit": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+        },
+        "tx_size_bytes": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+        },
+        "events_count": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": null,
+          "source": "successful non-diagnostic ContractEvents.length",
+          "limit_reason": "Protocol 28 has no independent event-count cap"
+        },
+        "event_data_bytes": {
+          "availability": "measured",
+          "consumed": 8,
+          "limit": 16384,
+          "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+          "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+        }
+      },
+      "resource_limits": {
+        "cpu_instructions": 400000000,
+        "memory_bytes": 41943040,
+        "footprint_entries": 400,
+        "disk_read_bytes": 200000,
+        "write_entries": 200,
+        "write_bytes": 132096,
+        "events_and_return_bytes": 16384
+      },
+      "provenance": {
+        "source": "soroban-simulation",
+        "source_version": "28.0.1",
+        "protocol": 28,
+        "helper_sha256": "60e51c7b7f528e76d17e6fc285b7d2bbd0b14b967b0b58ffa8c4f55300ed64a7",
+        "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+        "ledger": 2191,
+        "header_sha256": "5c4b0f4f97e695ad8faa784e90da42b3afe4c5ee8438de6734c920a6d077ad3a",
+        "snapshot_sha256": "c49963b1ccc9330850bd8d9c8e02313923e4cb0abc103824b82a6b7ddef90b11",
+        "config_sha256": "fe7b8d01b4533b87cf227810d82d950295b321b51987d1e05e74bb69788822e2",
+        "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+        "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+        "input_sha256": "d20b079206b6d173dcb743c9fd4fb47cb44cbca6babc85dee0523717d8ae26cd",
+        "seed": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "auth_mode": "recording(true,true)",
+        "host_features": [
+          "recording_mode",
+          "testutils"
+        ],
+        "source_account": "GAR44GTS47JE4YFECH4KG2D3PY3TVIAQP6LG3A2NFW2RJ23S2OPKJ2MB"
+      }
+    },
+    {
+      "label": "source-3",
+      "source_account": "GCVEHH2XDDAA3CDEYHJ5HSMXCBI34MTEFKGV7GS6NRRMBPTNJTGEFKWH",
+      "auth_mode": "recording(true,true)",
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "seed": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "protocol": 28,
+      "ledger": 2191,
+      "metrics": {
+        "cpu_instructions": {
+          "availability": "measured",
+          "consumed": 264852,
+          "limit": 400000000,
+          "source": "soroban-simulation.simulated_instructions",
+          "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+        },
+        "memory_bytes": {
+          "availability": "measured",
+          "consumed": 1124030,
+          "limit": 41943040,
+          "source": "soroban-simulation.simulated_memory",
+          "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+        },
+        "ledger_read_entries": {
+          "availability": "measured",
+          "consumed": 2,
+          "limit": 400,
+          "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+          "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+        },
+        "ledger_read_bytes": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 200000,
+          "source": "SorobanResources.diskReadBytes (identity adjustment)",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+        },
+        "ledger_write_entries": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 200,
+          "source": "SorobanResources.footprint.readWrite.length",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+        },
+        "ledger_write_bytes": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": 132096,
+          "source": "SorobanResources.writeBytes (identity adjustment)",
+          "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+        },
+        "historical_data_read_bytes": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+        },
+        "contract_data_hard_limit": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+        },
+        "tx_size_bytes": {
+          "availability": "unavailable",
+          "consumed": null,
+          "limit": null,
+          "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+        },
+        "events_count": {
+          "availability": "measured",
+          "consumed": 0,
+          "limit": null,
+          "source": "successful non-diagnostic ContractEvents.length",
+          "limit_reason": "Protocol 28 has no independent event-count cap"
+        },
+        "event_data_bytes": {
+          "availability": "measured",
+          "consumed": 8,
+          "limit": 16384,
+          "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+          "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+        }
+      },
+      "resource_limits": {
+        "cpu_instructions": 400000000,
+        "memory_bytes": 41943040,
+        "footprint_entries": 400,
+        "disk_read_bytes": 200000,
+        "write_entries": 200,
+        "write_bytes": 132096,
+        "events_and_return_bytes": 16384
+      },
+      "provenance": {
+        "source": "soroban-simulation",
+        "source_version": "28.0.1",
+        "protocol": 28,
+        "helper_sha256": "60e51c7b7f528e76d17e6fc285b7d2bbd0b14b967b0b58ffa8c4f55300ed64a7",
+        "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+        "ledger": 2191,
+        "header_sha256": "5c4b0f4f97e695ad8faa784e90da42b3afe4c5ee8438de6734c920a6d077ad3a",
+        "snapshot_sha256": "c49963b1ccc9330850bd8d9c8e02313923e4cb0abc103824b82a6b7ddef90b11",
+        "config_sha256": "fe7b8d01b4533b87cf227810d82d950295b321b51987d1e05e74bb69788822e2",
+        "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+        "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+        "input_sha256": "c5ecdea4e92945963b09d5c394cec7bb54993fbf305f171943355e1707c2e8ea",
+        "seed": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "auth_mode": "recording(true,true)",
+        "host_features": [
+          "recording_mode",
+          "testutils"
+        ],
+        "source_account": "GCVEHH2XDDAA3CDEYHJ5HSMXCBI34MTEFKGV7GS6NRRMBPTNJTGEFKWH"
+      }
+    }
+  ],
+  "effects": [
+    {
+      "label": "source-2",
+      "source_account": "GAR44GTS47JE4YFECH4KG2D3PY3TVIAQP6LG3A2NFW2RJ23S2OPKJ2MB",
+      "effects": [
+        {
+          "metric": "cpu_instructions",
+          "baseline": 264852,
+          "variant": 264852,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "memory_bytes",
+          "baseline": 1124030,
+          "variant": 1124030,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_read_entries",
+          "baseline": 2,
+          "variant": 2,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_read_bytes",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_write_entries",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_write_bytes",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "historical_data_read_bytes",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "contract_data_hard_limit",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "tx_size_bytes",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "events_count",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "event_data_bytes",
+          "baseline": 8,
+          "variant": 8,
+          "delta": 0,
+          "changed": false
+        }
+      ],
+      "changed_metrics": []
+    },
+    {
+      "label": "source-3",
+      "source_account": "GCVEHH2XDDAA3CDEYHJ5HSMXCBI34MTEFKGV7GS6NRRMBPTNJTGEFKWH",
+      "effects": [
+        {
+          "metric": "cpu_instructions",
+          "baseline": 264852,
+          "variant": 264852,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "memory_bytes",
+          "baseline": 1124030,
+          "variant": 1124030,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_read_entries",
+          "baseline": 2,
+          "variant": 2,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_read_bytes",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_write_entries",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "ledger_write_bytes",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "historical_data_read_bytes",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "contract_data_hard_limit",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "tx_size_bytes",
+          "baseline": null,
+          "variant": null,
+          "delta": null,
+          "changed": false
+        },
+        {
+          "metric": "events_count",
+          "baseline": 0,
+          "variant": 0,
+          "delta": 0,
+          "changed": false
+        },
+        {
+          "metric": "event_data_bytes",
+          "baseline": 8,
+          "variant": 8,
+          "delta": 0,
+          "changed": false
+        }
+      ],
+      "changed_metrics": []
+    }
+  ],
+  "held_fixed": {
+    "wasm_sha256": "d9fa9bf6c3457ce028198871fabaf3dd71c267a06b53b89918d17f37477e8028",
+    "host_function_sha256": "54c76d716e69ff892e8038aca507bf393c81aa3c2917ef39df7def7fb26c5870",
+    "protocol": 28,
+    "auth_mode": "recording(true,true)",
+    "host_features": [
+      "recording_mode",
+      "testutils"
+    ],
+    "seed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+    "helper_sha256": "60e51c7b7f528e76d17e6fc285b7d2bbd0b14b967b0b58ffa8c4f55300ed64a7",
+    "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+    "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9"
+  },
+  "comparison": {
+    "isolated": true,
+    "metrics_changed": false,
+    "changed_metrics": [],
+    "cross_run_comparison_valid": true,
+    "reason": "The source account did not change any measured resource for this contract case; results measured under different source accounts stay comparable for this case."
+  }
+}

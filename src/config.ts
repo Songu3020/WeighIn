@@ -45,12 +45,34 @@ export const FunctionThresholdsSchema = z.record(
   RuleValueSchema,
 );
 
+export const BenchmarkSelectorSchema = z
+  .object({
+    fixture_id: z.string().min(1).optional(),
+    logical_id: z.string().min(1).optional(),
+    function_name: z.string().min(1),
+    case_id: z.string().min(1).optional(),
+  })
+  .strict();
+
+export const AggregateBudgetConfigSchema = z
+  .object({
+    description: z.string().optional(),
+    members: z.array(BenchmarkSelectorSchema).min(1),
+    limits: z.record(z.enum(METRIC_KEYS), z.number().nonnegative()).optional(),
+    thresholds: z.record(z.enum(METRIC_KEYS), RuleValueSchema).optional(),
+  })
+  .strict();
+
+export type BenchmarkSelector = z.infer<typeof BenchmarkSelectorSchema>;
+export type AggregateBudgetConfig = z.infer<typeof AggregateBudgetConfigSchema>;
+
 export const WeighinConfigSchema = z
   .object({
     thresholds: z
       .object({
         global: GlobalThresholdsSchema.optional(),
         functions: z.record(z.string(), FunctionThresholdsSchema).optional(),
+        aggregates: z.record(z.string(), FunctionThresholdsSchema).optional(),
       })
       .strict()
       .optional(),
@@ -58,9 +80,11 @@ export const WeighinConfigSchema = z
       .object({
         global: GlobalLimitsSchema.optional(),
         functions: z.record(z.string(), FunctionLimitsSchema).optional(),
+        aggregates: z.record(z.string(), FunctionLimitsSchema).optional(),
       })
       .strict()
       .optional(),
+    aggregates: z.record(z.string(), AggregateBudgetConfigSchema).optional(),
   })
   .strict();
 
