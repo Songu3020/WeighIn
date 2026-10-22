@@ -35182,6 +35182,7 @@ var METRIC_KEYS = [
   "events_count",
   "event_data_bytes"
 ];
+var CURRENT_RECORD_SCHEMA_VERSION = 5;
 var MeasurementRecordValidationError = class extends Error {
   path;
   version;
@@ -35257,6 +35258,60 @@ var PROVENANCE_REQUIRED_STRINGS = [
   "input_sha256",
   "auth_mode"
 ];
+var APPROVED_METRIC_PROVENANCE = {
+  cpu_instructions: {
+    availability: "measured",
+    source: "soroban-simulation.simulated_instructions",
+    limitSource: "ConfigSettingContractComputeV0.txMaxInstructions"
+  },
+  memory_bytes: {
+    availability: "measured",
+    source: "soroban-simulation.simulated_memory",
+    limitSource: "ConfigSettingContractComputeV0.txMemoryLimit"
+  },
+  ledger_read_entries: {
+    availability: "measured",
+    source: "SorobanResources.footprint.readOnly.length + readWrite.length",
+    limitSource: "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+  },
+  ledger_read_bytes: {
+    availability: "measured",
+    source: "SorobanResources.diskReadBytes (identity adjustment)",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+  },
+  ledger_write_entries: {
+    availability: "measured",
+    source: "SorobanResources.footprint.readWrite.length",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+  },
+  ledger_write_bytes: {
+    availability: "measured",
+    source: "SorobanResources.writeBytes (identity adjustment)",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+  },
+  historical_data_read_bytes: {
+    availability: "unavailable",
+    reason: "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+  },
+  contract_data_hard_limit: {
+    availability: "unavailable",
+    reason: "No verified instance-only post-invocation size and corresponding limit mapping"
+  },
+  tx_size_bytes: {
+    availability: "unavailable",
+    reason: "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+  },
+  events_count: {
+    availability: "measured",
+    source: "successful non-diagnostic ContractEvents.length",
+    limitReason: "Protocol 28 has no independent event-count cap"
+  },
+  event_data_bytes: {
+    availability: "measured",
+    source: "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+    limitSource: "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+  }
+};
 var METRIC_KEY_SET = new Set(METRIC_KEYS);
 var SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
 function isPlainObject3(value) {
@@ -35269,7 +35324,7 @@ function detectRecordEnvelopeVersion(record) {
   if (!isPlainObject3(record)) return "unknown";
   const hasLogical = record.schema_version !== void 0 || record.fixture_id !== void 0 || record.logical_id !== void 0;
   if (!hasLogical) return "legacy";
-  if (record.schema_version === 2 || record.schema_version === 3 || record.schema_version === 4) {
+  if (record.schema_version === 2 || record.schema_version === 3 || record.schema_version === 4 || record.schema_version === 5) {
     return record.schema_version;
   }
   return "unknown";
@@ -35343,7 +35398,7 @@ function validateProvenanceObject(provenance, version2, pPath, diagnostics) {
       path: `${pPath}.resource_limits_sha256`,
       version: version2,
       code: "INVALID_RESOURCE_LIMITS_DIGEST",
-      message: "Schema 4 requires resource_limits_sha256"
+      message: `Schema ${version2} requires resource_limits_sha256`
     });
   }
 }
@@ -35390,12 +35445,12 @@ function inspectMeasurementRecord(value, index) {
       contractKey = JSON.stringify(["legacy", value.contract_id]);
     }
   } else {
-    if (value.schema_version !== 2 && value.schema_version !== 3 && value.schema_version !== 4) {
+    if (value.schema_version !== 2 && value.schema_version !== 3 && value.schema_version !== 4 && value.schema_version !== 5) {
       diagnostics.push({
         path: `${basePath}.schema_version`,
         version: "unknown",
         code: "UNSUPPORTED_SCHEMA_VERSION",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (!nonblank(value.fixture_id)) {
@@ -35403,7 +35458,7 @@ function inspectMeasurementRecord(value, index) {
         path: `${basePath}.fixture_id`,
         version: version2,
         code: "MISSING_FIXTURE_ID",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (!nonblank(value.logical_id)) {
@@ -35411,7 +35466,7 @@ function inspectMeasurementRecord(value, index) {
         path: `${basePath}.logical_id`,
         version: version2,
         code: "MISSING_LOGICAL_ID",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (benchmarksArray) {
@@ -35421,12 +35476,12 @@ function inspectMeasurementRecord(value, index) {
             path: `${basePath}.benchmarks[${bIdx}].case_id`,
             version: version2,
             code: "MISSING_CASE_ID",
-            message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+            message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
           });
         }
       });
     }
-    if ((version2 === 2 || version2 === 3 || version2 === 4) && nonblank(value.fixture_id) && nonblank(value.logical_id)) {
+    if ((version2 === 2 || version2 === 3 || version2 === 4 || version2 === 5) && nonblank(value.fixture_id) && nonblank(value.logical_id)) {
       contractKey = JSON.stringify([
         "logical",
         value.fixture_id,
@@ -35604,7 +35659,7 @@ function inspectMeasurementRecord(value, index) {
         }
       }
     }
-    if (version2 === 3 || version2 === 4) {
+    if (version2 === 3 || version2 === 4 || version2 === 5) {
       if (!benchmark.provenance) {
         diagnostics.push({
           path: `${bPath}.provenance`,
@@ -35633,19 +35688,28 @@ function inspectMeasurementRecord(value, index) {
               message: `Schema ${version2} requires explicit availability and measured source for ${key}`
             });
           }
-          if (version2 === 4 && metricVal.availability === "measured") {
+          if ((version2 === 4 || version2 === 5) && metricVal.availability === "measured") {
             if (metricVal.limit === null ? !nonblank(metricVal.limit_reason) : !nonblank(metricVal.limit_source)) {
               diagnostics.push({
                 path: metricVal.limit === null ? `${mPath}.limit_reason` : `${mPath}.limit_source`,
                 version: version2,
                 code: "MISSING_METRIC_LIMIT_PROVENANCE",
-                message: `Schema 4 requires explicit limit provenance for ${key}`
+                message: `Schema ${version2} requires explicit limit provenance for ${key}`
               });
             }
           }
+          if (version2 === 5) {
+            validateApprovedMetricProvenance(
+              key,
+              metricVal,
+              mPath,
+              version2,
+              diagnostics
+            );
+          }
         }
       }
-      if (version2 === 4 && isPlainObject3(benchmark.provenance) && !SHA256_HEX_PATTERN.test(
+      if ((version2 === 4 || version2 === 5) && isPlainObject3(benchmark.provenance) && !SHA256_HEX_PATTERN.test(
         benchmark.provenance.resource_limits_sha256 ?? ""
       )) {
         const alreadyReported = diagnostics.some(
@@ -35656,7 +35720,7 @@ function inspectMeasurementRecord(value, index) {
             path: `${bPath}.provenance.resource_limits_sha256`,
             version: version2,
             code: "MISSING_RESOURCE_LIMITS_DIGEST",
-            message: "Schema 4 requires resource_limits_sha256"
+            message: `Schema ${version2} requires resource_limits_sha256`
           });
         }
       }
@@ -35679,6 +35743,56 @@ function inspectMeasurementRecord(value, index) {
     record: value,
     diagnostics: []
   };
+}
+function validateApprovedMetricProvenance(key, metric, path7, version2, diagnostics) {
+  const approved = APPROVED_METRIC_PROVENANCE[key];
+  const allowedFields = approved.availability === "unavailable" ? ["availability", "consumed", "limit", "reason"] : [
+    "availability",
+    "consumed",
+    "limit",
+    "source",
+    "limitSource" in approved ? "limit_source" : "limit_reason"
+  ];
+  const expectedValues = approved.availability === "unavailable" ? { availability: approved.availability, reason: approved.reason } : {
+    availability: approved.availability,
+    source: approved.source,
+    ..."limitSource" in approved ? { limit_source: approved.limitSource } : { limit_reason: approved.limitReason }
+  };
+  for (const field of [
+    "availability",
+    "source",
+    "limit_source",
+    "limit_reason",
+    "reason"
+  ]) {
+    const expected = expectedValues[field];
+    if (metric[field] !== expected && (expected !== void 0 || metric[field] !== void 0)) {
+      diagnostics.push({
+        path: `${path7}.${field}`,
+        version: version2,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} has unapproved ${field} provenance`
+      });
+    }
+  }
+  if (approved.availability === "unavailable" && metric.limit !== null || approved.availability === "measured" && "limitReason" in approved && metric.limit !== null || approved.availability === "measured" && "limitSource" in approved && metric.limit === null) {
+    diagnostics.push({
+      path: `${path7}.limit`,
+      version: version2,
+      code: "UNAPPROVED_METRIC_PROVENANCE",
+      message: `Schema 5 metric ${key} has an unapproved limit shape`
+    });
+  }
+  for (const field of Object.keys(metric)) {
+    if (!allowedFields.includes(field)) {
+      diagnostics.push({
+        path: `${path7}.${field}`,
+        version: version2,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} contains unsupported provenance field ${field}`
+      });
+    }
+  }
 }
 function inspectMeasurementRecords(value) {
   if (!Array.isArray(value)) {
@@ -54433,7 +54547,7 @@ Build the contract before running measurements.`
       });
     }
     results.push({
-      schema_version: 4,
+      schema_version: CURRENT_RECORD_SCHEMA_VERSION,
       fixture_id: fixturesSpec.fixture_id,
       logical_id: contractSpec.logical_id,
       contract_id: contractId,

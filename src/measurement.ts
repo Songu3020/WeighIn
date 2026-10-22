@@ -6,6 +6,7 @@ import { ensureAccountReady } from "./account";
 import { redactEndpointSecrets, sanitizeEndpoint } from "./endpoint";
 import { validateLargeInt } from "./config";
 import { SUPPORTED_NETWORK_PASSPHRASE } from "./network";
+import { CURRENT_RECORD_SCHEMA_VERSION } from "./record-schema";
 import {
   measureInvocation,
   resolveSimulationHelper,
@@ -29,7 +30,7 @@ import {
 
 const DEFAULT_RPC_URL = "http://localhost:8000/rpc";
 
-/** Schema 4 adds audited consumption and per-metric limit provenance. */
+/** Schema 5 binds each metric to its approved source and cap mapping. */
 export interface MetricValue {
   availability?: "measured" | "unavailable";
   consumed: number | null;
@@ -65,7 +66,7 @@ export interface BenchmarkResult {
 
 export interface ContractBenchmark {
   /** Versions 2–4 separate logical comparison identity from deployment identity. */
-  schema_version?: 2 | 3 | 4;
+  schema_version?: 2 | 3 | 4 | 5;
   fixture_id?: string;
   logical_id?: string;
   /** Runtime address, never the comparison key for logical results. */
@@ -697,7 +698,7 @@ export async function runMeasurement(
     }
 
     results.push({
-      schema_version: 4,
+      schema_version: CURRENT_RECORD_SCHEMA_VERSION,
       fixture_id: fixturesSpec.fixture_id,
       logical_id: contractSpec.logical_id,
       contract_id: contractId,

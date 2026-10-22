@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "verifiable WeighIn package build provenance",
-  "source_revision": "1b6404e286b91fc65e998dcbf938ac5e3dbde589",
+  "source_revision": "2db9eeb12941c5d737cbb0f5b0a8249640b2cfdc",
   "tools": {
     "node": "v24.19.0",
     "npm": "unavailable"
@@ -17,7 +17,7 @@
     },
     {
       "path": "bundled/index.js",
-      "sha256": "1e010b55d7c556a9275e6376046ca7851b062d68fe80b0bbf59767b796f34081"
+      "sha256": "2feddc50cfac5a4030ccce356cde5fb05849d0a5926ef8da4099912577e697e6"
     },
     {
       "path": "native/simulation/Cargo.lock",
@@ -37,7 +37,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "e2b8b3253ac8920648171b0193453ba8d69d1d1bdde55a71c7fd1ba4db3fbbf9"
+      "sha256": "f32a4f17cb432c1758cb4ec524e45c20e2c95fb67b6fc6fa87b008d59d0d7fa3"
     },
     {
       "path": "src\\account.ts",
@@ -81,7 +81,7 @@
     },
     {
       "path": "src\\diff.ts",
-      "sha256": "1670678eec6547966090d2c1f675b57c0e7c0c5ba019f99ff4714fbe1b0f2074"
+      "sha256": "b0c1b5f453c4551ce393a037092beef0ef645365e47b3e9979ec8c39f991170a"
     },
     {
       "path": "src\\endpoint.ts",
@@ -93,7 +93,7 @@
     },
     {
       "path": "src\\measurement.ts",
-      "sha256": "a63ea58a01c7a0d7023213d2f034ab9a25f90c6e7ea4fd75c2b869380d83241f"
+      "sha256": "7c6495d05fa1eebd8e08a4b4387eb92022819c776332d7c4b76415e7cd98ca99"
     },
     {
       "path": "src\\network.ts",
@@ -105,7 +105,7 @@
     },
     {
       "path": "src\\record-schema.ts",
-      "sha256": "207c928ccc2005b97b09e9ea74336abf715b40a7acae55b8e0f895e320c4d10d"
+      "sha256": "9dd4acac20c807f1a5ef83debda341f927ae304fe1f2cbeabe00077e4829e9db"
     },
     {
       "path": "src\\report.ts",

@@ -243,10 +243,10 @@ test('legacy measurements pair by runtime address only, and never guess a mixed-
 test('partial version 2 identities fail rather than falling back to runtime address', () => {
   const records = measurement();
   delete records[0].logical_id;
-  assert.throws(() => diffBenchmarks(records, measurement()), /Version 2\/3\/4 results require/);
+  assert.throws(() => diffBenchmarks(records, measurement()), /Version 2\/3\/4\/5 results require/);
   const missingCase = measurement();
   delete missingCase[0].benchmarks[0].case_id;
-  assert.throws(() => diffBenchmarks(missingCase, measurement()), /Version 2\/3\/4 results require/);
+  assert.throws(() => diffBenchmarks(missingCase, measurement()), /Version 2\/3\/4\/5 results require/);
 });
 
 test('strict threshold sees a changed-WASM regression and identifies its logical case', () => {
