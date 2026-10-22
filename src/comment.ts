@@ -11,42 +11,179 @@ import { Violation, PolicyOrigin, EffectivePolicyReport } from "./threshold";
 
 export const COMMENT_MARKER = "<!-- weighin-report -->";
 
+/**
+ * Which identity should own the report comment.
+ *
+ * - `github-actions` (default): the canonical GitHub Actions bot
+ *   (`github-actions[bot]`, numeric ID 41898282, type `Bot`).
+ * - `authenticated-user`: the user returned by `GET /user` for the supplied
+ *   token. Use this when posting with a personal-access token or a user
+ *   OAuth token.
+ *
+ * Custom installation-token writers and arbitrary third-party GitHub App
+ * identities are not supported by either mode.
+ */
+export type CommentAuthorMode = "github-actions" | "authenticated-user";
+
+/** Canonical identity of the GitHub Actions bot. */
+const GITHUB_ACTIONS_BOT = {
+  login: "github-actions[bot]",
+  id: 41898282,
+  type: "Bot",
+} as const;
+
+interface ExpectedAuthor {
+  id: number;
+}
+
+/**
+ * Resolve the numeric user ID that is expected to own the report comment.
+ *
+ * For `github-actions` mode the identity is hardcoded to the canonical bot.
+ * For `authenticated-user` mode the currently-authenticated user is fetched
+ * via `GET /user`; if the response is missing or the ID is not a positive
+ * integer the function throws an actionable error before any comment mutation.
+ *
+ * Throws if `mode` is not one of the two supported values.
+ */
+export async function resolveExpectedAuthor(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  octokit: any,
+  mode: CommentAuthorMode,
+): Promise<ExpectedAuthor> {
+  if (mode === "github-actions") {
+    return { id: GITHUB_ACTIONS_BOT.id };
+  }
+  if (mode === "authenticated-user") {
+    let data: unknown;
+    try {
+      const response = await octokit.rest.users.getAuthenticated();
+      data = response.data;
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : String(err ?? "unknown error");
+      throw new Error(
+        `comment-author-mode is "authenticated-user" but the authenticated user could not be resolved: ${message}`,
+      );
+    }
+    const user = data as Record<string, unknown> | null | undefined;
+    if (
+      !user ||
+      typeof user.id !== "number" ||
+      !Number.isInteger(user.id) ||
+      user.id <= 0
+    ) {
+      throw new Error(
+        'comment-author-mode is "authenticated-user" but GET /user returned an unusable identity (missing or non-positive numeric id). ' +
+          "Ensure the supplied token belongs to a regular user or bot account with a valid numeric ID.",
+      );
+    }
+    return { id: user.id };
+  }
+  // Exhaustive check: TypeScript narrows `mode` to `never` here, but we
+  // also guard at runtime for callers that bypass type checking.
+  throw new Error(
+    `Unsupported comment-author-mode: "${mode as string}". ` +
+      'Supported values are "github-actions" and "authenticated-user".',
+  );
+}
+
+/**
+ * Options for `upsertPrComment`.
+ */
+export interface UpsertPrCommentOptions {
+  /**
+   * How to determine which identity owns the report comment.
+   * Defaults to `"github-actions"`.
+   */
+  commentAuthorMode?: CommentAuthorMode;
+  /**
+   * Injected `@actions/core` module — used by the shared path so the caller
+   * can supply its already-imported instance. Falls back to a dynamic import.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  core?: any;
+}
+
 export async function upsertPrComment(
   token: string,
   body: string,
+  options?: UpsertPrCommentOptions,
 ): Promise<void>;
 export async function upsertPrComment(
   token: string,
   prNumber: number,
   body: string,
+  options?: UpsertPrCommentOptions,
 ): Promise<void>;
 export async function upsertPrComment(
   token: string,
   numberOrBody: number | string,
-  explicitBody?: string,
+  bodyOrOptions?: string | UpsertPrCommentOptions,
+  maybeOptions?: UpsertPrCommentOptions,
 ): Promise<void> {
   const github = await import("@actions/github");
-  const core = await import("@actions/core");
-  const body = typeof numberOrBody === "string" ? numberOrBody : explicitBody!;
+
+  // Disambiguate overloads
+  let body: string;
+  let prNumberInput: number | undefined;
+  let options: UpsertPrCommentOptions;
+
+  if (typeof numberOrBody === "number") {
+    // upsertPrComment(token, prNumber, body, options?)
+    prNumberInput = numberOrBody;
+    body = bodyOrOptions as string;
+    options = maybeOptions ?? {};
+  } else {
+    // upsertPrComment(token, body, options?)
+    body = numberOrBody;
+    prNumberInput = undefined;
+    options = (bodyOrOptions as UpsertPrCommentOptions | undefined) ?? {};
+  }
+
+  const core = options.core ?? (await import("@actions/core"));
+  const mode: CommentAuthorMode = options.commentAuthorMode ?? "github-actions";
+
+  // Reject unsupported modes immediately before any mutation attempt.
+  if (mode !== "github-actions" && mode !== "authenticated-user") {
+    throw new Error(
+      `Unsupported comment-author-mode: "${mode as string}". ` +
+        'Supported values are "github-actions" and "authenticated-user".',
+    );
+  }
+
   const prNumber =
-    typeof numberOrBody === "number"
-      ? numberOrBody
-      : github.context.payload.pull_request?.number;
+    prNumberInput !== undefined
+      ? prNumberInput
+      : (github.context.payload.pull_request?.number as number | undefined);
+
   if (!prNumber) {
     core.warning("Not in a pull_request context; skipping PR comment.");
     return;
   }
+
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
+
+  // Resolve expected author before touching comments.
+  const expectedAuthor = await resolveExpectedAuthor(octokit, mode);
+
   const { data: comments } = await octokit.rest.issues.listComments({
     owner,
     repo,
     issue_number: prNumber,
   });
+
   const existing = comments.find(
-    (comment: { id: number; body?: string | null }) =>
-      comment.body?.includes(COMMENT_MARKER),
+    (comment: {
+      id: number;
+      body?: string | null;
+      user?: { id?: number | null } | null;
+    }) =>
+      comment.body?.includes(COMMENT_MARKER) &&
+      comment.user?.id === expectedAuthor.id,
   );
+
   if (existing) {
     await octokit.rest.issues.updateComment({
       owner,

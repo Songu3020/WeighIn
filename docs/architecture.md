@@ -193,11 +193,13 @@ valid comparison emit `fail` and `{}`; they never reuse a diff from another run.
 There is no successful no-baseline fallback. Optional direct-comment failure is
 warning-only.
 
-The separate `comment/` Action runs `bundled/comment-action.js`, reads and
-validates downloaded report/PR metadata, and creates or updates the comment
-carrying `<!-- weighin-report -->`. It fails on missing artifacts, invalid
-metadata or API failure. The example consumer runs only after successful PR
-producers, on trusted default-branch workflow code; it does not execute
-downloaded PR code. Failed policy reports remain in producer artifacts and
-summaries. Hosted expected-negative proof jobs separately assert genuine Action
-exit 1, then finish green once verified.
+The separate `comment/` Action runs `bundled/comment-action.js` resolved from
+the Action installation, independently of the caller's current working
+directory. Report and metadata paths are resolved from the caller's working
+directory. It reads and validates downloaded report/PR metadata, then creates or
+updates the comment carrying `<!-- weighin-report -->`. It fails on missing
+artifacts, invalid metadata or API failure. The example consumer runs only after
+successful PR producers, on trusted default-branch workflow code; it does not
+execute downloaded PR code. Failed policy reports remain in producer artifacts
+and summaries. Hosted expected-negative proof jobs separately assert genuine
+Action exit 1, then finish green once verified.

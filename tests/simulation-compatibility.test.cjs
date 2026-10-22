@@ -18,6 +18,7 @@ const base = require("./fixtures/stage1b/base-simulation.json");
 const head = require("./fixtures/stage1b/head-simulation.json");
 const control = require("./fixtures/stage1b/control-simulation.json");
 const leeway = require("./fixtures/stage1b/base-leeway.json");
+const TEST_WASM = Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
 
 test("the live unchanged control has identical transaction resource fields", () => {
   assert.deepEqual(control.parsed.resources, base.parsed.resources);
@@ -156,7 +157,7 @@ async function replay(t, response) {
   fs.writeFileSync(path.join(dir, "key"), keypair.secret(), { mode: 0o600 });
   fs.writeFileSync(
     path.join(dir, "contract.wasm"),
-    Buffer.from("test-only-wasm"),
+    TEST_WASM,
   );
   fs.writeFileSync(
     path.join(dir, "fixtures.json"),
@@ -178,7 +179,7 @@ async function replay(t, response) {
   );
   const wasmHash = crypto
     .createHash("sha256")
-    .update(Buffer.from("test-only-wasm"))
+    .update(TEST_WASM)
     .digest();
   const salt = crypto.createHash("sha256").update(wasmHash).digest();
   const contractId = calculateContractId(keypair.publicKey(), salt);
@@ -332,7 +333,7 @@ test("deployment probe failures do not masquerade as an absent contract", async 
   fs.writeFileSync(path.join(dir, "key"), keypair.secret(), { mode: 0o600 });
   fs.writeFileSync(
     path.join(dir, "contract.wasm"),
-    Buffer.from("test-only-wasm"),
+    TEST_WASM,
   );
   fs.writeFileSync(
     path.join(dir, "fixtures.json"),

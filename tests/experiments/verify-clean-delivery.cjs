@@ -47,7 +47,7 @@ async function main(){
   const helper=path.join(pkg,'native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation');assert.ok(fs.existsSync(helper));
   const frozen=JSON.parse(fs.readFileSync(path.join(checkout,'docs/experiments/network-readiness/live/run-1/action/native.json')))[0];
   const replay=await checked('installed-helper-replay',helper,[],consumer,{},JSON.stringify(frozen.input));assert.deepEqual(JSON.parse(replay.stdout),frozen.output);
-  await checked('contract-build',process.execPath,['-e',"require('./dist/build').buildContracts('weighin-fixtures.json','1.95.0').catch(e=>{console.error(e);process.exitCode=1})"]);
+  await checked('contract-build',process.execPath,['-e',"require('./dist/build').buildContracts('weighin-fixtures.json','.','1.95.0').catch(e=>{console.error(e);process.exitCode=1})"]);
   const present=await checked('existing-sidecar','docker',['ps','-a','-q','-f','name=^/stellar-quickstart$']);assert.equal(present.stdout.trim(),'','Refusing to replace existing sidecar');
   try{
     await checked('startup','bash',['scripts/start-local-network.sh']);

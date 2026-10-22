@@ -4,7 +4,7 @@ This document specifies the design, interface, compatibility model, and evaluati
 
 ## 1. Problem Statement & Motivation
 
-Existing WeighIn policies evaluate benchmark cases independently (per-function overrides and global regression thresholds). However, complex Soroban workflows and user scenarios span multiple distinct contract invocations (e.g., reserve + transfer, initialize + quote + swap, or auth + deposit). 
+Existing WeighIn policies evaluate benchmark cases independently (per-function overrides and global regression thresholds). However, complex Soroban workflows and user scenarios span multiple distinct contract invocations (e.g., reserve + transfer, initialize + quote + swap, or auth + deposit).
 
 Evaluating cases only in isolation leaves a validation gap: individual operations might each stay within permissive per-invocation tolerances, while the aggregate cost of the complete scenario regresses significantly or exceeds network limits.
 
@@ -96,7 +96,7 @@ Each Soroban metric has specific physical characteristics when aggregated across
 
 ### Memory Semantics (Cumulative vs. Peak)
 
-Simulated memory (`memory_bytes`) meters the host memory allocated for each isolated contract invocation. 
+Simulated memory (`memory_bytes`) meters the host memory allocated for each isolated contract invocation.
 
 > [!IMPORTANT]
 > A sum of invocation memory costs across multiple sequential invocations measures the **cumulative invocation memory allocated**. It does **NOT** represent peak resident set size (RSS) or peak concurrent memory. In all machine schemas, reports, and documentation, this metric is explicitly designated as `Cumulative Invocation Memory Bytes (sum of invocation costs, not peak concurrent memory)`.

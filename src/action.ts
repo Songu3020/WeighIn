@@ -17,7 +17,7 @@ import {
   PolicyOrigin,
 } from "./threshold";
 
-import { renderComment } from "./comment";
+import { renderComment, upsertPrComment, CommentAuthorMode } from "./comment";
 import { buildForRevision, parseOptionalBooleanInput } from "./build-selection";
 import { writeReportFile, generateFailureReport } from "./report";
 import { buildPrMetadata } from "./pr-metadata";
@@ -329,51 +329,6 @@ async function removeWorktree(repoRoot: string, dir: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// PR comment management
-// ---------------------------------------------------------------------------
-
-const COMMENT_MARKER = "<!-- weighin-report -->";
-
-async function upsertPrComment(token: string, body: string): Promise<void> {
-  const octokit = github.getOctokit(token);
-  const { owner, repo } = github.context.repo;
-  const prNumber = github.context.payload.pull_request?.number;
-
-  if (!prNumber) {
-    core.warning("Not in a pull_request context; skipping PR comment.");
-    return;
-  }
-
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber,
-  });
-
-  const existing = comments.find((c: { id: number; body?: string | null }) =>
-    c.body?.includes(COMMENT_MARKER),
-  );
-
-  if (existing) {
-    await octokit.rest.issues.updateComment({
-      owner,
-      repo,
-      comment_id: existing.id,
-      body,
-    });
-    core.info(`Updated PR comment #${existing.id}`);
-  } else {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body,
-    });
-    core.info("Created new PR comment");
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -390,12 +345,28 @@ async function run(): Promise<void> {
     const rpcUrl = core.getInput("rpc-url") || "http://localhost:8000/rpc";
     configuredRpcUrl = rpcUrl;
     const githubToken = core.getInput("github-token");
+    const commentAuthorModeRaw =
+      core.getInput("comment-author-mode") || "github-actions";
+    if (
+      commentAuthorModeRaw !== "github-actions" &&
+      commentAuthorModeRaw !== "authenticated-user"
+    ) {
+      throw new Error(
+        `Unsupported comment-author-mode: "${commentAuthorModeRaw}". ` +
+          'Supported values are "github-actions" and "authenticated-user".',
+      );
+    }
+    const commentAuthorMode = commentAuthorModeRaw as CommentAuthorMode;
     const baseRefInput = core.getInput("base-ref", { trimWhitespace: false });
     const rustToolchain = core.getInput("rust-toolchain");
     const reportPathInput = core.getInput("report-path");
     const metadataPathInput = core.getInput("metadata-path");
     const buildCommand = core.getInput("build-command");
     const skipBuild = parseOptionalBooleanInput("skip-build", false);
+    const allowCrossTargetSubstitution = parseOptionalBooleanInput(
+      "allow-cross-target-substitution",
+      false,
+    );
 
     if (buildCommand && skipBuild) {
       throw new Error("build-command and skip-build cannot be used together");
@@ -479,6 +450,7 @@ async function run(): Promise<void> {
         sdkVersion: getSdkVersion(headWorkspace),
         rpcUrl,
         keyFile: sharedKeyFile,
+        allowCrossTargetSubstitution,
       });
     } catch (err: any) {
       throw new Error(`HEAD measurement failed: ${err.message}`);
@@ -529,6 +501,7 @@ async function run(): Promise<void> {
           sdkVersion: getSdkVersion(baseDir),
           rpcUrl,
           keyFile: sharedKeyFile,
+          allowCrossTargetSubstitution,
         });
 
         // Log WASM hashes from base
@@ -622,7 +595,10 @@ async function run(): Promise<void> {
     if (githubToken) {
       core.startGroup("Posting PR comment");
       try {
-        await upsertPrComment(githubToken, body);
+        await upsertPrComment(githubToken, body, {
+          commentAuthorMode,
+          core,
+        });
       } catch (err: any) {
         core.warning(`Failed to post PR comment: ${err.message}`);
       }

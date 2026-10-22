@@ -68,7 +68,8 @@ function scenario(t,options={}){
     if(request.method==='getLedgers'){
       const header=xdr.LedgerHeader.fromXDR(replay.input.header_xdr,'base64');
       header.ledgerSeq(baseLedger+state.simulations-1+(options.headerMismatch?1:0));
-      const history=new xdr.LedgerHeaderHistoryEntry({hash:Buffer.alloc(32),header,ext:new xdr.LedgerHeaderHistoryEntryExt(0)});
+      const historyHash=crypto.createHash('sha256').update(header.toXDR()).digest();
+      const history=new xdr.LedgerHeaderHistoryEntry({hash:historyHash,header,ext:new xdr.LedgerHeaderHistoryEntryExt(0)});
       const seq = baseLedger+state.simulations-1;
       const headerXdr = options.malformedHeaderXdr ? 'invalid-header-xdr' : history.toXDR('base64');
       if (options.duplicateHeaders) {

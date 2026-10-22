@@ -5,7 +5,7 @@ const path = require('node:path');
 const cp = require('node:child_process');
 const { EventEmitter } = require('node:events');
 const { createHash } = require('node:crypto');
-const { Transaction } = require('@stellar/stellar-sdk');
+const { Transaction, xdr } = require('@stellar/stellar-sdk');
 
 const { measureInvocation } = require('../dist/simulation');
 const { metricsFromSimulation } = require('../dist/measurement');
@@ -75,7 +75,25 @@ test('all five controlled ledger-progression samples replay through public measu
       const req = JSON.parse(fetchOptions.body);
       const matched = runRpc.find((c) => c.request.method === req.method);
       assert.ok(matched, `Unexpected RPC method ${req.method} during run ${run.run} replay`);
-      return new Response(JSON.stringify({ ...matched.raw, jsonrpc: '2.0', id: req.id }));
+      const response = structuredClone(matched.raw);
+      if (req.method === 'getLedgers') {
+        // These archived replay records predate header-hash verification and carry a
+        // run-number placeholder. Keep the checked-in evidence untouched; for this
+        // synthetic RPC replay, derive the protocol-required hash from the captured
+        // header bytes before passing the response through the current validator.
+        response.result.ledgers = response.result.ledgers.map((ledger) => {
+          const history = xdr.LedgerHeaderHistoryEntry.fromXDR(ledger.headerXdr, 'base64');
+          const computedHash = createHash('sha256').update(history.header().toXDR()).digest();
+          assert.ok(
+            Buffer.from(history.hash()).equals(Buffer.alloc(32, Number(run.run))) ||
+              Buffer.from(history.hash()).equals(computedHash),
+            'only the historical run-number placeholder may be repaired in the test response',
+          );
+          history.hash(computedHash);
+          return { ...ledger, headerXdr: history.toXDR('base64') };
+        });
+      }
+      return new Response(JSON.stringify({ ...response, jsonrpc: '2.0', id: req.id }));
     });
 
     t.mock.method(cp, 'execFile', (file, _args, _options, callback) => {

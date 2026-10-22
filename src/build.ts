@@ -3,6 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import { createHash } from "crypto";
 import * as exec from "@actions/exec";
+import { z } from "zod";
 import { parseFixtures } from "./identity";
 
 export interface BuiltContract {
@@ -12,6 +13,91 @@ export interface BuiltContract {
   wasm_sha256: string;
   stellar_version: string;
   rust_version: string;
+}
+
+export const CargoTargetSchema = z
+  .object({
+    name: z.string().optional(),
+    crate_types: z.array(z.string()),
+  })
+  .passthrough();
+
+export const CargoPackageSchema = z
+  .object({
+    id: z.string().min(1, "package id must not be empty"),
+    name: z.string().min(1, "package name must not be empty"),
+    manifest_path: z.string().min(1, "manifest_path must not be empty"),
+    targets: z.array(CargoTargetSchema),
+  })
+  .passthrough();
+
+export const CargoMetadataSchema = z
+  .object({
+    packages: z.array(CargoPackageSchema),
+    workspace_members: z.array(z.string()),
+  })
+  .passthrough();
+
+export type CargoPackage = z.infer<typeof CargoPackageSchema>;
+export type CargoMetadata = z.infer<typeof CargoMetadataSchema>;
+
+export function validateCargoMetadata(
+  raw: unknown,
+  manifest: string,
+): CargoMetadata {
+  const result = CargoMetadataSchema.safeParse(raw);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((i) => `${i.path.join(".") || "metadata"}: ${i.message}`)
+      .join("; ");
+    throw new Error(`Invalid Cargo metadata for ${manifest}: ${issues}`);
+  }
+  const metadata = result.data;
+  const packageMap = new Map<string, CargoPackage>();
+  for (const pkg of metadata.packages) {
+    if (!fs.existsSync(pkg.manifest_path)) {
+      throw new Error(
+        `Cargo package ${pkg.name} has unusable manifest_path ${pkg.manifest_path}: file does not exist`,
+      );
+    }
+    packageMap.set(pkg.id, pkg);
+  }
+  for (const memberId of metadata.workspace_members) {
+    if (!packageMap.has(memberId)) {
+      throw new Error(
+        `Cargo metadata for ${manifest} contains foreign workspace member ${memberId} not found in packages list`,
+      );
+    }
+  }
+  return metadata;
+}
+
+export interface BuildContractsOptions {
+  fixturesPath: string;
+  workspaceRoot: string;
+  rustToolchain?: string;
+}
+
+function getCanonicalPath(filePath: string): string {
+  const normalized = path.normalize(filePath);
+  let current = normalized;
+  const segments: string[] = [];
+  while (current && !fs.existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    segments.unshift(path.basename(current));
+    current = parent;
+  }
+  try {
+    const realCurrent = fs.existsSync(current)
+      ? fs.realpathSync(current)
+      : current;
+    return segments.length > 0
+      ? path.join(realCurrent, ...segments)
+      : realCurrent;
+  } catch {
+    return normalized;
+  }
 }
 
 export interface ContractInputSnapshot {
@@ -113,13 +199,6 @@ export function assertContractInputsNotMutated(
   }
 }
 
-interface CargoPackage {
-  id: string;
-  name: string;
-  manifest_path: string;
-  targets: Array<{ name?: string; crate_types: string[] }>;
-}
-
 /** Detect storage errors that the optimizer's temporary-file writer may hide. */
 function verifyBuildStorage(directory: string, bytes = 1024 * 1024): void {
   const probePath = path.join(directory, ".weighin-storage-probe");
@@ -148,17 +227,61 @@ function verifyBuildStorage(directory: string, bytes = 1024 * 1024): void {
 /** Build exactly the configured contracts, and measure fresh CLI output rather
  * than a potentially stale artifact already present at the fixture path. */
 export async function buildContracts(
-  fixturesPath: string,
+  fixturesPathOrOptions: string | BuildContractsOptions,
+  workspaceRoot?: string,
   rustToolchain?: string,
 ): Promise<BuiltContract[]> {
+  let fixturesPath: string;
+  let root: string;
+  let toolchain: string | undefined;
+
+  if (
+    typeof fixturesPathOrOptions === "object" &&
+    fixturesPathOrOptions !== null
+  ) {
+    fixturesPath = fixturesPathOrOptions.fixturesPath;
+    root = fixturesPathOrOptions.workspaceRoot;
+    toolchain = fixturesPathOrOptions.rustToolchain;
+  } else {
+    fixturesPath = fixturesPathOrOptions;
+    root = workspaceRoot ?? "";
+    toolchain = rustToolchain;
+  }
+
+  if (!root || !root.trim()) {
+    throw new Error(
+      "Workspace root is required to prevent build escapes; provide an explicit directory",
+    );
+  }
+
+  const resolvedRoot = path.resolve(root);
+  if (!fs.existsSync(resolvedRoot)) {
+    throw new Error(`Workspace root does not exist: ${root}`);
+  }
+  const rootStat = fs.statSync(resolvedRoot);
+  if (!rootStat.isDirectory()) {
+    throw new Error(`Workspace root is not a directory: ${root}`);
+  }
+  const canonicalRoot = fs.realpathSync(resolvedRoot);
+
+  const resolvedFixturesPath = path.resolve(canonicalRoot, fixturesPath);
+  if (!fs.existsSync(resolvedFixturesPath)) {
+    throw new Error(`Fixtures file not found: ${fixturesPath}`);
+  }
+  const canonicalFixturesFile = fs.realpathSync(resolvedFixturesPath);
+  const relFixtures = path.relative(canonicalRoot, canonicalFixturesFile);
+  if (relFixtures.startsWith("..") || path.isAbsolute(relFixtures)) {
+    throw new Error(`Fixtures path escapes workspace root: ${fixturesPath}`);
+  }
+
   const fixtures = parseFixtures(
-    fs.readFileSync(fixturesPath, "utf8"),
-    path.basename(fixturesPath),
+    fs.readFileSync(canonicalFixturesFile, "utf8"),
+    path.basename(canonicalFixturesFile),
   );
-  const fixturesDir = path.dirname(path.resolve(fixturesPath));
+  const fixturesDir = path.dirname(canonicalFixturesFile);
   const env = {
     ...process.env,
-    ...(rustToolchain ? { RUSTUP_TOOLCHAIN: rustToolchain } : {}),
+    ...(toolchain ? { RUSTUP_TOOLCHAIN: toolchain } : {}),
   } as Record<string, string>;
   async function command(
     tool: string,
@@ -195,17 +318,6 @@ export async function buildContracts(
       process.stdout.write(stdout + stderr);
     return stdout.trim();
   }
-  const rustVersion = await command("rustc", ["--version"], fixturesDir);
-  const rust = rustVersion.match(/^rustc (\d+)\.(\d+)\./);
-  if (
-    !rust ||
-    Number(rust[1]) < 1 ||
-    (Number(rust[1]) === 1 && Number(rust[2]) < 84)
-  ) {
-    throw new Error(
-      `Rust 1.84+ is required for wasm32v1-none; got ${rustVersion}`,
-    );
-  }
   const stellarVersion = await command("stellar", ["--version"], fixturesDir);
   const stellar = stellarVersion.match(/stellar (\d+)\.(\d+)\.(\d+)/);
   if (
@@ -218,42 +330,162 @@ export async function buildContracts(
     );
   }
 
+  const packageRustVersions = new Map<string, string>();
+  async function probePackageCompiler(packageDir: string): Promise<string> {
+    let version = packageRustVersions.get(packageDir);
+    if (!version) {
+      version = await command("rustc", ["--version"], packageDir);
+      const rust = version.match(/^rustc (\d+)\.(\d+)\./);
+      if (
+        !rust ||
+        Number(rust[1]) < 1 ||
+        (Number(rust[1]) === 1 && Number(rust[2]) < 84)
+      ) {
+        throw new Error(
+          `Rust 1.84+ is required for wasm32v1-none; got ${version}`,
+        );
+      }
+      packageRustVersions.set(packageDir, version);
+    }
+    return version;
+  }
+
+  function validateDestinationPath(
+    destination: string,
+    contractWasmPath: string,
+  ): void {
+    const relFromRoot = path.relative(canonicalRoot, destination);
+    if (relFromRoot.startsWith("..") || path.isAbsolute(relFromRoot)) {
+      throw new Error(
+        `WASM destination escapes workspace root for wasm_path ${contractWasmPath}: ${destination}`,
+      );
+    }
+
+    let check = destination;
+    while (
+      check !== canonicalRoot &&
+      path.relative(canonicalRoot, check) !== ""
+    ) {
+      try {
+        const lstat = fs.lstatSync(check);
+        if (lstat.isSymbolicLink()) {
+          const canonicalCheck = fs.realpathSync(check);
+          const relCheck = path.relative(canonicalRoot, canonicalCheck);
+          if (relCheck.startsWith("..") || path.isAbsolute(relCheck)) {
+            throw new Error(
+              `WASM destination symlink escapes workspace root for wasm_path ${contractWasmPath}: ${check} -> ${canonicalCheck}`,
+            );
+          }
+        }
+      } catch (err: any) {
+        if (err.code !== "ENOENT") throw err;
+      }
+      const parent = path.dirname(check);
+      if (parent === check) break;
+      check = parent;
+    }
+  }
+
   const plans: Array<{
     destination: string;
+    canonicalDestination: string;
     pkg: CargoPackage;
     targetName: string;
+    wasmPath: string;
   }> = [];
   const metadataCache = new Map<string, CargoPackage[]>();
+  const destinationOwnership = new Map<
+    string,
+    { pkg: CargoPackage; wasm_path: string }
+  >();
   for (const contract of fixtures.contracts) {
-    const destination = path.resolve(fixturesDir, contract.wasm_path);
+    const destination = path.normalize(
+      path.resolve(fixturesDir, contract.wasm_path),
+    );
+    const canonicalDestination = getCanonicalPath(destination);
+    validateDestinationPath(destination, contract.wasm_path);
+
     let dir = path.dirname(destination);
-    while (!fs.existsSync(path.join(dir, "Cargo.toml"))) {
-      const parent = path.dirname(dir);
-      if (parent === dir)
+    let manifest: string | null = null;
+    while (true) {
+      const relDir = path.relative(canonicalRoot, dir);
+      if (relDir.startsWith("..") || path.isAbsolute(relDir)) {
         throw new Error(
-          `No Cargo.toml found for wasm_path ${contract.wasm_path}`,
+          `Manifest search escaped workspace root for wasm_path ${contract.wasm_path}`,
         );
+      }
+      if (fs.existsSync(dir)) {
+        const canonicalDir = fs.realpathSync(dir);
+        const relCanonical = path.relative(canonicalRoot, canonicalDir);
+        if (relCanonical.startsWith("..") || path.isAbsolute(relCanonical)) {
+          throw new Error(
+            `Manifest search traversed symlink escaping workspace root for wasm_path ${contract.wasm_path}`,
+          );
+        }
+      }
+
+      const candidate = path.join(dir, "Cargo.toml");
+      if (fs.existsSync(candidate)) {
+        const canonicalManifest = fs.realpathSync(candidate);
+        const relManifest = path.relative(canonicalRoot, canonicalManifest);
+        if (relManifest.startsWith("..") || path.isAbsolute(relManifest)) {
+          throw new Error(
+            `Cargo.toml symlink escapes workspace root for wasm_path ${contract.wasm_path}`,
+          );
+        }
+        manifest = candidate;
+        break;
+      }
+
+      const currentCanonical = fs.existsSync(dir)
+        ? fs.realpathSync(dir)
+        : path.resolve(dir);
+      if (
+        currentCanonical === canonicalRoot ||
+        path.relative(canonicalRoot, currentCanonical) === ""
+      ) {
+        break;
+      }
+
+      const parent = path.dirname(dir);
+      if (parent === dir) {
+        break;
+      }
       dir = parent;
     }
-    const manifest = path.join(dir, "Cargo.toml");
+
+    if (!manifest) {
+      throw new Error(
+        `No Cargo.toml found for wasm_path ${contract.wasm_path}`,
+      );
+    }
+
     let packages = metadataCache.get(manifest);
     if (!packages) {
-      const metadata = JSON.parse(
-        await command(
-          "cargo",
-          [
-            "metadata",
-            "--no-deps",
-            "--locked",
-            "--format-version",
-            "1",
-            "--manifest-path",
-            manifest,
-          ],
-          dir,
-        ),
-      );
-      packages = (metadata.packages as CargoPackage[]).filter(
+      let rawMetadata: unknown;
+      try {
+        rawMetadata = JSON.parse(
+          await command(
+            "cargo",
+            [
+              "metadata",
+              "--no-deps",
+              "--locked",
+              "--format-version",
+              "1",
+              "--manifest-path",
+              manifest,
+            ],
+            dir,
+          ),
+        );
+      } catch (error: any) {
+        throw new Error(
+          `Failed to parse Cargo metadata for ${manifest}: ${error.message}`,
+        );
+      }
+      const metadata = validateCargoMetadata(rawMetadata, manifest);
+      packages = metadata.packages.filter(
         (pkg) =>
           metadata.workspace_members.includes(pkg.id) &&
           pkg.targets.some((target) => target.crate_types.includes("cdylib")),
@@ -287,13 +519,57 @@ export async function buildContracts(
       throw new Error(
         `wasm_path ${contract.wasm_path} must identify exactly one Cargo cdylib package; found ${matches.length}`,
       );
+
     const { pkg, targetName } = matches[0];
-    plans.push({ destination, pkg, targetName });
+    const canonicalPkgManifest = fs.realpathSync(pkg.manifest_path);
+    const relPkg = path.relative(canonicalRoot, canonicalPkgManifest);
+    if (relPkg.startsWith("..") || path.isAbsolute(relPkg)) {
+      throw new Error(
+        `Cargo package ${pkg.name} manifest escapes workspace root: ${pkg.manifest_path}`,
+      );
+    }
+
+    const existing = destinationOwnership.get(canonicalDestination);
+    if (existing) {
+      if (
+        existing.pkg.id !== pkg.id ||
+        existing.pkg.manifest_path !== pkg.manifest_path
+      ) {
+        throw new Error(
+          `Conflicting build destinations: ${contract.wasm_path} resolves to ${canonicalDestination} which is already claimed by package ${existing.pkg.name} (${existing.pkg.manifest_path})`,
+        );
+      }
+    } else {
+      destinationOwnership.set(canonicalDestination, {
+        pkg,
+        wasm_path: contract.wasm_path,
+      });
+    }
+
+    const packageDir = path.dirname(pkg.manifest_path);
+    await probePackageCompiler(packageDir);
+
+    plans.push({
+      destination,
+      canonicalDestination,
+      pkg,
+      targetName,
+      wasmPath: contract.wasm_path,
+    });
   }
 
   const artifacts = new Map<string, Buffer>();
+  const writtenDestinations = new Map<string, Buffer>();
   const results: BuiltContract[] = [];
-  for (const { destination, pkg, targetName } of plans) {
+  for (const {
+    destination,
+    canonicalDestination,
+    pkg,
+    targetName,
+    wasmPath,
+  } of plans) {
+    const packageDir = path.dirname(pkg.manifest_path);
+    const rustVersion = await probePackageCompiler(packageDir);
     let wasm = artifacts.get(pkg.manifest_path);
     if (!wasm) {
       let outputDir: string;
@@ -342,8 +618,19 @@ export async function buildContracts(
         fs.rmSync(outputDir, { recursive: true, force: true });
       }
     }
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.writeFileSync(destination, wasm);
+    validateDestinationPath(destination, wasmPath);
+    const prevWritten = writtenDestinations.get(canonicalDestination);
+    if (prevWritten) {
+      if (!prevWritten.equals(wasm)) {
+        throw new Error(
+          `Conflicting build output for destination ${destination}: bytes disagree across declarations`,
+        );
+      }
+    } else {
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
+      fs.writeFileSync(destination, wasm);
+      writtenDestinations.set(canonicalDestination, wasm);
+    }
     const record = {
       wasm_path: destination,
       manifest_path: pkg.manifest_path,
