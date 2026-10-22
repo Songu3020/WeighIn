@@ -11553,21 +11553,21 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/expect@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/expect@4.1.12",
       "name": "@vitest/expect",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/expect@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/expect@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "557db1e6f3495c44f8eca005cf011123e29132d4d30925937d230ab16ec9b14b17578a6cabef9edc3bd9a6e4c33a91dcc72b620ecea9da78556f6b550e289463"
+          "content": "bc5953b7e604bbd581a4d8dd19ac8d9a5315ceb58f8b5facbfce77ffbb76154ee1a4ee6000504a1f3426902ab95e3a6bf9ebde805dbdf782d04f7845de6465a9"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/expect/-/expect-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/expect/-/expect-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11581,7 +11581,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-VX2x5vNJXET47KAFzwERI+KRMtTTCSWTfSMKsW7JsUsXV4psq++e3DvZpuTDOpHcxytiDs6p2nhVb2tVDiiUYw=="
+          "value": "sha512-vFlTt+YEu9WBpNjdGayNmlMVzrWPi1+sv853/7t2FU7hpO5gAFBKHzQmkCq5Xjpr+evegF2994LQT3hF3mRlqQ=="
         },
         {
           "name": "weighin:lockfile",
@@ -11589,27 +11589,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/expect/-/expect-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/expect/-/expect-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/mocker@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/mocker@4.1.12",
       "name": "@vitest/mocker",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/mocker@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/mocker@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "d972550f9e5dd68e40668bace42086292ef883fae23a3f68744b766d0a4255979b947c8776731e165e239745e3536d6cb5fe266e35247b0d9e5d066deb983909"
+          "content": "7ca4a1369299ceea5666e634cfb7a0c9dbcbd2ca96e08344641104c4c04c01aea2ce510d1151f0a1781d69309a059e5fc25af8c5fda8d705c2f379fd4693be34"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/mocker/-/mocker-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/mocker/-/mocker-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11623,7 +11623,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-2XJVD55d1o5AZous5CCGKS74g/riOj9odEt2bQpCVZeblHyHdnMeFl4jl0XjU21stf4mbjUkew2eXQZt65g5CQ=="
+          "value": "sha512-fKShNpKZzupWZuY0z7egydvL0sqW4INEZBEExMBMAa6izlENEVHwoXgdaTCaBZ5fwlr4xf2o1wXC83n9RpO+NA=="
         },
         {
           "name": "weighin:lockfile",
@@ -11631,27 +11631,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/mocker/-/mocker-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/mocker/-/mocker-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/pretty-format@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/pretty-format@4.1.12",
       "name": "@vitest/pretty-format",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/pretty-format@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/pretty-format@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "ca26733db1934bd4abfc9a4597ccc7adc2240287cd6c557a936d6f22040dfdc63fa3165e5e126fe6c73f3012798c5296996b3ea091f0d145cb66399ff77d7e57"
+          "content": "5d6f4ef3e331c785690ad91874c24b650430b15af23fdc24edc3ca0f1b5715fc126a4eb2461e7ed9f7a9fd8d1717f12506f247abc6dc61d8ba69eb9a8b4a2964"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11665,7 +11665,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-yiZzPbGTS9Sr/JpFl8zHrcIkAofNbFV6k21vIgQN/cY/oxZeXhJv5sc/MBJ5jFKWmWs+oJHw0UXLZjmf931+Vw=="
+          "value": "sha512-XW9O8+Mxx4VpCtkYdMJLZQQwsVryP9wk7cPKDxtXFfwSak6yRh5+2fep/Y0XF/ElBvJHq8bcYdi6aeuai0opZA=="
         },
         {
           "name": "weighin:lockfile",
@@ -11673,27 +11673,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/runner@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/runner@4.1.12",
       "name": "@vitest/runner",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/runner@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/runner@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "2f3b6f52077030d24c2248f78509e7c620b65f2d73371abddbc5bfc618c22da342cea4d93ae763c1b41feaff489ed6463f0d77da2d8bab6ae04d16470f724737"
+          "content": "34a955282af942709ef238a374c9e69291c753e593aa22c547a1b4a478e2f6e4635caf71265d64d674f0e85de938e8f63c372c0edd86290308ef022c693e3dd7"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/runner/-/runner-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/runner/-/runner-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11707,7 +11707,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-LztvUgdwMNJMIkj3hQnnxiC2Xy1zNxq928W/xhjCLaNCzqTZOudjwbQf6v9IntZGPw132i2Lq2rgTRZHD3JHNw=="
+          "value": "sha512-NKlVKCr5QnCe8jijdMnmkpHHU+WTqiLFR6G0pHji9uRjXK9xJl1k1nTw6F3pOOj2PDcsDt2GKQMI7wIsaT491w=="
         },
         {
           "name": "weighin:lockfile",
@@ -11715,27 +11715,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/runner/-/runner-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/runner/-/runner-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/snapshot@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/snapshot@4.1.12",
       "name": "@vitest/snapshot",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/snapshot@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/snapshot@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "a4dee2927d4e37b87c79ee20200a78033c8afb306d24fcd56ea3a0bb92c2121e1568955b3d072061060920c1903d755e249ab57e77dace2b3b6b9a4534f6a1a2"
+          "content": "928d72d5081bfec97343d9abf9bf3d0aeaae77c586d532adb0f0fcafb65405dbd5386b7ce407f61f00aa1ee8eb87026af7986cffd44cedf7003e0e7ba35be5cf"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/snapshot/-/snapshot-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/snapshot/-/snapshot-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11749,7 +11749,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-pN7ikn1ON7h8ee4gIAp4AzyK+zBtJPzVbqOgu5LCEh4VaJVbPQcgYQYJIMGQPXVeJJq1fnfazis7a5pFNPahog=="
+          "value": "sha512-ko1y1Qgb/slzQ9mr+b89Cuqud8WG1TKtsPD8r7ZUBdvVOGt85Af2HwCqHujrhwJq95hs/9RM7fcAPg57o1vlzw=="
         },
         {
           "name": "weighin:lockfile",
@@ -11757,27 +11757,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/snapshot/-/snapshot-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/snapshot/-/snapshot-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/spy@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/spy@4.1.12",
       "name": "@vitest/spy",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/spy@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/spy@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "6a935afe9ad0cb6a827b2c219e2c4e1cf442806361be0ed3e036a97e5d466a12e9fd1fae8419b970fc85a0d572aac35dda1d672712fa06aa9d22388004beb460"
+          "content": "446abdc7824d18d4d91c4271bcdd284a2263792084c66d27da064a28964763d717e40540e8ced52482c14f7649fed27fd09f6e593edf11357dfdbb688bffef4a"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/spy/-/spy-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/spy/-/spy-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11791,7 +11791,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-apNa/prQy2qCeywhnixOHPRCgGNhvg7T4Dapfl1GahLp/R+uhBm5cPyFoNVyqsNd2h1nJxL6BqqdIjiABL60YA=="
+          "value": "sha512-RGq9x4JNGNTZHEJxvN0oSiJjeSCExm0n2gZKKJZHY9cX5AVA6M7VJILBT3ZJ/tJ/0J9uWT7fETV9/btoi//vSg=="
         },
         {
           "name": "weighin:lockfile",
@@ -11799,27 +11799,27 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/spy/-/spy-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/spy/-/spy-4.1.12.tgz"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/%40vitest/utils@4.1.11",
+      "bom-ref": "pkg:npm/%40vitest/utils@4.1.12",
       "name": "@vitest/utils",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/utils@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/utils@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cd30951a9c85b0658186594ec8a953c3fbe7afa0fdab1b1f483c9f6f26664f28c7c3937f56ebf31e91e84239b6649ce7e11260c79c38afb5747abebd0a62e03d"
+          "content": "4376b05ebc0e7c457ea9cdd698ee4e372134c8eed0d6043dfe8c87c462d9fe997b37734efd9ceda90c0a2eec0c915f8203525848878ede09079d10c8a3801568"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@vitest/utils/-/utils-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/@vitest/utils/-/utils-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -11833,7 +11833,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ=="
+          "value": "sha512-Q3awXrwOfEV+qc3WmO5ONyE0yO7Q1gQ9/oyHxGLZ/pl7N3NO/ZztqQwKLuwMkV+CA1JYSIeO3gkHnRDIo4AVaA=="
         },
         {
           "name": "weighin:lockfile",
@@ -11841,7 +11841,7 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/@vitest/utils/-/utils-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/@vitest/utils/-/utils-4.1.12.tgz"
         }
       ]
     },
@@ -15255,21 +15255,21 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/vitest@4.1.11",
+      "bom-ref": "pkg:npm/vitest@4.1.12",
       "name": "vitest",
-      "version": "4.1.11",
-      "purl": "pkg:npm/vitest@4.1.11",
+      "version": "4.1.12",
+      "purl": "pkg:npm/vitest@4.1.12",
       "scope": "excluded",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "7e1002acd5d489d21b19206be4595bb8190eed5582d59c8b9740cee025360eb42800fc57f3862cc6cf877864298a2e656565754388016534eee3d985f80e8477"
+          "content": "e5e59dcf6c9bdda8f1585dc2f02e138e45e5ec51a6de7d84fd595acc02eb407ccaee760c486167099b68d1b6cf365efb03090e6552e4d189c101e8d4bb436258"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/vitest/-/vitest-4.1.11.tgz"
+          "url": "https://registry.npmjs.org/vitest/-/vitest-4.1.12.tgz"
         }
       ],
       "properties": [
@@ -15283,7 +15283,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-fhACrNXUidIbGSBr5FlbuBkO7VWC1ZyLl0DO4CU2DrQoAPxX84Ysxs+HeGQpii5lZWV1Q4gBZTTu49mF+A6Edw=="
+          "value": "sha512-5eWdz2yb3ajxWF3C8C4TjkXl7FGm3n2E/VlazALrQHzK7nYMSGFnCZto0bbPNl77AwkOZVLk0YnBAejUu0NiWA=="
         },
         {
           "name": "weighin:lockfile",
@@ -15291,7 +15291,7 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/vitest/-/vitest-4.1.11.tgz"
+          "value": "https://registry.npmjs.org/vitest/-/vitest-4.1.12.tgz"
         }
       ]
     },
@@ -16909,54 +16909,54 @@
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/expect@4.1.11",
+      "ref": "pkg:npm/%40vitest/expect@4.1.12",
       "dependsOn": [
         "pkg:npm/%40standard-schema/spec@1.1.0",
         "pkg:npm/%40types/chai@5.2.3",
-        "pkg:npm/%40vitest/spy@4.1.11",
-        "pkg:npm/%40vitest/utils@4.1.11",
+        "pkg:npm/%40vitest/spy@4.1.12",
+        "pkg:npm/%40vitest/utils@4.1.12",
         "pkg:npm/chai@6.3.0",
         "pkg:npm/tinyrainbow@3.2.0"
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/mocker@4.1.11",
+      "ref": "pkg:npm/%40vitest/mocker@4.1.12",
       "dependsOn": [
-        "pkg:npm/%40vitest/spy@4.1.11",
+        "pkg:npm/%40vitest/spy@4.1.12",
         "pkg:npm/estree-walker@3.0.3",
         "pkg:npm/magic-string@0.30.21"
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/pretty-format@4.1.11",
+      "ref": "pkg:npm/%40vitest/pretty-format@4.1.12",
       "dependsOn": [
         "pkg:npm/tinyrainbow@3.2.0"
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/runner@4.1.11",
+      "ref": "pkg:npm/%40vitest/runner@4.1.12",
       "dependsOn": [
-        "pkg:npm/%40vitest/utils@4.1.11",
+        "pkg:npm/%40vitest/utils@4.1.12",
         "pkg:npm/pathe@2.0.3"
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/snapshot@4.1.11",
+      "ref": "pkg:npm/%40vitest/snapshot@4.1.12",
       "dependsOn": [
-        "pkg:npm/%40vitest/pretty-format@4.1.11",
-        "pkg:npm/%40vitest/utils@4.1.11",
+        "pkg:npm/%40vitest/pretty-format@4.1.12",
+        "pkg:npm/%40vitest/utils@4.1.12",
         "pkg:npm/magic-string@0.30.21",
         "pkg:npm/pathe@2.0.3"
       ]
     },
     {
-      "ref": "pkg:npm/%40vitest/spy@4.1.11",
+      "ref": "pkg:npm/%40vitest/spy@4.1.12",
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/%40vitest/utils@4.1.11",
+      "ref": "pkg:npm/%40vitest/utils@4.1.12",
       "dependsOn": [
-        "pkg:npm/%40vitest/pretty-format@4.1.11",
+        "pkg:npm/%40vitest/pretty-format@4.1.12",
         "pkg:npm/convert-source-map@2.0.0",
         "pkg:npm/tinyrainbow@3.2.0"
       ]
@@ -17429,15 +17429,15 @@
       ]
     },
     {
-      "ref": "pkg:npm/vitest@4.1.11",
+      "ref": "pkg:npm/vitest@4.1.12",
       "dependsOn": [
-        "pkg:npm/%40vitest/expect@4.1.11",
-        "pkg:npm/%40vitest/mocker@4.1.11",
-        "pkg:npm/%40vitest/pretty-format@4.1.11",
-        "pkg:npm/%40vitest/runner@4.1.11",
-        "pkg:npm/%40vitest/snapshot@4.1.11",
-        "pkg:npm/%40vitest/spy@4.1.11",
-        "pkg:npm/%40vitest/utils@4.1.11",
+        "pkg:npm/%40vitest/expect@4.1.12",
+        "pkg:npm/%40vitest/mocker@4.1.12",
+        "pkg:npm/%40vitest/pretty-format@4.1.12",
+        "pkg:npm/%40vitest/runner@4.1.12",
+        "pkg:npm/%40vitest/snapshot@4.1.12",
+        "pkg:npm/%40vitest/spy@4.1.12",
+        "pkg:npm/%40vitest/utils@4.1.12",
         "pkg:npm/es-module-lexer@2.3.2",
         "pkg:npm/expect-type@1.4.0",
         "pkg:npm/magic-string@0.30.21",
@@ -17467,7 +17467,7 @@
         "pkg:npm/toml@4.2.0",
         "pkg:npm/typescript@5.9.3",
         "pkg:npm/vite@7.3.7",
-        "pkg:npm/vitest@4.1.11",
+        "pkg:npm/vitest@4.1.12",
         "pkg:npm/yaml@2.9.1",
         "pkg:npm/zod@3.25.76"
       ]
