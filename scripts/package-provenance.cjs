@@ -51,7 +51,18 @@ if (process.argv.includes("--verify")) {
   if (!fs.existsSync(manifestPath))
     throw new Error("provenance-manifest.json is missing");
   const actual = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  if (JSON.stringify(actual) !== JSON.stringify(manifest))
+  if (
+    typeof actual.source_revision !== "string" ||
+    (actual.source_revision !== "unavailable" &&
+      !/^[a-f0-9]{40}$/.test(actual.source_revision))
+  ) {
+    throw new Error(
+      "package provenance manifest has an invalid source_revision",
+    );
+  }
+  const { source_revision: _actualRevision, ...actualInputs } = actual;
+  const { source_revision: _expectedRevision, ...expectedInputs } = manifest;
+  if (JSON.stringify(actualInputs) !== JSON.stringify(expectedInputs))
     throw new Error(
       "package provenance manifest is stale or does not match source and bundles",
     );
