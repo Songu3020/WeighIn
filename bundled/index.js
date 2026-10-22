@@ -54694,9 +54694,9 @@ function enforceThresholds(diff, config2) {
       );
     }
   }
-  if ((global2.fail_on_any_regression || GLOBAL_RULE_MAP.some(({ field }) => global2[field] !== void 0)) && comparedNames.size === 0) {
+  if ((global2.fail_on_any_regression || GLOBAL_RULE_MAP.some(({ field }) => global2[field] !== void 0) || Object.keys(globalLimits).length > 0) && comparedNames.size === 0) {
     throw new Error(
-      "Cannot evaluate global policy: no matched BASE/HEAD benchmarks"
+      "Cannot evaluate configured global policy or limits: no matched BASE/HEAD benchmarks"
     );
   }
   for (const contract of diff.contracts) {
