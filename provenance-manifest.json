@@ -5,6 +5,10 @@
   "tools": {
     "node": "v24.14.0",
     "npm": "11.9.0"
+  "source_revision": "e0b7b3e48021af6b1d0f1c78ec65074a5ef8a148",
+  "tools": {
+    "node": "v24.21.0",
+    "npm": "11.19.0"
   },
   "inputs": [
     {
@@ -17,7 +21,7 @@
     },
     {
       "path": "bundled/index.js",
-      "sha256": "26447f5239fd55e7d50744ea03546f76c0f809a39ec540be081b40ec55bec08e"
+      "sha256": "e0432feb946821a6c8d4997c03d3fd9f0903b8c7ea47ebd80ee40c88978475c3"
     },
     {
       "path": "native/simulation/Cargo.lock",
@@ -33,11 +37,11 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "932fef16ee0e0dba8cd024113db4c9a0e06be38c6b2105124c91601c859ec801"
+      "sha256": "4b9b1bd4d1a2bea2d5987622f1a32293df5f13c2b027d3065fdf7336894cf8e4"
     },
     {
       "path": "package.json",
-      "sha256": "a3f33d61c09503cbfadec7dd83ebb881bc99a11b8914700d91fa3a22c7b15093"
+      "sha256": "4ab0915dc8e341dbf1d0f577de1c8f380dbe70870124f7b7fa3a195d57401bc1"
     },
     {
       "path": "src/account.ts",
@@ -61,7 +65,7 @@
     },
     {
       "path": "src/cli.ts",
-      "sha256": "2abfb702efcd7341fe580b3b37d2b3445af85d6ac78307a0f15dcd58a865fcce"
+      "sha256": "2ba43e870d8bf2f223782910ef75db0fc4b9b7637a5e6dd94a119011095be982"
     },
     {
       "path": "src/comment-action.ts",
@@ -89,7 +93,7 @@
     },
     {
       "path": "src/git-utils.ts",
-      "sha256": "8ab417117aeae423812950bec1be424deeb5f9195f11e561fe33021113462027"
+      "sha256": "18d4cf6dc2fab7abcf13716ee51e1b427db34d6b4b729a6bdc78849bd9f0cc68"
     },
     {
       "path": "src/identity.ts",
@@ -97,7 +101,7 @@
     },
     {
       "path": "src/measurement.ts",
-      "sha256": "5e80a03f9a94f3535d3e5575354171fb5653fd39e20cd671c5b92c40441f08f1"
+      "sha256": "4f7d35342977c5d38018e8e02ad06de7339c12a480a8794d3320c51958415890"
     },
     {
       "path": "src/network.ts",
@@ -122,6 +126,10 @@
     {
       "path": "src/report.ts",
       "sha256": "531612923e05a8d96b61037d98f3efc179735bfe8a526bcd88dcda1f6b9547c2"
+    },
+    {
+      "path": "src/sdk-version.ts",
+      "sha256": "8c0aeced896b1b3085cf1a087b67d0e6e484f4f8986b6ce4d34314d9ff543d35"
     },
     {
       "path": "src/simulation.ts",

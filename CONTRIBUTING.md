@@ -38,6 +38,12 @@ npm audit
 runs Vitest tests under `test`. `npm run test:watch` starts Vitest watch mode.
 Use `npm run format` for intentional formatting changes.
 
+The Node test files run one at a time (`--test-concurrency=1`). Packing the
+consumer artifact runs the `prepack` lifecycle, which rebuilds `dist/` and
+`bundled/` in the checkout; running test files concurrently let one file read a
+bundle another file was still writing. Keep the suite serial so every test
+observes a complete build artifact.
+
 The JavaScript test suite also covers the dependency inventory and the packed
 consumer, so it needs the pinned Rust 1.95.0 toolchain and the locked native
 helper crates (`cargo +1.95.0 fetch --locked --manifest-path

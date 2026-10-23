@@ -14,7 +14,7 @@
     "provenance": "node scripts/package-provenance.cjs --verify",
     "inventory:generate": "npm run build && node dist/dependency-inventory.js",
     "inventory:check": "npm run build && node dist/dependency-inventory.js --check",
-    "test": "npm run build && node --test tests/*.test.cjs && npm run test:vitest",
+    "test": "npm run build && node --test --test-concurrency=1 tests/*.test.cjs && npm run test:vitest",
     "test:vitest": "vitest run test/*.test.ts",
     "test:watch": "vitest test/*.test.ts",
     "test:native": "npm run build && npm run build:helper && node --test tests/native/*.test.cjs",
@@ -29,7 +29,7 @@
     "@actions/exec": "1.1.1",
     "@actions/github": "9.1.1",
     "@stellar/stellar-sdk": "16.0.1",
-    "toml": "4.2.0",
+    "toml": "5.0.1",
     "zod": "3.25.76"
   },
   "devDependencies": {
