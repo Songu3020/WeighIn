@@ -29,7 +29,7 @@ function setup(t, { wasm = false } = {}) {
     fs.rmSync(sandbox, { recursive: true, force: true });
   });
   fs.writeFileSync(path.join(work, 'fixtures.json'), JSON.stringify(FIXTURES));
-  if (wasm) fs.writeFileSync(path.join(work, 'contract.wasm'), Buffer.from('test-only-wasm'));
+  if (wasm) fs.writeFileSync(path.join(work, 'contract.wasm'), Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
 
   const fetchMock = t.mock.method(globalThis, 'fetch', async (url, options) => {
     const body = JSON.parse(options.body);
