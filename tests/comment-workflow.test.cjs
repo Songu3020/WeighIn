@@ -236,6 +236,9 @@ async function executeAuthorMode({
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'weighin-author-mode-test-'));
   const workspace  = path.join(temporary, 'workspace');
   const calls      = [];
+  const headSha = (metadata && typeof metadata === 'object' && metadata.headSha) || validMetadata.headSha;
+  const eventPath = path.join(temporary, 'event.json');
+  fs.writeFileSync(eventPath, JSON.stringify({ workflow_run: { event: 'pull_request', head_sha: headSha } }));
 
   const server = http.createServer((request, response) => {
     let raw = '';
@@ -255,6 +258,12 @@ async function executeAuthorMode({
         }
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify(authenticatedUser));
+        return;
+      }
+
+      if (request.method === 'GET' && request.url === '/repos/WeighInNG/WeighIn/pulls/27') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ head: { sha: headSha } }));
         return;
       }
 
@@ -320,7 +329,7 @@ async function executeAuthorMode({
           env: {
             ...process.env,
             GITHUB_REPOSITORY: 'WeighInNG/WeighIn',
-            GITHUB_EVENT_PATH: '',
+            GITHUB_EVENT_PATH: eventPath,
             GITHUB_API_URL: apiUrl,
             HTTP_PROXY: '', HTTPS_PROXY: '', ALL_PROXY: '',
             http_proxy: '', https_proxy: '', all_proxy: '',
@@ -543,7 +552,7 @@ test('author-mode: comment with null user is not matched as owned by expected au
 const freshHead = validMetadata.headSha, newerHead = 'e'.repeat(40), mergeCommit = 'c'.repeat(40), baseTip = 'b'.repeat(40), unrelated = 'd'.repeat(40);
 const deliver = (scenario, metadata = true) => execute(steps, metadata, successfulPr, commentJob.if, scenario);
 const output = result => result.stdout + result.stderr;
-const newerComment = [{ id: 7, body: '<!-- weighin-report -->\n# Newer head result' }];
+const newerComment = [{ id: 7, body: '<!-- weighin-report -->\n# Newer head result', user: { id: GITHUB_ACTIONS_BOT_ID, login: 'github-actions[bot]', type: 'Bot' } }];
 const pullLookup = '/repos/WeighInNG/WeighIn/pulls/27';
 test('a fresh report checks the live pull request head before posting', async () => {
   const result = await deliver({});
