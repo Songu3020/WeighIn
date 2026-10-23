@@ -36,6 +36,23 @@ Future changes to approved source/cap semantics must add an explicitly
 versioned schema and validator mapping rather than changing the meaning of
 existing schema versions.
 
+### `soroban_sdk_version` provenance
+
+The value is reported metadata, not a claim about how a prebuilt WASM was
+compiled:
+
+* **Caller-supplied:** when the caller passes `sdkVersion` to `runMeasurement`
+  (the GitHub Action passes an explicitly discovered value), it is recorded
+  verbatim on every contract record.
+* **Discovered:** when the CLI omits it, each contract record reports the
+  `soroban-sdk` version declared in the Cargo.lock of the Cargo workspace that
+  owns that contract's WASM artifact. Root workspaces, nested crates and the
+  `contract/Cargo.lock` convention are all supported; when no owning lock can
+  be established the value is `"unknown"`. Multiple `soroban-sdk` versions
+  declared in one lock are reported as a comma-separated list rather than
+  silently collapsing to the first match.
+* Discovery reads on-disk lockfiles only and never contacts RPC.
+
 ## Public standalone validation API
 
 The validator and schema generator are exported from `weighin`

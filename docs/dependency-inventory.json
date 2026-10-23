@@ -14887,21 +14887,21 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/toml@4.2.0",
+      "bom-ref": "pkg:npm/toml@5.0.1",
       "name": "toml",
-      "version": "4.2.0",
-      "purl": "pkg:npm/toml@4.2.0",
+      "version": "5.0.1",
+      "purl": "pkg:npm/toml@5.0.1",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "4ef0098db1d9958988df6dfeb2bb6a1d017226ca16cba988d3da6992e8fdfa246caac54a1bd7ef4dc38fec51c5d9409bd10498b6311abdf7eb2b375dd1780296"
+          "content": "12a60d03f62f50d9ddac0d81dceda88f32d0a1342b071799f5422343093cb75d287ba9fb77072507077d21d6504ce2b07babd65fe017b65e889ed5d16dea5dc5"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/toml/-/toml-4.2.0.tgz"
+          "url": "https://registry.npmjs.org/toml/-/toml-5.0.1.tgz"
         }
       ],
       "properties": [
@@ -14919,7 +14919,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-TvAJjbHZlYmI323+srtqHQFyJsoWy6mI09ppkuj9+iRsqsVKG9fvTcOP7FHF2UCb0QSYtjEavffrKzdd0XgClg=="
+          "value": "sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ=="
         },
         {
           "name": "weighin:lockfile",
@@ -14927,7 +14927,7 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/toml/-/toml-4.2.0.tgz"
+          "value": "https://registry.npmjs.org/toml/-/toml-5.0.1.tgz"
         }
       ]
     },
@@ -17389,7 +17389,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/toml@4.2.0",
+      "ref": "pkg:npm/toml@5.0.1",
       "dependsOn": []
     },
     {
@@ -17464,7 +17464,7 @@
         "pkg:npm/%40types/node@20.19.43",
         "pkg:npm/esbuild@0.25.6",
         "pkg:npm/prettier@3.9.6",
-        "pkg:npm/toml@4.2.0",
+        "pkg:npm/toml@5.0.1",
         "pkg:npm/typescript@5.9.3",
         "pkg:npm/vite@7.3.7",
         "pkg:npm/vitest@4.1.12",

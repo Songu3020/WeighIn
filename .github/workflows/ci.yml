@@ -126,10 +126,21 @@ jobs:
           npm test
           npm run test:native
           npm run bundle
-          # Bundle generation refreshes the informational source_revision in
-          # the provenance manifest. Keep the benchmark checkout at its
-          # reported HEAD after generating the bundles.
-          git restore --source=HEAD -- provenance-manifest.json
+      - name: Restore committed artifacts before measuring
+        run: |
+          # Rebuilding the bundle rewrites the provenance manifest and the
+          # dependency inventory, because both record the checkout they were
+          # produced from. The Action refuses to measure a checkout with
+          # modified tracked files, so restore the committed artifacts. The
+          # verify-build job already proved that the committed bundle is up to
+          # date.
+          git checkout -- bundled/ provenance-manifest.json docs/dependency-inventory.json
+          status="$(git status --porcelain --untracked-files=no)"
+          if [ -n "$status" ]; then
+            echo "Error: tracked files are still modified before measuring:"
+            echo "$status"
+            exit 1
+          fi
 
       - name: Start local Stellar network
         run: bash scripts/start-local-network.sh
