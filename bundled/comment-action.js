@@ -21712,7 +21712,7 @@ var require_core = __commonJS({
     exports2.isDebug = isDebug;
     exports2.debug = debug;
     exports2.error = error;
-    exports2.warning = warning;
+    exports2.warning = warning2;
     exports2.notice = notice;
     exports2.info = info;
     exports2.startGroup = startGroup;
@@ -21805,7 +21805,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     function error(message, properties = {}) {
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
-    function warning(message, properties = {}) {
+    function warning2(message, properties = {}) {
       (0, command_1.issueCommand)("warning", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     function notice(message, properties = {}) {
@@ -26150,6 +26150,65 @@ function parsePrMetadata(raw, expectedRepository) {
   };
 }
 
+// src/pr-freshness.ts
+var SHA_PATTERN2 = /^[0-9a-f]{40}$/i;
+var short = (sha) => sha.slice(0, 8);
+function requireSha(value, label) {
+  if (typeof value !== "string" || !SHA_PATTERN2.test(value)) {
+    throw new Error(`${label} must be a 40-character hexadecimal SHA`);
+  }
+  return value.toLowerCase();
+}
+function assessFreshness(producerSha, currentHeadSha) {
+  const producer = requireSha(producerSha, "workflow run head SHA");
+  const current = requireSha(currentHeadSha, "current pull request head SHA");
+  if (producer === current) return { fresh: true };
+  return {
+    fresh: false,
+    reason: `Skipped stale report: it was produced for ${short(producer)} but the pull request head is now ${short(current)}. The current comment was left untouched.`
+  };
+}
+async function assertMetadataMatchesRun(metadataSha, producer, source) {
+  const metadata = requireSha(metadataSha, "PR metadata headSha");
+  if (metadata === producer) return;
+  const parents = (await source.getCommitParents(metadata)).map(
+    (parent) => parent.toLowerCase()
+  );
+  if (!parents.includes(producer)) {
+    throw new Error(
+      `PR metadata headSha ${short(metadata)} is neither the producing run's head ${short(producer)} nor a merge commit of it`
+    );
+  }
+}
+async function evaluateReportFreshness(input, source) {
+  const producer = requireSha(input.producerSha, "workflow run head SHA");
+  await assertMetadataMatchesRun(input.metadataSha, producer, source);
+  const current = await source.getCurrentHeadSha(input.prNumber);
+  return assessFreshness(producer, current);
+}
+
+// src/pr-revision-source.ts
+function createOctokitRevisionSource(octokit, owner, repo) {
+  return {
+    async getCurrentHeadSha(prNumber) {
+      const { data } = await octokit.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: prNumber
+      });
+      return data.head.sha;
+    },
+    async getCommitParents(sha) {
+      const { data } = await octokit.rest.git.getCommit({
+        owner,
+        repo,
+        commit_sha: sha
+      });
+      return data.parents.map((parent) => parent.sha);
+    }
+  };
+}
+
 // src/record-schema.ts
 var METRIC_KEYS = [
   "cpu_instructions",
@@ -26257,6 +26316,12 @@ async function upsertPrComment(token, numberOrBody, bodyOrOptions, maybeOptions)
 }
 
 // src/comment-action.ts
+async function reportSkipped(reason) {
+  core.warning(reason);
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    await core.summary.addHeading("WeighIn comment skipped", 3).addRaw(reason, true).write();
+  }
+}
 async function run() {
   try {
     const reportPath = core.getInput("report-path", { required: true });
@@ -26279,6 +26344,18 @@ async function run() {
     const metadataRaw = fs.readFileSync(metadataPath, "utf8");
     const { owner, repo } = context2.repo;
     const metadata = parsePrMetadata(metadataRaw, `${owner}/${repo}`);
+    const freshness = await evaluateReportFreshness(
+      {
+        prNumber: metadata.prNumber,
+        producerSha: context2.payload.workflow_run?.head_sha,
+        metadataSha: metadata.headSha
+      },
+      createOctokitRevisionSource(getOctokit(token), owner, repo)
+    );
+    if (!freshness.fresh) {
+      await reportSkipped(freshness.reason);
+      return;
+    }
     await upsertPrComment(token, metadata.prNumber, reportBody, {
       commentAuthorMode,
       core
