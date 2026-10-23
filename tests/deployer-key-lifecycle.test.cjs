@@ -39,17 +39,32 @@ function setup(t, { wasm = false } = {}) {
     return new Response(JSON.stringify({ jsonrpc: '2.0', id: body.id, result: { latestLedger: 100, entries: [{ key, xdr: value.toXDR('base64') }] } }));
   });
   t.mock.method(rpc.Server.prototype, 'getAccount', async address => new Account(address, '1'));
-  t.mock.method(rpc.Server.prototype, 'getLedgerEntries', async () => ({ entries: [{}] }));
+  // A well-formed contract-instance entry for whichever key is probed.
+  t.mock.method(rpc.Server.prototype, 'getLedgerEntries', async key => {
+    const instance = xdr.LedgerEntryData.contractData(
+      new xdr.ContractDataEntry({
+        ext: new xdr.ExtensionPoint(0),
+        contract: key.contractData().contract(),
+        key: xdr.ScVal.scvLedgerKeyContractInstance(),
+        durability: xdr.ContractDataDurability.persistent(),
+        val: xdr.ScVal.scvBool(true),
+      }),
+    );
+    return {
+      latestLedger: 100,
+      entries: [{ key: key.toXDR('base64'), xdr: instance.toXDR('base64'), liveUntilLedgerSeq: 100 + 1_000_000 }],
+    };
+  });
   return { work, sandbox, fetchMock };
 }
 
 const run = (work, extra = {}) =>
   runMeasurement({ fixturesPath: path.join(work, 'fixtures.json'), fixtureId: 'fixtures.json', gitCommit: 'test', sdkVersion: '25.3.1', ...extra });
 
-test('no keyFile, WASM missing after the key is created: no key is left behind', async t => {
+test('no keyFile, WASM missing (preflight rejects before funding): no key is left behind', async t => {
   const { work, sandbox, fetchMock } = setup(t);
   await assert.rejects(run(work), /WASM not found/);
-  assert.ok(fetchMock.mock.callCount() >= 1, 'run must get past key creation for this test to mean anything');
+  assert.equal(fetchMock.mock.callCount(), 0, 'WASM preflight must reject before any account funding');
   assert.deepEqual(fs.readdirSync(work).sort(), ['fixtures.json']);
   assert.deepEqual(fs.readdirSync(sandbox), []);
 });
