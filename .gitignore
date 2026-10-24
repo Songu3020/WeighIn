@@ -9,6 +9,8 @@ contract/target/
 # Weighin runtime files
 .weighin-temp-key
 weighin-results.json
+weighin-report.md
+pr-metadata.json
 
 # Misc
 *.tar.bz2

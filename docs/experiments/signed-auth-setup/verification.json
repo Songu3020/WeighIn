@@ -1,0 +1,32 @@
+{
+  "status": "VERIFIED",
+  "assessment": "signed_authorization_committed_setup",
+  "issue": 58,
+  "protocol": 28,
+  "action_outcome": "success",
+  "result": "pass",
+  "smallest_supported_modes": [
+    "SourceAccountAuth",
+    "AddressAccountAuth"
+  ],
+  "unsupported_modes": [
+    "ContractAuth",
+    "MultisigThreshold",
+    "AddressWithDelegates",
+    "RemoteSigners"
+  ],
+  "security_invariants": {
+    "uncommitted_private_signers": true,
+    "credentials_sanitized": true,
+    "signing_overhead_excluded_from_benchmark": true,
+    "setup_rejection_halts_measurement": true,
+    "base_head_isolated_state": true
+  },
+  "authorization_verification": {
+    "sdk_preimage_building": "verified",
+    "ed25519_signature_verification": "verified",
+    "mismatched_signer_rejection": "verified",
+    "expired_authorization_rejection": "verified",
+    "recording_mode_distinguished_from_signed_commitment": "verified"
+  }
+}

@@ -93,8 +93,16 @@ see the separate [repeatability experiment](repeatability.md).
 New measurements emit `ContractBenchmark.schema_version: 4`. The logical tuple
 and runtime diagnostics are unchanged. Measured metrics add `limit_source`, or
 `limit_reason` when there is no independent cap. Provenance adds
-`resource_limits_sha256`. The helper input/output transport remains schema 1:
+`resource_limits_sha256` and the optional `source_account`, the account that
+invoked the measured call. The helper input/output transport remains schema 1:
 its existing footprint/IO/event fields were sufficient for this audit.
+
+`source_account` is recorded, not assumed. It is the identity the measured
+transaction invoked the contract with, and it is compared together with the
+other environment identities, so records measured under different source
+accounts are reported as incompatible instead of being compared. The
+measurement capability and the measured proof are documented in
+[source-account effects](source-account-effects.md).
 
 The legacy key `event_data_bytes` is retained for configured policies, but schema
 4 explicitly defines it as **Events + Return XDR Bytes**, not payload-only bytes.

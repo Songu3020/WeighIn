@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import * as fs from "fs";
+import * as path from "path";
 import { execSync } from "child_process";
 import { runMeasurement } from "./measurement";
+import { parseFixtures } from "./identity";
+import { discoverSdkAssociations, formatSdkVersions } from "./sdk-version";
 import { redactEndpointSecrets, sanitizeEndpoint } from "./endpoint";
 
 function getGitCommit(): string {
@@ -17,6 +20,7 @@ export interface CliOptions {
   outputPath: string | null;
   rpcUrl: string;
   jsonStdout: boolean;
+  allowCrossTargetSubstitution: boolean;
 }
 
 export function parseArgs(
@@ -26,6 +30,7 @@ export function parseArgs(
   let explicitOutputFile: string | null = null;
   let jsonStdout = false;
   let rpcUrl = "http://localhost:8000/rpc";
+  let allowCrossTargetSubstitution = false;
 
   for (let i = 0; i < rawArgs.length; i++) {
     const arg = rawArgs[i];
@@ -40,6 +45,8 @@ export function parseArgs(
       }
     } else if (arg === "--stdout" || arg === "--json-stdout") {
       jsonStdout = true;
+    } else if (arg === "--allow-cross-target-substitution") {
+      allowCrossTargetSubstitution = true;
     } else if (!arg.startsWith("--")) {
       // Positional argument
       if (fixturesPath === null) {
@@ -72,6 +79,7 @@ export function parseArgs(
       : explicitOutputFile || "weighin-results.json",
     rpcUrl,
     jsonStdout,
+    allowCrossTargetSubstitution,
   };
 }
 
@@ -87,22 +95,47 @@ async function main() {
   const { fixturesPath, outputPath, rpcUrl, jsonStdout } = options;
   const gitCommit = getGitCommit();
 
-  // Best-effort: read soroban-sdk version from contract/Cargo.lock if present
-  let sdkVersion = "unknown";
-  try {
-    const lock = fs.readFileSync("contract/Cargo.lock", "utf8");
-    const m = lock.match(/name = "soroban-sdk"\nversion = "([^"]+)"/);
-    if (m) sdkVersion = m[1];
-  } catch {
-    /* ignore */
-  }
-
-  // When stdout mode is requested, route diagnostic and progress logs to stderr
+  // When stdout mode is requested, route diagnostic and progress logs to stderr.
+  // This is installed before any discovery output is produced so stdout carries
+  // the JSON payload and nothing else.
   const originalLog = console.log;
   const originalInfo = console.info;
   if (jsonStdout) {
     console.log = (...args: any[]) => console.error(...args);
     console.info = (...args: any[]) => console.error(...args);
+  }
+
+  // Best-effort: resolve each fixture artifact to its owning Cargo
+  // workspace/lock and report the `soroban-sdk` version declared there.
+  // Filesystem only — no RPC — and reported per contract: multiple declared
+  // versions are listed and unresolved associations say "unknown".
+  let sdkSummary = "unknown";
+  try {
+    const fixturesRaw = fs.readFileSync(fixturesPath, "utf8");
+    const fixturesSpec = parseFixtures(
+      fixturesRaw,
+      path.relative(process.cwd(), path.resolve(fixturesPath)),
+    );
+    const fixturesDir = path.dirname(path.resolve(fixturesPath));
+    const wasmPaths = fixturesSpec.contracts.map((contract) =>
+      path.resolve(fixturesDir, contract.wasm_path),
+    );
+    const associations = discoverSdkAssociations(wasmPaths);
+    const versions = [
+      ...new Set(associations.flatMap((assoc) => assoc.versions)),
+    ];
+    sdkSummary = formatSdkVersions(versions);
+    for (const assoc of associations) {
+      const relative = path.relative(process.cwd(), assoc.wasmPath);
+      const lockHint = assoc.lockPath
+        ? ` (lock: ${path.relative(process.cwd(), assoc.lockPath)})`
+        : " (no lock found)";
+      console.log(
+        `SDK ${relative}: ${formatSdkVersions(assoc.versions)}${lockHint}`,
+      );
+    }
+  } catch {
+    /* ignore — SDK discovery is best-effort */
   }
 
   try {
@@ -111,13 +144,13 @@ async function main() {
     console.log(`Output:   ${jsonStdout ? "stdout" : outputPath}`);
     console.log(`RPC URL:  ${sanitizeEndpoint(rpcUrl)}`);
     console.log(`Commit:   ${gitCommit}`);
-    console.log(`SDK:      ${sdkVersion}`);
+    console.log(`SDK:      ${sdkSummary}`);
 
     const results = await runMeasurement({
       fixturesPath,
       gitCommit,
-      sdkVersion,
       rpcUrl,
+      allowCrossTargetSubstitution: options.allowCrossTargetSubstitution,
     });
 
     if (jsonStdout) {

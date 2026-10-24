@@ -1,0 +1,36 @@
+{
+  "scenario": "unauthorized_signed_auth_setup",
+  "status": "rejected",
+  "protocol": 28,
+  "contract_id": "CAUTHKL44G5Y7U534K7AEYZ3A7P3O3QJ7D6C4QZ4LMBVVM2NZZ5ZAUTH",
+  "setup_operation": {
+    "function_name": "initialize",
+    "args": [
+      {
+        "type": "Address",
+        "value": "GAEVHLRQ27T5KVGN5DHTBX24MAREEITOWJHJP5A3VE4FJCFBT3F2EKNN"
+      }
+    ]
+  },
+  "attempted_authorization": {
+    "expected_authorizer": "GAEVHLRQ27T5KVGN5DHTBX24MAREEITOWJHJP5A3VE4FJCFBT3F2EKNN",
+    "actual_signer": "GD6GJ4R4CIY7FSH7Y3YELFWPZJANWZPINFR64KCE5A45ZA5WRCXL5OKH",
+    "mismatch": true,
+    "sanitized_signature": {
+      "key_type": "ed25519_public_key",
+      "signature_length": 64,
+      "signature_sha256": "4b68f3a3d213985223e75b7b9f57eb2d59664da3e9ad1785f8c87f469950b731"
+    }
+  },
+  "submission_failure": {
+    "status": "ERROR",
+    "transaction_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+    "error_code": "txFAILED",
+    "host_error": "HostError: Error(Auth, BadSignature)",
+    "confirmed_committed": false
+  },
+  "setup_gate_result": {
+    "proceed_to_measurement": false,
+    "reason": "Unauthorized setup transaction rejected by network; incomplete scenario"
+  }
+}

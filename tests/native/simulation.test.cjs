@@ -30,7 +30,7 @@ test('real helper rejects missing config, uncaptured state, failed calls, protoc
   const badFunction = xdr.HostFunction.fromXDR(base.host_function_xdr, 'base64'); badFunction.invokeContract().functionName('missing');
   const cases = [
     [{ ...base, entries: [] }, /network configuration/],
-    [{ ...base, entries: base.entries.filter(row => !['contractCode', 'contractData'].includes(xdr.LedgerKey.fromXDR(row.key, 'base64').switch().name)) }, /UNCAPTURED_KEY/],
+    [{ ...base, entries: base.entries.filter(row => !['contractCode', 'contractData'].includes(xdr.LedgerKey.fromXDR(row.key, 'base64').switch().name)) }, /Native helper uncaptured: snapshot is missing ledger keys/],
     [{ ...base, host_function_xdr: badFunction.toXDR('base64') }, /host invocation failed/],
     [{ ...base, header_xdr: alteredHeader.toXDR('base64') }, /unsupported protocol/],
     [{ ...base, seed: [0] }, /32 bytes/],
@@ -172,4 +172,85 @@ test('RPC charged-event disagreement fails even when return value and transactio
     return { ...result, events:[event.toXDR('base64'),...result.events.slice(1)] };
   });
   await assert.rejects(measureInvocation('http://captured/rpc', transaction(), helper), /disagrees with RPC/);
+});
+
+// ---------------------------------------------------------------------------
+// Invocation chaining: observable delete-then-read state-loss proof
+//
+// This is a replay of the raw capture archived by
+// tests/experiments/verify-metric-provenance.cjs. That experiment builds and
+// deploys a fresh contract whose constructor commits persistent `bench = 7`.
+// Setup is necessary: without a known committed value, a successful read could
+// not distinguish a discarded simulated delete from an initially absent key.
+//
+// The first invocation is `bench(2, ...)`, which deletes `bench` in simulation.
+// The second, distinct invocation is `bench(0, ...)`, which asserts that
+// `bench` is still `Some(7)` before returning `[7]`. Both replay against the
+// same captured ledger state. Thus the successful second return is the
+// user-visible observation that the simulated delete was not committed.
+// ---------------------------------------------------------------------------
+const metricProvenance = require('../../docs/experiments/metric-provenance/rpc-captures.json');
+const archivedRead = metricProvenance[23];
+const archivedDelete = metricProvenance[35];
+const archivedDeleteEntries = metricProvenance[36];
+const archivedDeleteHeader = metricProvenance[37];
+const provenancePassphrase = 'Standalone Network ; February 2017';
+const deleteTransaction = () => TransactionBuilder.fromXDR(
+  archivedDelete.request.params.transaction, provenancePassphrase);
+const readTransaction = () => TransactionBuilder.fromXDR(
+  archivedRead.request.params.transaction, provenancePassphrase);
+const returnedSeven = 'AAAAEAAAAAEAAAABAAAAAwAAAAc=';
+
+function capturedDeleteThenRead(t, corruptRead = false) {
+  const deleteXdr = archivedDelete.request.params.transaction;
+  const readXdr = archivedRead.request.params.transaction;
+  const ledger = archivedDelete.raw.result.latestLedger;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const body = JSON.parse(options.body);
+    let result;
+    if (body.method === 'getNetwork') result = { passphrase: provenancePassphrase, protocolVersion: 28 };
+    if (body.method === 'simulateTransaction') {
+      if (body.params.transaction === deleteXdr) result = archivedDelete.raw.result;
+      if (body.params.transaction === readXdr) {
+        // The archived read response was captured one ledger earlier, before
+        // the simulated delete. Only its ledger label is aligned to the
+        // delete snapshot; its return/data remain the recorded RPC values.
+        result = { ...archivedRead.raw.result, latestLedger: ledger };
+        if (corruptRead) result = { ...result, results: [{ xdr: xdr.ScVal.scvVoid().toXDR('base64') }] };
+      }
+    }
+    if (body.method === 'getLedgerEntries') result = {
+      ...archivedDeleteEntries.raw.result,
+      entries: archivedDeleteEntries.raw.result.entries.filter(entry => body.params.keys.includes(entry.key)),
+    };
+    if (body.method === 'getLedgers') result = archivedDeleteHeader.raw.result;
+    assert.ok(result, body.method);
+    return new Response(JSON.stringify({ jsonrpc: '2.0', id: body.id, result }));
+  });
+}
+
+test('simulated delete is discarded before a distinct read invocation', async t => {
+  capturedDeleteThenRead(t);
+  const deleted = await measureInvocation('http://captured/rpc', deleteTransaction(), helper);
+  const read = await measureInvocation('http://captured/rpc', readTransaction(), helper);
+
+  // Archive the exact return values. `bench(2)` reports one modified entry;
+  // `bench(0)` returns [7] only after asserting persistent bench is Some(7).
+  assert.equal(deleted.output.retval_xdr, returnedSeven);
+  assert.equal(deleted.output.modified_entries, 1);
+  assert.equal(deleted.output.write_bytes, 0, 'deleting an entry changes no payload bytes');
+  assert.equal(read.output.retval_xdr, returnedSeven);
+  assert.equal(read.output.read_write_keys.length, 0, 'the second invocation is a read, not a replayed write');
+  assert.notEqual(read.provenance.snapshot_sha256, deleted.provenance.snapshot_sha256,
+    'the read additionally captures its absent-key lookup, while both use ledger 333');
+  assert.equal(read.provenance.ledger, 333);
+});
+
+test('delete-then-read capture fails closed if the read return is invalid', async t => {
+  capturedDeleteThenRead(t, true);
+  await measureInvocation('http://captured/rpc', deleteTransaction(), helper);
+  await assert.rejects(
+    measureInvocation('http://captured/rpc', readTransaction(), helper),
+    /disagrees with RPC/,
+  );
 });

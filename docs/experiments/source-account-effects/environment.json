@@ -1,0 +1,18 @@
+{
+  "scenario": "source_account_effects",
+  "issue": 201,
+  "node_version": "v24.11.1",
+  "stellar_sdk_version": "16.0.1",
+  "native_helper_source_version": "28.0.1",
+  "protocol": 28,
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "rpc_url": "http://localhost:8000/rpc",
+  "quickstart_image": "stellar/quickstart@sha256:4c8bad1ef7341205b898f83d9489321da80c7bd74183100fc8e2a39a5938c7d5",
+  "source_files_sha256": {
+    "contract/Cargo.toml": "209742d95f42fe2fae5654fca443fa8ee63d3bb56aab735ffa011dd95176fcaa",
+    "contract/Cargo.lock": "cd6867542e4bf61fd1abf5723b7c4416e432c693736aa89ecc42d9d48037bb2f",
+    "contract/src/lib.rs": "6c37fe9cc57ca01a05881242170d9241509c415cf1d6423e5094f131d8cc12bd",
+    "source-account-fixtures.json": "c80c5623f0f293a081789144dfabac8c04dc1a10f055587f826dd975f49c71b9"
+  },
+  "wasm_sha256": "d9fa9bf6c3457ce028198871fabaf3dd71c267a06b53b89918d17f37477e8028"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "nested-invocation-suite",
+  "contracts": [
+    {
+      "id": "caller",
+      "wasm_path": "{{NESTED_BUILD_DIR}}/wasm/nested_caller.wasm",
+      "invocations": [
+        {
+          "id": "nested-failure",
+          "function_name": "run_failing",
+          "args": [{ "type": "address", "value": "{{NESTED_CALLEE_ADDRESS}}" }]
+        }
+      ]
+    }
+  ]
+}

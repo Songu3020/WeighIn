@@ -28,7 +28,9 @@ const validMetadata = { schemaVersion: 1, repository: 'WeighInNG/WeighIn', prNum
 async function execute(order, metadata = true, run = successfulPr, condition = commentJob.if) {
   if (!shouldRun(condition, run)) return { skipped: true, executedSteps: [], calls: [] };
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'weighin-comment-test-'));
-  const workspace = path.join(temporary, 'workspace'), calls = [];
+  const workspace = path.join(temporary, 'caller'), actionInstall = path.join(temporary, 'action-install'), calls = [];
+  assert.notEqual(workspace, root);
+  assert.notEqual(actionInstall, workspace);
   const server = http.createServer((request, response) => {
     let raw = ''; request.on('data', data => raw += data);
     request.on('end', () => {
@@ -43,20 +45,21 @@ async function execute(order, metadata = true, run = successfulPr, condition = c
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const apiUrl = `http://127.0.0.1:${server.address().port}`;
-  fs.mkdirSync(workspace);
+  fs.mkdirSync(workspace); fs.mkdirSync(actionInstall);
   try {
     git(workspace, 'init', '--quiet');
     git(workspace, 'config', 'user.name', 'WeighIn workflow test');
     git(workspace, 'config', 'user.email', 'workflow@example.invalid');
+    fs.writeFileSync(path.join(workspace, 'README.md'), 'Isolated comment caller\n');
+    git(workspace, 'add', 'README.md'); git(workspace, 'commit', '--quiet', '-m', 'Disposable caller workspace');
     for (const file of ['comment/action.yml', 'bundled/comment-action.js']) {
-      const destination = path.join(workspace, file); fs.mkdirSync(path.dirname(destination), { recursive: true });
+      const destination = path.join(actionInstall, file); fs.mkdirSync(path.dirname(destination), { recursive: true });
       fs.copyFileSync(path.join(root, file), destination);
     }
-    git(workspace, 'add', 'comment', 'bundled'); git(workspace, 'commit', '--quiet', '-m', 'Disposable workflow test');
     let result;
     for (const step of order) {
       if (step.uses === 'actions/checkout@v4') {
-        // Real cleanup performed by checkout's default clean policy.
+        // Model checkout's cleanup of caller artifacts without placing the Action there.
         git(workspace, 'clean', '-ffdx'); git(workspace, 'reset', '--hard', 'HEAD');
       } else if (step.uses === 'actions/download-artifact@v4') {
         assert.equal(step.with.name, 'weighin-artifacts');
@@ -69,9 +72,13 @@ async function execute(order, metadata = true, run = successfulPr, condition = c
           fs.writeFileSync(path.join(workspace, post.with['metadata-path']), text);
         }
       } else if (step.uses === './comment') {
-        const action = YAML.parse(fs.readFileSync(path.join(workspace, 'comment/action.yml'), 'utf8'));
+        const actionYml = path.join(actionInstall, 'comment/action.yml');
+        const action = YAML.parse(fs.readFileSync(actionYml, 'utf8'));
+        const entrypoint = path.resolve(path.dirname(actionYml), action.runs.main);
+        assert.equal(entrypoint, path.join(actionInstall, 'bundled/comment-action.js'));
+        assert.ok(fs.existsSync(entrypoint), 'Action entrypoint must resolve inside the installed Action directory');
         result = await new Promise((resolve, reject) => {
-          const child = spawn(process.execPath, ['--require', path.join(root, 'tests/support/comment-transport-hook.cjs'), path.resolve(workspace, 'comment', action.runs.main)], {
+          const child = spawn(process.execPath, ['--require', path.join(root, 'tests/support/comment-transport-hook.cjs'), entrypoint], {
             cwd: workspace, timeout: 15000,
             env: { ...process.env, GITHUB_REPOSITORY: 'WeighInNG/WeighIn', GITHUB_EVENT_PATH: '', GITHUB_API_URL: apiUrl,
               HTTP_PROXY: '', HTTPS_PROXY: '', ALL_PROXY: '', http_proxy: '', https_proxy: '', all_proxy: '', NO_PROXY: '127.0.0.1', no_proxy: '127.0.0.1',
@@ -88,7 +95,7 @@ async function execute(order, metadata = true, run = successfulPr, condition = c
     return { ...result, skipped: false, executedSteps: order.map(step => step.name), calls };
   } finally { await new Promise(resolve => server.close(resolve)); fs.rmSync(temporary, { recursive: true, force: true }); }
 }
-test('comment workflow preserves downloaded report/metadata and sends their contents through the bundled Action', async () => {
+test('installed comment Action uses caller artifacts from a separate working directory and sends the report', async () => {
   const result = await execute(steps);
   assert.equal(result.skipped, false);
   assert.equal(result.status, 0, result.stdout + result.stderr);
@@ -176,4 +183,341 @@ test('a successful fork PR uses the same comment delivery path', async () => {
   assert.equal(result.skipped, false);
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.equal(result.calls[1].body.body, report);
+});
+
+// ---------------------------------------------------------------------------
+// Author-mode regression tests (issue #16)
+// ---------------------------------------------------------------------------
+//
+// A richer execute helper that supports:
+//  - customisable existing-comment fixtures (with user.id)
+//  - GET /user for authenticated-user mode
+//  - PATCH /repos/.../issues/comments/:id for updates
+//  - comment-author-mode input forwarding
+//
+const GITHUB_ACTIONS_BOT_ID = 41898282;
+const OTHER_USER_ID         = 99999;
+const AUTH_USER_ID          = 55555;
+
+/**
+ * Spawn the bundled comment-action with a configurable mock server.
+ *
+ * @param {object} opts
+ *   existingComments  – Array of comment objects already on the issue (user.id, body, id).
+ *   authenticatedUser – Object returned by GET /user (or null to simulate failure).
+ *   commentAuthorMode – Value of INPUT_COMMENT-AUTHOR-MODE.
+ *   metadata          – Override metadata (default: validMetadata).
+ *   extraEnv          – Additional env vars.
+ */
+async function executeAuthorMode({
+  existingComments = [],
+  authenticatedUser = { id: AUTH_USER_ID, login: 'test-user', type: 'User' },
+  commentAuthorMode = 'github-actions',
+  metadata = validMetadata,
+  extraEnv = {},
+} = {}) {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'weighin-author-mode-test-'));
+  const workspace  = path.join(temporary, 'workspace');
+  const calls      = [];
+
+  const server = http.createServer((request, response) => {
+    let raw = '';
+    request.on('data', data => (raw += data));
+    request.on('end', () => {
+      const issuesUrl  = '/repos/WeighInNG/WeighIn/issues/27/comments';
+      const userUrl    = '/user';
+      const commentPatchRe = /^\/repos\/WeighInNG\/WeighIn\/issues\/comments\/(\d+)$/;
+      const body = raw ? JSON.parse(raw) : undefined;
+
+      if (request.url === userUrl && request.method === 'GET') {
+        calls.push({ method: 'GET', url: '/user' });
+        if (authenticatedUser === null) {
+          response.writeHead(401, { 'content-type': 'application/json' });
+          response.end(JSON.stringify({ message: 'Bad credentials' }));
+          return;
+        }
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify(authenticatedUser));
+        return;
+      }
+
+      if (request.url === issuesUrl) {
+        if (request.method === 'GET') {
+          calls.push({ method: 'GET', url: issuesUrl });
+          response.writeHead(200, { 'content-type': 'application/json' });
+          response.end(JSON.stringify(existingComments));
+          return;
+        }
+        if (request.method === 'POST') {
+          calls.push({ method: 'POST', url: issuesUrl, body });
+          response.writeHead(201, { 'content-type': 'application/json' });
+          response.end(JSON.stringify({ id: 100, body: body.body }));
+          return;
+        }
+      }
+
+      const patchMatch = commentPatchRe.exec(request.url);
+      if (patchMatch && request.method === 'PATCH') {
+        calls.push({ method: 'PATCH', url: request.url, commentId: Number(patchMatch[1]), body });
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ id: Number(patchMatch[1]), body: body.body }));
+        return;
+      }
+
+      response.writeHead(400);
+      response.end(`Unexpected test API request: ${request.method} ${request.url}`);
+    });
+  });
+
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const apiUrl = `http://127.0.0.1:${server.address().port}`;
+
+  fs.mkdirSync(workspace);
+  try {
+    git(workspace, 'init', '--quiet');
+    git(workspace, 'config', 'user.name', 'WeighIn author-mode test');
+    git(workspace, 'config', 'user.email', 'author-mode@example.invalid');
+    for (const file of ['comment/action.yml', 'bundled/comment-action.js']) {
+      const destination = path.join(workspace, file);
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
+      fs.copyFileSync(path.join(root, file), destination);
+    }
+    git(workspace, 'add', 'comment', 'bundled');
+    git(workspace, 'commit', '--quiet', '-m', 'Author-mode test workspace');
+
+    const commentStep = steps.find(step => step.uses === './comment');
+    fs.writeFileSync(path.join(workspace, commentStep.with['report-path']), report);
+    fs.writeFileSync(
+      path.join(workspace, commentStep.with['metadata-path']),
+      JSON.stringify(typeof metadata === 'object' && metadata !== null ? metadata : validMetadata),
+    );
+
+    const action = YAML.parse(fs.readFileSync(path.join(workspace, 'comment/action.yml'), 'utf8'));
+    const result = await new Promise((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        ['--require', path.join(root, 'tests/support/comment-transport-hook.cjs'),
+         path.resolve(workspace, 'comment', action.runs.main)],
+        {
+          cwd: workspace, timeout: 15000,
+          env: {
+            ...process.env,
+            GITHUB_REPOSITORY: 'WeighInNG/WeighIn',
+            GITHUB_EVENT_PATH: '',
+            GITHUB_API_URL: apiUrl,
+            HTTP_PROXY: '', HTTPS_PROXY: '', ALL_PROXY: '',
+            http_proxy: '', https_proxy: '', all_proxy: '',
+            NO_PROXY: '127.0.0.1', no_proxy: '127.0.0.1',
+            'INPUT_REPORT-PATH':    commentStep.with['report-path'],
+            'INPUT_METADATA-PATH':  commentStep.with['metadata-path'],
+            'INPUT_GITHUB-TOKEN':   'unit-test-token',
+            'INPUT_COMMENT-AUTHOR-MODE': commentAuthorMode,
+            ...extraEnv,
+          },
+        },
+      );
+      let stdout = '', stderr = '';
+      child.stdout.on('data', data => (stdout += data));
+      child.stderr.on('data', data => (stderr += data));
+      child.on('error', reject);
+      child.on('close', status => resolve({ status, stdout, stderr }));
+    });
+
+    return { ...result, calls };
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+}
+
+// Helper: a comment owned by the expected author with the report marker
+function botComment(id = 1) {
+  return { id, body: `${report}<!-- weighin-report -->`, user: { id: GITHUB_ACTIONS_BOT_ID, login: 'github-actions[bot]', type: 'Bot' } };
+}
+function userComment(userId, id = 2) {
+  return { id, body: `${report}<!-- weighin-report -->`, user: { id: userId, login: 'other-user', type: 'User' } };
+}
+function markerOnly(userId, id = 3) {
+  return { id, body: 'Some comment <!-- weighin-report --> here', user: { id: userId } };
+}
+
+// 1. A user-authored comment containing the marker is NOT updated.
+test('author-mode: user comment with marker is not updated (github-actions default)', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [userComment(OTHER_USER_ID, 5)],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  // Should have created a new comment, not patched the existing user-owned one
+  const methods = result.calls.map(c => c.method);
+  assert.ok(methods.includes('GET'), 'must GET existing comments');
+  assert.ok(methods.includes('POST'), 'must POST (create) when no owned comment exists');
+  assert.ok(!methods.includes('PATCH'), 'must not PATCH a comment not owned by the bot');
+});
+
+// 2. An unrelated bot's comment with the marker is not updated.
+test('author-mode: unrelated bot comment with marker is not updated', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [{ id: 9, body: `${report}<!-- weighin-report -->`, user: { id: 12345, login: 'other-bot[bot]', type: 'Bot' } }],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const methods = result.calls.map(c => c.method);
+  assert.ok(methods.includes('POST'), 'must POST (create) when no owned comment exists');
+  assert.ok(!methods.includes('PATCH'), 'must not PATCH a comment belonging to a different bot');
+});
+
+// 3. An expected-author comment is updated even if an unrelated matching comment appears earlier.
+test('author-mode: expected-author comment is updated even when an earlier unrelated comment matches marker', async () => {
+  // Comment id=10 is owned by an unrelated user; id=11 is owned by the bot
+  const result = await executeAuthorMode({
+    existingComments: [
+      userComment(OTHER_USER_ID, 10),
+      botComment(11),
+    ],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const methods = result.calls.map(c => c.method);
+  assert.ok(methods.includes('PATCH'), 'must PATCH the owned comment');
+  assert.ok(!methods.includes('POST'), 'must not create a duplicate comment');
+  const patch = result.calls.find(c => c.method === 'PATCH');
+  assert.equal(patch.commentId, 11, 'must patch the bot-owned comment, not the user-owned one');
+});
+
+// 4. A new report is created when no comment belonging to the expected author exists.
+test('author-mode: creates new comment when no expected-author comment exists', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const methods = result.calls.map(c => c.method);
+  assert.deepEqual(methods.filter(m => m === 'POST'), ['POST'], 'must POST exactly once');
+  assert.ok(!methods.includes('PATCH'), 'must not PATCH when there is nothing to update');
+});
+
+// 5. Default github-actions mode verifies the canonical bot identity (numeric ID + type).
+test('author-mode: default github-actions mode selects only the canonical bot ID 41898282', async () => {
+  // Two comments: one from another bot (id 12345) and one from the real bot
+  const result = await executeAuthorMode({
+    existingComments: [
+      { id: 20, body: `x <!-- weighin-report -->`, user: { id: 12345, login: 'other-bot[bot]', type: 'Bot' } },
+      botComment(21),
+    ],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const patch = result.calls.find(c => c.method === 'PATCH');
+  assert.ok(patch, 'must PATCH the canonical bot comment');
+  assert.equal(patch.commentId, 21, 'patched comment must have the canonical bot ID');
+});
+
+// 6. authenticated-user mode resolves the authenticated user's numeric ID.
+test('author-mode: authenticated-user mode resolves GET /user and selects matching comment', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [userComment(AUTH_USER_ID, 30)],
+    authenticatedUser: { id: AUTH_USER_ID, login: 'test-user', type: 'User' },
+    commentAuthorMode: 'authenticated-user',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const getUserCalls = result.calls.filter(c => c.url === '/user');
+  assert.equal(getUserCalls.length, 1, 'must call GET /user exactly once');
+  const patch = result.calls.find(c => c.method === 'PATCH');
+  assert.ok(patch, 'must PATCH when the authenticated user owns a marked comment');
+  assert.equal(patch.commentId, 30);
+});
+
+// 7. Unsupported modes fail closed before any mutation.
+test('author-mode: unsupported comment-author-mode fails closed with zero mutation calls', async () => {
+  const result = await executeAuthorMode({
+    commentAuthorMode: 'invalid-mode',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout + result.stderr, /Unsupported comment-author-mode/);
+  const mutationCalls = result.calls.filter(c => ['POST', 'PATCH'].includes(c.method));
+  assert.deepEqual(mutationCalls, [], 'zero mutation calls on unsupported mode');
+});
+
+// 8. Failure to resolve the authenticated user causes zero mutation calls.
+test('author-mode: GET /user failure causes zero mutation calls', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [userComment(AUTH_USER_ID, 40)],
+    authenticatedUser: null,  // server returns 401
+    commentAuthorMode: 'authenticated-user',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout + result.stderr, /authenticated-user/);
+  const mutationCalls = result.calls.filter(c => ['POST', 'PATCH'].includes(c.method));
+  assert.deepEqual(mutationCalls, [], 'zero mutation calls when user resolution fails');
+});
+
+// 9. Failure to establish expected automation identity fails closed.
+// (Covered by test 7 for invalid mode and test 8 for bad credentials.)
+// Additional: github-actions mode with a server error is not applicable since
+// the identity is hardcoded (no network call). We verify the mode check itself:
+test('author-mode: github-actions mode does not call GET /user (identity is hardcoded)', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [botComment(50)],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const getUserCalls = result.calls.filter(c => c.url === '/user');
+  assert.equal(getUserCalls.length, 0, 'github-actions mode must not call GET /user');
+});
+
+// 10. Both upsert paths enforce identical author-ownership rules.
+// The comment-action path is the shared path exercised by all tests above.
+// Here we verify the create-vs-update decision mirrors correctly: with no
+// owned comment a POST is issued (not a PATCH on a foreign comment).
+test('author-mode: shared upsert path does not update a comment owned by a different user', async () => {
+  // Only a foreign-user comment exists
+  const result = await executeAuthorMode({
+    existingComments: [userComment(OTHER_USER_ID, 60)],
+    authenticatedUser: { id: AUTH_USER_ID, login: 'test-user', type: 'User' },
+    commentAuthorMode: 'authenticated-user',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const methods = result.calls.map(c => c.method);
+  assert.ok(methods.includes('POST'), 'must create new comment rather than updating foreign one');
+  assert.ok(!methods.includes('PATCH'), 'must not patch a comment not owned by the authenticated user');
+});
+
+// 11. Existing direct-comment warning-only and separate-consumer failure behaviors remain intact.
+// (The existing tests above this block already verify the separate-consumer failure behavior.)
+// We add a focused check that the default (github-actions) mode still creates a comment from scratch.
+test('author-mode: default github-actions mode creates a fresh comment when no prior comment exists', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.ok(result.calls.some(c => c.method === 'POST'), 'must POST a new comment');
+});
+
+// 12. Tokens never appear in captured logs or diagnostics.
+test('author-mode: the token never appears in stdout or stderr', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [botComment(70)],
+    commentAuthorMode: 'github-actions',
+  });
+  const combined = result.stdout + result.stderr;
+  assert.ok(!combined.includes('unit-test-token'), 'token must not appear in output');
+});
+
+// 13. Existing pagination and comment-workflow tests are covered by the tests above this block.
+// This test verifies that the bundled action correctly handles a non-empty comment list
+// where the first comment has no author info (defensive: user may be null from GitHub).
+test('author-mode: comment with null user is not matched as owned by expected author', async () => {
+  const result = await executeAuthorMode({
+    existingComments: [
+      { id: 80, body: `x <!-- weighin-report -->`, user: null },
+      botComment(81),
+    ],
+    commentAuthorMode: 'github-actions',
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const patch = result.calls.find(c => c.method === 'PATCH');
+  assert.ok(patch, 'must PATCH the bot-owned comment');
+  assert.equal(patch.commentId, 81, 'must select the comment with a matching user.id, not the null-user one');
 });

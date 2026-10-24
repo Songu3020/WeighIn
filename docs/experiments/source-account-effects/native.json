@@ -1,0 +1,194 @@
+[
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "1187c87cff95768a6930f1e5bc0e056514f187c222fea43397ff92aca1c522cb",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  },
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "d20b079206b6d173dcb743c9fd4fb47cb44cbca6babc85dee0523717d8ae26cd",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  },
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "c5ecdea4e92945963b09d5c394cec7bb54993fbf305f171943355e1707c2e8ea",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  },
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "1187c87cff95768a6930f1e5bc0e056514f187c222fea43397ff92aca1c522cb",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  },
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "d90128cd7e91b20d03e9e3403f08c6d9354d05a0130fd4b3891611c70b896da4",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  },
+  {
+    "file": "/home/semicolon/Desktop/TechBroAfrica Drip/WeighIn/native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation",
+    "args": [],
+    "input_sha256": "e9aab431eba71076fd687be3e225a15f3a08a4546077e311a1a16fd46c0a40f1",
+    "output": {
+      "auth_mode": "recording(true,true)",
+      "contract_events_xdr": [],
+      "cpu_instructions_consumed": 264852,
+      "cpu_limit": 400000000,
+      "disk_read_bytes": 0,
+      "host_features": [
+        "recording_mode",
+        "testutils"
+      ],
+      "instruction_budget": 314852,
+      "memory_bytes_consumed": 1124030,
+      "memory_limit": 41943040,
+      "modified_entries": 0,
+      "protocol": 28,
+      "read_only_keys": [
+        "AAAABgAAAAHD1quayEUCoJTSJiJ8AVZtc9i/Wp3JeF/+kcB/D6BjigAAABQAAAAB",
+        "AAAAB9n6m/bDRXzgKBmIcfq6891xwmega1O4mRjRfzdHfoAo"
+      ],
+      "read_write_keys": [],
+      "retval_xdr": "AAAAAwABfoA=",
+      "schema_version": 1,
+      "source": "soroban-simulation",
+      "source_version": "28.0.1",
+      "transaction_data_xdr": "AAAAAAAAAAIAAAAGAAAAAcPWq5rIRQKglNImInwBVm1z2L9ancl4X/6RwH8PoGOKAAAAFAAAAAEAAAAH2fqb9sNFfOAoGYhx+rrz3XHCZ6BrU7iZGNF/N0d+gCgAAAAAAATN5AAAAAAAAAAAAAAAAAAAMTo=",
+      "write_bytes": 0
+    }
+  }
+]

@@ -45,5 +45,5 @@ export async function buildForRevision(
     }
     return;
   }
-  await buildContracts(fixturesPath, rustToolchain);
+  await buildContracts(fixturesPath, worktreeRoot, rustToolchain);
 }

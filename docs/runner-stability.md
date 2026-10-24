@@ -1,6 +1,6 @@
 # Hosted Runner Stability Validation (Schema 4)
 
-This document and the retained evidence in [`docs/experiments/runner-stability`](../experiments/runner-stability/) validate measurement stability across supported GitHub Actions Linux x64 hosted runner environments.
+This document and the retained evidence in [`docs/experiments/runner-stability`](experiments/runner-stability/) validate measurement stability across supported GitHub Actions Linux x64 hosted runner environments.
 
 ## Supported Hosted Runner Images
 
@@ -53,7 +53,7 @@ Five repeated clean samples were captured on each runner image (10 total samples
 
 ## Retained Evidence Artifacts
 
-The experiment directory [`docs/experiments/runner-stability`](../experiments/runner-stability/) preserves:
+The experiment directory [`docs/experiments/runner-stability`](experiments/runner-stability/) preserves:
 - `matrix.json`: Detailed runner specifications and toolchain versions.
 - `samples.json`: Complete per-runner measurement sample runs.
 - `analysis.json`: Statistical breakdown confirming zero variance across deterministic metrics.

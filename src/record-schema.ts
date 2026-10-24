@@ -64,7 +64,7 @@ export const RUNTIME_RECORD_INVARIANTS = [
     id: "COMPARISON_ENVIRONMENT_COMPATIBILITY",
     scope: "comparison",
     description:
-      "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, and schema-4 per-metric availability/source/limit/limit_source/limit_reason.",
+      "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4 per-metric availability/source/limit/limit_source/limit_reason.",
   },
   {
     id: "SAFE_INTEGER_BOUNDS",
@@ -167,6 +167,7 @@ const PROVENANCE_ALLOWED_KEYS = new Set([
   "auth_mode",
   "host_features",
   "resource_limits_sha256",
+  "source_account",
 ]);
 
 const PROVENANCE_REQUIRED_STRINGS = [
@@ -184,6 +185,8 @@ const PROVENANCE_REQUIRED_STRINGS = [
 
 const METRIC_KEY_SET = new Set<string>(METRIC_KEYS);
 const SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
+/** Ed25519 account public keys (StrKey "G..." form). */
+const ACCOUNT_PUBLIC_KEY_PATTERN = /^G[A-Z2-7]{55}$/;
 
 function isPlainObject(value: unknown): value is Record<string, any> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -311,6 +314,20 @@ function validateProvenanceObject(
       version,
       code: "INVALID_RESOURCE_LIMITS_DIGEST",
       message: "Schema 4 requires resource_limits_sha256",
+    });
+  }
+
+  if (
+    provenance.source_account !== undefined &&
+    (typeof provenance.source_account !== "string" ||
+      !ACCOUNT_PUBLIC_KEY_PATTERN.test(provenance.source_account))
+  ) {
+    diagnostics.push({
+      path: `${pPath}.source_account`,
+      version,
+      code: "INVALID_SOURCE_ACCOUNT",
+      message:
+        "Invalid compute provenance: source_account must be an Ed25519 account public key",
     });
   }
 }
@@ -882,6 +899,9 @@ export function validateBenchmarkComparisonCompatibility(
     "seed",
     "auth_mode",
     "host_features",
+    // The invoking account is part of the measured environment: results
+    // measured under different source accounts are not comparable.
+    "source_account",
   ] as const;
   for (const field of fields) {
     if (
@@ -946,6 +966,7 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
       items: { $ref: "#/$defs/NonBlankString" },
     },
     resource_limits_sha256: { $ref: "#/$defs/Sha256Hex" },
+    source_account: { $ref: "#/$defs/AccountPublicKey" },
   };
 
   const provenanceSchema3Required = [
@@ -1002,6 +1023,10 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
       Sha256Hex: {
         type: "string",
         pattern: "^[a-f0-9]{64}$",
+      },
+      AccountPublicKey: {
+        type: "string",
+        pattern: "^G[A-Z2-7]{55}$",
       },
       SeedByte: {
         type: "integer",

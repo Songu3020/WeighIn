@@ -78,6 +78,10 @@ test("CLI transport receives the unchanged endpoint while failures stay redacted
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "weighin-fixtures-"));
   const fixtures = path.join(directory, "fixtures.json");
   fs.writeFileSync(
+    path.join(directory, "dummy.wasm"),
+    Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]),
+  );
+  fs.writeFileSync(
     fixtures,
     JSON.stringify({
       contracts: [

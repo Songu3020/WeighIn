@@ -202,8 +202,8 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.issueFileCommand = issueFileCommand;
     exports2.prepareKeyValueMessage = prepareKeyValueMessage;
-    var crypto5 = __importStar(require("crypto"));
-    var fs6 = __importStar(require("fs"));
+    var crypto6 = __importStar(require("crypto"));
+    var fs7 = __importStar(require("fs"));
     var os3 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -211,15 +211,15 @@ var require_file_command = __commonJS({
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs6.existsSync(filePath)) {
+      if (!fs7.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs6.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
+      fs7.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
     function prepareKeyValueMessage(key, value) {
-      const delimiter = `ghadelimiter_${crypto5.randomUUID()}`;
+      const delimiter = `ghadelimiter_${crypto6.randomUUID()}`;
       const convertedValue = (0, utils_1.toCommandValue)(value);
       if (key.includes(delimiter)) {
         throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
@@ -1352,14 +1352,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol || ""}//${url.hostname || ""}:${port}`;
-        let path7 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path8 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path7 && path7[0] !== "/") {
-          path7 = `/${path7}`;
+        if (path8 && path8[0] !== "/") {
+          path8 = `/${path8}`;
         }
-        return new URL(`${origin}${path7}`);
+        return new URL(`${origin}${path8}`);
       }
       if (!isHttpOrHttpsPrefixed(url.origin || url.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -1810,39 +1810,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin }
+          request: { method, path: path8, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path7);
+        debuglog("sending request to %s %s/%s", method, origin, path8);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin },
+          request: { method, path: path8, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path7,
+          path8,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin }
+          request: { method, path: path8, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path7);
+        debuglog("trailers received from %s %s/%s", method, origin, path8);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path7, origin },
+          request: { method, path: path8, origin },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path7,
+          path8,
           error2.message
         );
       });
@@ -1891,9 +1891,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path7, origin }
+            request: { method, path: path8, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path7);
+          debuglog("sending request to %s %s/%s", method, origin, path8);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -1956,7 +1956,7 @@ var require_request = __commonJS({
     var kHandler = Symbol("handler");
     var Request2 = class {
       constructor(origin, {
-        path: path7,
+        path: path8,
         method,
         body,
         headers,
@@ -1971,11 +1971,11 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler2) {
-        if (typeof path7 !== "string") {
+        if (typeof path8 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path7[0] !== "/" && !(path7.startsWith("http://") || path7.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path8[0] !== "/" && !(path8.startsWith("http://") || path8.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path7)) {
+        } else if (invalidPathRegex.test(path8)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2041,7 +2041,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL2(path7, query) : path7;
+        this.path = query ? buildURL2(path8, query) : path8;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -2374,9 +2374,9 @@ var require_dispatcher_base = __commonJS({
       }
       close(callback) {
         if (callback === void 0) {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             this.close((err, data) => {
-              return err ? reject(err) : resolve6(data);
+              return err ? reject(err) : resolve7(data);
             });
           });
         }
@@ -2414,12 +2414,12 @@ var require_dispatcher_base = __commonJS({
           err = null;
         }
         if (callback === void 0) {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             this.destroy(err, (err2, data) => {
               return err2 ? (
                 /* istanbul ignore next: should never error */
                 reject(err2)
-              ) : resolve6(data);
+              ) : resolve7(data);
             });
           });
         }
@@ -4301,11 +4301,11 @@ var require_util2 = __commonJS({
     var { isUint8Array } = require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto5;
+    var crypto6;
     try {
-      crypto5 = require("node:crypto");
+      crypto6 = require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto5.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
+      supportedHashes = crypto6.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
     } catch {
     }
     function responseURL(response) {
@@ -4578,7 +4578,7 @@ var require_util2 = __commonJS({
       }
     }
     function bytesMatch(bytes, metadataList) {
-      if (crypto5 === void 0) {
+      if (crypto6 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -4593,7 +4593,7 @@ var require_util2 = __commonJS({
       for (const item of metadata) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto5.createHash(algorithm).update(bytes).digest("base64");
+        let actualValue = crypto6.createHash(algorithm).update(bytes).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -4686,8 +4686,8 @@ var require_util2 = __commonJS({
     function createDeferredPromise() {
       let res;
       let rej;
-      const promise = new Promise((resolve6, reject) => {
-        res = resolve6;
+      const promise = new Promise((resolve7, reject) => {
+        res = resolve7;
         rej = reject;
       });
       return { promise, resolve: res, reject: rej };
@@ -5657,8 +5657,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto5 = require("node:crypto");
-      random = (max) => crypto5.randomInt(0, max);
+      const crypto6 = require("node:crypto");
+      random = (max) => crypto6.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -6670,7 +6670,7 @@ var require_client_h1 = __commonJS({
       return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
     }
     function writeH1(client, request3) {
-      const { method, path: path7, host, upgrade, blocking, reset } = request3;
+      const { method, path: path8, host, upgrade, blocking, reset } = request3;
       let { body, headers, contentLength } = request3;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method === "PROPFIND" || method === "PROPPATCH";
       if (util2.isFormDataLike(body)) {
@@ -6745,7 +6745,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path7} HTTP/1.1\r
+      let header = `${method} ${path8} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -6932,12 +6932,12 @@ upgrade: ${upgrade}\r
           cb();
         }
       }
-      const waitForDrain = () => new Promise((resolve6, reject) => {
+      const waitForDrain = () => new Promise((resolve7, reject) => {
         assert(callback === null);
         if (socket[kError]) {
           reject(socket[kError]);
         } else {
-          callback = resolve6;
+          callback = resolve7;
         }
       });
       socket.on("close", onDrain).on("drain", onDrain);
@@ -7271,7 +7271,7 @@ var require_client_h2 = __commonJS({
     }
     function writeH2(client, request3) {
       const session = client[kHTTP2Session];
-      const { method, path: path7, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
+      const { method, path: path8, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
       let { body } = request3;
       if (upgrade) {
         util2.errorRequest(client, request3, new Error("Upgrade not supported for H2"));
@@ -7338,7 +7338,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path7;
+      headers[HTTP2_HEADER_PATH] = path8;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -7574,12 +7574,12 @@ var require_client_h2 = __commonJS({
           cb();
         }
       }
-      const waitForDrain = () => new Promise((resolve6, reject) => {
+      const waitForDrain = () => new Promise((resolve7, reject) => {
         assert(callback === null);
         if (socket[kError]) {
           reject(socket[kError]);
         } else {
-          callback = resolve6;
+          callback = resolve7;
         }
       });
       h2stream.on("close", onDrain).on("drain", onDrain);
@@ -7691,9 +7691,9 @@ var require_redirect_handler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util2.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path7 = search ? `${pathname}${search}` : pathname;
+        const path8 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path7;
+        this.opts.path = path8;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -8057,16 +8057,16 @@ var require_client = __commonJS({
         return this[kNeedDrain] < 2;
       }
       async [kClose]() {
-        return new Promise((resolve6) => {
+        return new Promise((resolve7) => {
           if (this[kSize]) {
-            this[kClosedResolve] = resolve6;
+            this[kClosedResolve] = resolve7;
           } else {
-            resolve6(null);
+            resolve7(null);
           }
         });
       }
       async [kDestroy](err) {
-        return new Promise((resolve6) => {
+        return new Promise((resolve7) => {
           const requests = this[kQueue].splice(this[kPendingIdx]);
           for (let i = 0; i < requests.length; i++) {
             const request3 = requests[i];
@@ -8077,7 +8077,7 @@ var require_client = __commonJS({
               this[kClosedResolve]();
               this[kClosedResolve] = null;
             }
-            resolve6(null);
+            resolve7(null);
           };
           if (this[kHTTPContext]) {
             this[kHTTPContext].destroy(err, callback);
@@ -8128,7 +8128,7 @@ var require_client = __commonJS({
         });
       }
       try {
-        const socket = await new Promise((resolve6, reject) => {
+        const socket = await new Promise((resolve7, reject) => {
           client[kConnector]({
             host,
             hostname,
@@ -8140,7 +8140,7 @@ var require_client = __commonJS({
             if (err) {
               reject(err);
             } else {
-              resolve6(socket2);
+              resolve7(socket2);
             }
           });
         });
@@ -8476,8 +8476,8 @@ var require_pool_base = __commonJS({
         if (this[kQueue].isEmpty()) {
           await Promise.all(this[kClients].map((c) => c.close()));
         } else {
-          await new Promise((resolve6) => {
-            this[kClosedResolve] = resolve6;
+          await new Promise((resolve7) => {
+            this[kClosedResolve] = resolve7;
           });
         }
       }
@@ -8928,10 +8928,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path7 = "/",
+          path: path8 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path7;
+        opts.path = origin + path8;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -9743,7 +9743,7 @@ var require_readable = __commonJS({
         if (this._readableState.closeEmitted) {
           return null;
         }
-        return await new Promise((resolve6, reject) => {
+        return await new Promise((resolve7, reject) => {
           if (this[kContentLength] > limit) {
             this.destroy(new AbortError());
           }
@@ -9756,7 +9756,7 @@ var require_readable = __commonJS({
             if (signal?.aborted) {
               reject(signal.reason ?? new AbortError());
             } else {
-              resolve6(null);
+              resolve7(null);
             }
           }).on("error", noop3).on("data", function(chunk) {
             limit -= chunk.length;
@@ -9775,7 +9775,7 @@ var require_readable = __commonJS({
     }
     async function consume(stream, type) {
       assert(!stream[kConsume]);
-      return new Promise((resolve6, reject) => {
+      return new Promise((resolve7, reject) => {
         if (isUnusable(stream)) {
           const rState = stream._readableState;
           if (rState.destroyed && rState.closeEmitted === false) {
@@ -9792,7 +9792,7 @@ var require_readable = __commonJS({
             stream[kConsume] = {
               type,
               stream,
-              resolve: resolve6,
+              resolve: resolve7,
               reject,
               length: 0,
               body: []
@@ -9862,18 +9862,18 @@ var require_readable = __commonJS({
       return buffer;
     }
     function consumeEnd(consume2) {
-      const { type, body, resolve: resolve6, stream, length } = consume2;
+      const { type, body, resolve: resolve7, stream, length } = consume2;
       try {
         if (type === "text") {
-          resolve6(chunksDecode(body, length));
+          resolve7(chunksDecode(body, length));
         } else if (type === "json") {
-          resolve6(JSON.parse(chunksDecode(body, length)));
+          resolve7(JSON.parse(chunksDecode(body, length)));
         } else if (type === "arrayBuffer") {
-          resolve6(chunksConcat(body, length).buffer);
+          resolve7(chunksConcat(body, length).buffer);
         } else if (type === "blob") {
-          resolve6(new Blob(body, { type: stream[kContentType] }));
+          resolve7(new Blob(body, { type: stream[kContentType] }));
         } else if (type === "bytes") {
-          resolve6(chunksConcat(body, length));
+          resolve7(chunksConcat(body, length));
         }
         consumeFinish(consume2);
       } catch (err) {
@@ -10130,9 +10130,9 @@ var require_api_request = __commonJS({
     };
     function request3(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           request3.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10355,9 +10355,9 @@ var require_api_stream = __commonJS({
     };
     function stream(opts, factory, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           stream.call(this, opts, factory, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10642,9 +10642,9 @@ var require_api_upgrade = __commonJS({
     };
     function upgrade(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           upgrade.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10736,9 +10736,9 @@ var require_api_connect = __commonJS({
     };
     function connect(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve6, reject) => {
+        return new Promise((resolve7, reject) => {
           connect.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve6(data);
+            return err ? reject(err) : resolve7(data);
           });
         });
       }
@@ -10903,20 +10903,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path7) {
-      if (typeof path7 !== "string") {
-        return path7;
+    function safeUrl(path8) {
+      if (typeof path8 !== "string") {
+        return path8;
       }
-      const pathSegments = path7.split("?");
+      const pathSegments = path8.split("?");
       if (pathSegments.length !== 2) {
-        return path7;
+        return path8;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path7, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path7);
+    function matchKey(mockDispatch2, { path: path8, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path8);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10938,7 +10938,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL2(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path7 }) => matchValue(safeUrl(path7), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path8 }) => matchValue(safeUrl(path8), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10976,9 +10976,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path7, method, body, headers, query } = opts;
+      const { path: path8, method, body, headers, query } = opts;
       return {
-        path: path7,
+        path: path8,
         method,
         body,
         headers,
@@ -11441,10 +11441,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path7, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path8, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path7,
+            Path: path8,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -14600,7 +14600,7 @@ var require_fetch = __commonJS({
       function dispatch({ body }) {
         const url = requestCurrentURL(request3);
         const agent = fetchParams.controller.dispatcher;
-        return new Promise((resolve6, reject) => agent.dispatch(
+        return new Promise((resolve7, reject) => agent.dispatch(
           {
             path: url.pathname + url.search,
             origin: url.origin,
@@ -14676,7 +14676,7 @@ var require_fetch = __commonJS({
                 }
               }
               const onError = this.onError.bind(this);
-              resolve6({
+              resolve7({
                 status,
                 statusText,
                 headersList,
@@ -14722,7 +14722,7 @@ var require_fetch = __commonJS({
               for (let i = 0; i < rawHeaders.length; i += 2) {
                 headersList.append(bufferToLowerCasedHeaderName(rawHeaders[i]), rawHeaders[i + 1].toString("latin1"), true);
               }
-              resolve6({
+              resolve7({
                 status,
                 statusText: STATUS_CODES[status],
                 headersList,
@@ -16325,9 +16325,9 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path7) {
-      for (let i = 0; i < path7.length; ++i) {
-        const code = path7.charCodeAt(i);
+    function validateCookiePath(path8) {
+      for (let i = 0; i < path8.length; ++i) {
+        const code = path8.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -17256,13 +17256,13 @@ var require_frame = __commonJS({
     "use strict";
     var { maxUnsigned16Bit } = require_constants5();
     var BUFFER_SIZE = 16386;
-    var crypto5;
+    var crypto6;
     var buffer = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto5 = require("node:crypto");
+      crypto6 = require("node:crypto");
     } catch {
-      crypto5 = {
+      crypto6 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer2, _offset, _size) {
           for (let i = 0; i < buffer2.length; ++i) {
@@ -17275,7 +17275,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto5.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto6.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++]];
     }
@@ -17347,9 +17347,9 @@ var require_connection = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers();
     var { getDecodeSplit } = require_util2();
     var { WebsocketFrameSend } = require_frame();
-    var crypto5;
+    var crypto6;
     try {
-      crypto5 = require("node:crypto");
+      crypto6 = require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url, protocols, client, ws, onEstablish, options) {
@@ -17369,7 +17369,7 @@ var require_connection = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request3.headersList = headersList;
       }
-      const keyValue = crypto5.randomBytes(16).toString("base64");
+      const keyValue = crypto6.randomBytes(16).toString("base64");
       request3.headersList.append("sec-websocket-key", keyValue);
       request3.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -17399,7 +17399,7 @@ var require_connection = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto5.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto6.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -18453,8 +18453,8 @@ var require_util8 = __commonJS({
       return true;
     }
     function delay(ms) {
-      return new Promise((resolve6) => {
-        setTimeout(resolve6, ms).unref();
+      return new Promise((resolve7) => {
+        setTimeout(resolve7, ms).unref();
       });
     }
     module2.exports = {
@@ -19169,11 +19169,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path7 = opts.path;
+          let path8 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path7 = `/${path7}`;
+            path8 = `/${path8}`;
           }
-          url = new URL(util2.parseOrigin(url).origin + path7);
+          url = new URL(util2.parseOrigin(url).origin + path8);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -19287,11 +19287,11 @@ var require_lib = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19307,7 +19307,7 @@ var require_lib = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -19394,26 +19394,26 @@ var require_lib = __commonJS({
       }
       readBody() {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7) => __awaiter2(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
             });
             this.message.on("end", () => {
-              resolve6(output.toString());
+              resolve7(output.toString());
             });
           }));
         });
       }
       readBodyBuffer() {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7) => __awaiter2(this, void 0, void 0, function* () {
             const chunks = [];
             this.message.on("data", (chunk) => {
               chunks.push(chunk);
             });
             this.message.on("end", () => {
-              resolve6(Buffer.concat(chunks));
+              resolve7(Buffer.concat(chunks));
             });
           }));
         });
@@ -19621,14 +19621,14 @@ var require_lib = __commonJS({
        */
       requestRaw(info4, data) {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6, reject) => {
+          return new Promise((resolve7, reject) => {
             function callbackForResult(err, res) {
               if (err) {
                 reject(err);
               } else if (!res) {
                 reject(new Error("Unknown error"));
               } else {
-                resolve6(res);
+                resolve7(res);
               }
             }
             this.requestRawWithCallback(info4, data, callbackForResult);
@@ -19872,12 +19872,12 @@ var require_lib = __commonJS({
         return __awaiter2(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-          return new Promise((resolve6) => setTimeout(() => resolve6(), ms));
+          return new Promise((resolve7) => setTimeout(() => resolve7(), ms));
         });
       }
       _processResponse(res, options) {
         return __awaiter2(this, void 0, void 0, function* () {
-          return new Promise((resolve6, reject) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7, reject) => __awaiter2(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -19885,7 +19885,7 @@ var require_lib = __commonJS({
               headers: {}
             };
             if (statusCode === HttpCodes.NotFound) {
-              resolve6(response);
+              resolve7(response);
             }
             function dateTimeDeserializer(key, value) {
               if (typeof value === "string") {
@@ -19924,7 +19924,7 @@ var require_lib = __commonJS({
               err.result = response.result;
               reject(err);
             } else {
-              resolve6(response);
+              resolve7(response);
             }
           }));
         });
@@ -19941,11 +19941,11 @@ var require_auth = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19961,7 +19961,7 @@ var require_auth = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20045,11 +20045,11 @@ var require_oidc_utils = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20065,7 +20065,7 @@ var require_oidc_utils = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20143,11 +20143,11 @@ var require_summary = __commonJS({
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20163,7 +20163,7 @@ var require_summary = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20476,7 +20476,7 @@ var require_path_utils = __commonJS({
     exports2.toPosixPath = toPosixPath;
     exports2.toWin32Path = toWin32Path;
     exports2.toPlatformPath = toPlatformPath;
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -20484,7 +20484,7 @@ var require_path_utils = __commonJS({
       return pth.replace(/[/]/g, "\\");
     }
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path7.sep);
+      return pth.replace(/[/\\]/g, path8.sep);
     }
   }
 });
@@ -20518,11 +20518,11 @@ var require_io_util = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20538,7 +20538,7 @@ var require_io_util = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20546,12 +20546,12 @@ var require_io_util = __commonJS({
     var _a2;
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
-    var fs6 = __importStar(require("fs"));
-    var path7 = __importStar(require("path"));
-    _a2 = fs6.promises, exports2.chmod = _a2.chmod, exports2.copyFile = _a2.copyFile, exports2.lstat = _a2.lstat, exports2.mkdir = _a2.mkdir, exports2.open = _a2.open, exports2.readdir = _a2.readdir, exports2.readlink = _a2.readlink, exports2.rename = _a2.rename, exports2.rm = _a2.rm, exports2.rmdir = _a2.rmdir, exports2.stat = _a2.stat, exports2.symlink = _a2.symlink, exports2.unlink = _a2.unlink;
+    var fs7 = __importStar(require("fs"));
+    var path8 = __importStar(require("path"));
+    _a2 = fs7.promises, exports2.chmod = _a2.chmod, exports2.copyFile = _a2.copyFile, exports2.lstat = _a2.lstat, exports2.mkdir = _a2.mkdir, exports2.open = _a2.open, exports2.readdir = _a2.readdir, exports2.readlink = _a2.readlink, exports2.rename = _a2.rename, exports2.rm = _a2.rm, exports2.rmdir = _a2.rmdir, exports2.stat = _a2.stat, exports2.symlink = _a2.symlink, exports2.unlink = _a2.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
-    exports2.READONLY = fs6.constants.O_RDONLY;
+    exports2.READONLY = fs7.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -20596,7 +20596,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports2.IS_WINDOWS) {
-            const upperExt = path7.extname(filePath).toUpperCase();
+            const upperExt = path8.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -20620,11 +20620,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports2.IS_WINDOWS) {
               try {
-                const directory = path7.dirname(filePath);
-                const upperName = path7.basename(filePath).toUpperCase();
+                const directory = path8.dirname(filePath);
+                const upperName = path8.basename(filePath).toUpperCase();
                 for (const actualName of yield exports2.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path7.join(directory, actualName);
+                    filePath = path8.join(directory, actualName);
                     break;
                   }
                 }
@@ -20691,11 +20691,11 @@ var require_io = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20711,7 +20711,7 @@ var require_io = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20719,7 +20719,7 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter2(this, void 0, void 0, function* () {
@@ -20728,7 +20728,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path7.join(dest, path7.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path8.join(dest, path8.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -20740,7 +20740,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path7.relative(source, newDest) === "") {
+          if (path8.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -20753,7 +20753,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path7.join(dest, path7.basename(source));
+            dest = path8.join(dest, path8.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -20764,7 +20764,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path7.dirname(dest));
+        yield mkdirP(path8.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -20827,7 +20827,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path7.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path8.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -20840,12 +20840,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path7.sep)) {
+        if (tool.includes(path8.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path7.delimiter)) {
+          for (const p of process.env.PATH.split(path8.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -20853,7 +20853,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path7.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path8.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -20939,11 +20939,11 @@ var require_toolrunner = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -20959,7 +20959,7 @@ var require_toolrunner = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20969,7 +20969,7 @@ var require_toolrunner = __commonJS({
     var os3 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = require("timers");
@@ -21184,10 +21184,10 @@ var require_toolrunner = __commonJS({
       exec() {
         return __awaiter2(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path7.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path8.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
-          return new Promise((resolve6, reject) => __awaiter2(this, void 0, void 0, function* () {
+          return new Promise((resolve7, reject) => __awaiter2(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
             for (const arg of this.args) {
@@ -21270,7 +21270,7 @@ var require_toolrunner = __commonJS({
               if (error2) {
                 reject(error2);
               } else {
-                resolve6(exitCode);
+                resolve7(exitCode);
               }
             });
             if (this.options.input) {
@@ -21423,11 +21423,11 @@ var require_exec = __commonJS({
     };
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21443,7 +21443,7 @@ var require_exec = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21452,7 +21452,7 @@ var require_exec = __commonJS({
     exports2.getExecOutput = exports2.exec = void 0;
     var string_decoder_1 = require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec7(commandLine, args, options) {
+    function exec9(commandLine, args, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -21464,7 +21464,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports2.exec = exec7;
+    exports2.exec = exec9;
     function getExecOutput(commandLine, args, options) {
       var _a2, _b;
       return __awaiter2(this, void 0, void 0, function* () {
@@ -21487,7 +21487,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec7(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec9(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -21544,11 +21544,11 @@ var require_platform = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21564,7 +21564,7 @@ var require_platform = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21576,12 +21576,12 @@ var require_platform = __commonJS({
     exports2.isLinux = exports2.isMacOS = exports2.isWindows = exports2.arch = exports2.platform = void 0;
     exports2.getDetails = getDetails;
     var os_1 = __importDefault(require("os"));
-    var exec7 = __importStar(require_exec());
+    var exec9 = __importStar(require_exec());
     var getWindowsInfo = () => __awaiter2(void 0, void 0, void 0, function* () {
-      const { stdout: version2 } = yield exec7.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', void 0, {
+      const { stdout: version2 } = yield exec9.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', void 0, {
         silent: true
       });
-      const { stdout: name } = yield exec7.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
+      const { stdout: name } = yield exec9.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
         silent: true
       });
       return {
@@ -21591,7 +21591,7 @@ var require_platform = __commonJS({
     });
     var getMacOsInfo = () => __awaiter2(void 0, void 0, void 0, function* () {
       var _a2, _b, _c, _d2;
-      const { stdout } = yield exec7.getExecOutput("sw_vers", void 0, {
+      const { stdout } = yield exec9.getExecOutput("sw_vers", void 0, {
         silent: true
       });
       const version2 = (_b = (_a2 = stdout.match(/ProductVersion:\s*(.+)/)) === null || _a2 === void 0 ? void 0 : _a2[1]) !== null && _b !== void 0 ? _b : "";
@@ -21602,7 +21602,7 @@ var require_platform = __commonJS({
       };
     });
     var getLinuxInfo = () => __awaiter2(void 0, void 0, void 0, function* () {
-      const { stdout } = yield exec7.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
+      const { stdout } = yield exec9.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
         silent: true
       });
       const [name, version2] = stdout.trim().split("\n");
@@ -21673,11 +21673,11 @@ var require_core = __commonJS({
     }();
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21693,7 +21693,7 @@ var require_core = __commonJS({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -21712,7 +21712,7 @@ var require_core = __commonJS({
     exports2.isDebug = isDebug;
     exports2.debug = debug;
     exports2.error = error2;
-    exports2.warning = warning2;
+    exports2.warning = warning3;
     exports2.notice = notice;
     exports2.info = info4;
     exports2.startGroup = startGroup2;
@@ -21725,7 +21725,7 @@ var require_core = __commonJS({
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
     var os3 = __importStar(require("os"));
-    var path7 = __importStar(require("path"));
+    var path8 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -21751,7 +21751,7 @@ var require_core = __commonJS({
       } else {
         (0, command_1.issueCommand)("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path7.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path8.delimiter}${process.env["PATH"]}`;
     }
     function getInput3(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
@@ -21805,7 +21805,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     function error2(message, properties = {}) {
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
-    function warning2(message, properties = {}) {
+    function warning3(message, properties = {}) {
       (0, command_1.issueCommand)("warning", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     function notice(message, properties = {}) {
@@ -21886,8 +21886,8 @@ var init_context = __esm({
           if ((0, import_fs.existsSync)(process.env.GITHUB_EVENT_PATH)) {
             this.payload = JSON.parse((0, import_fs.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
           } else {
-            const path7 = process.env.GITHUB_EVENT_PATH;
-            process.stdout.write(`GITHUB_EVENT_PATH ${path7} does not exist${import_os.EOL}`);
+            const path8 = process.env.GITHUB_EVENT_PATH;
+            process.stdout.write(`GITHUB_EVENT_PATH ${path8} does not exist${import_os.EOL}`);
           }
         }
         this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -21972,11 +21972,11 @@ var init_utils = __esm({
     import_undici = __toESM(require_undici(), 1);
     __awaiter = function(thisArg, _arguments, P2, generator) {
       function adopt(value) {
-        return value instanceof P2 ? value : new P2(function(resolve6) {
-          resolve6(value);
+        return value instanceof P2 ? value : new P2(function(resolve7) {
+          resolve7(value);
         });
       }
-      return new (P2 || (P2 = Promise))(function(resolve6, reject) {
+      return new (P2 || (P2 = Promise))(function(resolve7, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -21992,7 +21992,7 @@ var init_utils = __esm({
           }
         }
         function step(result) {
-          result.done ? resolve6(result.value) : adopt(result.value).then(fulfilled, rejected);
+          result.done ? resolve7(result.value) : adopt(result.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -26079,6 +26079,11 @@ var init_utils2 = __esm({
 });
 
 // node_modules/@actions/github/lib/github.js
+var github_exports = {};
+__export(github_exports, {
+  context: () => context2,
+  getOctokit: () => getOctokit
+});
 function getOctokit(token, options, ...additionalPlugins) {
   const GitHubWithPlugins = GitHub.plugin(...additionalPlugins);
   return new GitHubWithPlugins(getOctokitOptions(token, options));
@@ -30990,20 +30995,20 @@ var require_compiler = __commonJS({
         obj[lastKey] = value;
       }
       function setPath(node) {
-        var path7 = node.value;
-        var quotedPath = path7.map(quoteDottedString).join(".");
+        var path8 = node.value;
+        var quotedPath = path8.map(quoteDottedString).join(".");
         var off = node.offset;
         if (assignedPaths.has(quotedPath)) {
-          genError("Cannot redefine existing key '" + path7 + "'.", off);
+          genError("Cannot redefine existing key '" + path8 + "'.", off);
         }
         assignedPaths.add(quotedPath);
         explicitTablePaths.add(quotedPath);
-        context3 = deepRef(data, path7, createTable(), off);
-        currentPath = path7;
+        context3 = deepRef(data, path8, createTable(), off);
+        currentPath = path8;
       }
       function addTableArray(node) {
-        var path7 = node.value;
-        var quotedPath = path7.map(quoteDottedString).join(".");
+        var path8 = node.value;
+        var quotedPath = path8.map(quoteDottedString).join(".");
         var off = node.offset;
         if (valueAssignments.has(quotedPath)) {
           genError("Cannot append to statically defined array '" + quotedPath + "'.", off);
@@ -31015,14 +31020,14 @@ var require_compiler = __commonJS({
           if (isSameOrSubPath(p, quotedPath)) valueAssignments.delete(p);
         });
         assignedPaths.add(quotedPath);
-        context3 = deepRef(data, path7, createTableArray(), off);
-        currentPath = path7;
+        context3 = deepRef(data, path8, createTableArray(), off);
+        currentPath = path8;
         if (context3 instanceof Array) {
           var newObj = createTable();
           context3.push(newObj);
           context3 = newObj;
         } else {
-          genError("Cannot redefine existing key '" + path7 + "'.", off);
+          genError("Cannot redefine existing key '" + path8 + "'.", off);
         }
       }
       function deepRef(start, keys, value, off) {
@@ -31086,8 +31091,8 @@ var require_compiler = __commonJS({
       function makeFullPath(keys) {
         return pathKey(currentPath.concat(keys));
       }
-      function isSameOrSubPath(path7, prefix) {
-        return path7 === prefix || path7.indexOf(prefix + ".") === 0;
+      function isSameOrSubPath(path8, prefix) {
+        return path8 === prefix || path8.indexOf(prefix + ".") === 0;
       }
     }
     module2.exports = {
@@ -31113,15 +31118,15 @@ var require_toml = __commonJS({
 
 // src/action.ts
 var core3 = __toESM(require_core());
-var exec5 = __toESM(require_exec());
+var exec7 = __toESM(require_exec());
 init_github();
-var fs5 = __toESM(require("fs"));
-var path6 = __toESM(require("path"));
+var fs6 = __toESM(require("fs"));
+var path7 = __toESM(require("path"));
 var os2 = __toESM(require("os"));
 
 // src/measurement.ts
-var fs2 = __toESM(require("fs"));
-var path3 = __toESM(require("path"));
+var fs3 = __toESM(require("fs"));
+var path4 = __toESM(require("path"));
 var crypto3 = __toESM(require("crypto"));
 
 // src/identity.ts
@@ -31605,8 +31610,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path7, errorMaps, issueData } = params;
-  const fullPath = [...path7, ...issueData.path || []];
+  const { data, path: path8, errorMaps, issueData } = params;
+  const fullPath = [...path8, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -31722,11 +31727,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path7, key) {
+  constructor(parent, value, path8, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path7;
+    this._path = path8;
     this._key = key;
   }
   get path() {
@@ -35243,7 +35248,8 @@ var PROVENANCE_ALLOWED_KEYS = /* @__PURE__ */ new Set([
   "seed",
   "auth_mode",
   "host_features",
-  "resource_limits_sha256"
+  "resource_limits_sha256",
+  "source_account"
 ]);
 var PROVENANCE_REQUIRED_STRINGS = [
   "source",
@@ -35259,6 +35265,7 @@ var PROVENANCE_REQUIRED_STRINGS = [
 ];
 var METRIC_KEY_SET = new Set(METRIC_KEYS);
 var SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
+var ACCOUNT_PUBLIC_KEY_PATTERN = /^G[A-Z2-7]{55}$/;
 function isPlainObject3(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -35344,6 +35351,14 @@ function validateProvenanceObject(provenance, version2, pPath, diagnostics) {
       version: version2,
       code: "INVALID_RESOURCE_LIMITS_DIGEST",
       message: "Schema 4 requires resource_limits_sha256"
+    });
+  }
+  if (provenance.source_account !== void 0 && (typeof provenance.source_account !== "string" || !ACCOUNT_PUBLIC_KEY_PATTERN.test(provenance.source_account))) {
+    diagnostics.push({
+      path: `${pPath}.source_account`,
+      version: version2,
+      code: "INVALID_SOURCE_ACCOUNT",
+      message: "Invalid compute provenance: source_account must be an Ed25519 account public key"
     });
   }
 }
@@ -35770,7 +35785,10 @@ function validateBenchmarkComparisonCompatibility(baseFn, headFn) {
     "compute_config_sha256",
     "seed",
     "auth_mode",
-    "host_features"
+    "host_features",
+    // The invoking account is part of the measured environment: results
+    // measured under different source accounts are not comparable.
+    "source_account"
   ];
   for (const field of fields) {
     if (!baseFn.provenance || !headFn.provenance || JSON.stringify(baseFn.provenance[field]) !== JSON.stringify(headFn.provenance[field])) {
@@ -35800,6 +35818,19 @@ function validateBenchmarkComparisonCompatibility(baseFn, headFn) {
 }
 
 // src/diff.ts
+var AGGREGATE_METRIC_DESCRIPTIONS = {
+  cpu_instructions: "Cumulative CPU Instructions",
+  memory_bytes: "Cumulative Invocation Memory Bytes (sum of invocation costs, not peak concurrent memory)",
+  ledger_read_entries: "Cumulative Footprint Read Entries (RO + RW)",
+  ledger_read_bytes: "Cumulative Disk Read Bytes",
+  ledger_write_entries: "Cumulative Write Footprint Entries",
+  ledger_write_bytes: "Cumulative Ledger Write Bytes",
+  historical_data_read_bytes: "Cumulative Historical Read Bytes",
+  contract_data_hard_limit: "Cumulative Contract Data (instance)",
+  tx_size_bytes: "Cumulative Tx Size Bytes",
+  events_count: "Cumulative Successful Contract/System Events",
+  event_data_bytes: "Cumulative Events + Return XDR Bytes"
+};
 function diffMetrics(base, head) {
   return METRIC_KEYS.map((key) => {
     const b = base[key];
@@ -35898,7 +35929,237 @@ function contractMap(contracts) {
 function contractLabel(contract) {
   return contract.logical_id === void 0 ? contract.contract_id : `${contract.fixture_id} / ${contract.logical_id}`;
 }
-function diffBenchmarks(base, head) {
+function matchesSelector(selector, candidate) {
+  if (selector.function_name !== candidate.function_name) return false;
+  if (selector.fixture_id !== void 0 && selector.fixture_id !== candidate.fixture_id)
+    return false;
+  if (selector.logical_id !== void 0 && selector.logical_id !== candidate.logical_id)
+    return false;
+  if (selector.case_id !== void 0 && selector.case_id !== candidate.case_id)
+    return false;
+  return true;
+}
+function formatSelector(sel) {
+  const parts = [];
+  if (sel.fixture_id) parts.push(`fixture:${sel.fixture_id}`);
+  if (sel.logical_id) parts.push(`contract:${sel.logical_id}`);
+  parts.push(`fn:${sel.function_name}`);
+  if (sel.case_id) parts.push(`case:${sel.case_id}`);
+  return parts.join(" / ");
+}
+function computeAggregateDiffs(diff, config2) {
+  if (!config2) return [];
+  const aggregateNames = /* @__PURE__ */ new Set();
+  if (config2.aggregates) {
+    for (const name of Object.keys(config2.aggregates)) aggregateNames.add(name);
+  }
+  if (config2.limits?.aggregates) {
+    for (const name of Object.keys(config2.limits.aggregates))
+      aggregateNames.add(name);
+  }
+  if (config2.thresholds?.aggregates) {
+    for (const name of Object.keys(config2.thresholds.aggregates))
+      aggregateNames.add(name);
+  }
+  if (aggregateNames.size === 0) return [];
+  const aggregateDiffs = [];
+  for (const name of aggregateNames) {
+    const aggDef = config2.aggregates?.[name];
+    if (!aggDef || !aggDef.members || !Array.isArray(aggDef.members) || aggDef.members.length === 0) {
+      throw new Error(
+        `Cannot evaluate aggregate budget "${name}": missing required member selectors in [aggregates.${name}]`
+      );
+    }
+    const seenSelectors = /* @__PURE__ */ new Set();
+    for (const member of aggDef.members) {
+      if (!member.function_name) {
+        throw new Error(
+          `Cannot evaluate aggregate budget "${name}": member selector missing required function_name`
+        );
+      }
+      const selKey = JSON.stringify([
+        member.fixture_id ?? "",
+        member.logical_id ?? "",
+        member.function_name,
+        member.case_id ?? ""
+      ]);
+      if (seenSelectors.has(selKey)) {
+        throw new Error(
+          `Cannot evaluate aggregate budget "${name}": duplicate member selector ${formatSelector(member)}`
+        );
+      }
+      seenSelectors.add(selKey);
+    }
+    const resolvedMembers = [];
+    const matchedCanonicalKeys = /* @__PURE__ */ new Set();
+    for (const member of aggDef.members) {
+      const matches = [];
+      for (const contract2 of diff.contracts) {
+        for (const fn2 of contract2.functions) {
+          if (matchesSelector(member, {
+            fixture_id: contract2.fixture_id,
+            logical_id: contract2.logical_id,
+            function_name: fn2.function_name,
+            case_id: fn2.case_id
+          })) {
+            matches.push({ contract: contract2, fn: fn2 });
+          }
+        }
+      }
+      if (matches.length === 0) {
+        throw new Error(
+          `Cannot evaluate aggregate budget "${name}": member ${formatSelector(member)} has no matched BASE/HEAD benchmark`
+        );
+      }
+      if (matches.length > 1) {
+        throw new Error(
+          `Cannot evaluate aggregate budget "${name}": member ${formatSelector(member)} is ambiguous (matched ${matches.length} benchmarks)`
+        );
+      }
+      const { contract, fn } = matches[0];
+      const canonicalKey = JSON.stringify([
+        contract.fixture_id ?? "",
+        contract.logical_id ?? "",
+        fn.function_name,
+        fn.case_id ?? ""
+      ]);
+      if (matchedCanonicalKeys.has(canonicalKey)) {
+        throw new Error(
+          `Cannot evaluate aggregate budget "${name}": duplicate member detected for benchmark "${contract.logical_id ?? contract.contract_id} / ${fn.function_name}${fn.case_id ? ` / ${fn.case_id}` : ""}"`
+        );
+      }
+      matchedCanonicalKeys.add(canonicalKey);
+      resolvedMembers.push({ selector: member, contract, fn, canonicalKey });
+    }
+    let commonSource;
+    let commonProtocol;
+    let commonNetwork;
+    let commonComputeConfig;
+    let commonLimitsConfig;
+    for (const { fn } of resolvedMembers) {
+      const prov = fn.head_provenance;
+      if (!prov) continue;
+      if (commonSource === void 0) {
+        commonSource = prov.source;
+        commonProtocol = prov.protocol;
+        commonNetwork = prov.network_id;
+        commonComputeConfig = prov.compute_config_sha256;
+        commonLimitsConfig = prov.resource_limits_sha256;
+      } else {
+        if (prov.source !== commonSource) {
+          throw new Error(
+            `Cannot evaluate aggregate budget "${name}": incompatible measurement environments across members (mismatched meter source: ${commonSource} vs ${prov.source})`
+          );
+        }
+        if (prov.protocol !== commonProtocol) {
+          throw new Error(
+            `Cannot evaluate aggregate budget "${name}": incompatible measurement environments across members (mismatched protocol: ${commonProtocol} vs ${prov.protocol})`
+          );
+        }
+        if (prov.network_id !== commonNetwork) {
+          throw new Error(
+            `Cannot evaluate aggregate budget "${name}": incompatible measurement environments across members (mismatched network: ${commonNetwork} vs ${prov.network_id})`
+          );
+        }
+        if (prov.compute_config_sha256 !== commonComputeConfig) {
+          throw new Error(
+            `Cannot evaluate aggregate budget "${name}": incompatible measurement environments across members (mismatched compute configuration / calibration)`
+          );
+        }
+        if (prov.resource_limits_sha256 !== commonLimitsConfig) {
+          throw new Error(
+            `Cannot evaluate aggregate budget "${name}": incompatible measurement environments across members (mismatched resource limits configuration)`
+          );
+        }
+      }
+    }
+    const breakdown = {};
+    const metrics = [];
+    for (const key of METRIC_KEYS) {
+      const memberRows = [];
+      let allComparable = true;
+      let unavailableReason;
+      let baseSum = 0;
+      let headSum = 0;
+      for (const { contract, fn } of resolvedMembers) {
+        const mDiff = fn.metrics.find((m) => m.key === key);
+        const baseVal = mDiff?.base.consumed ?? null;
+        const headVal = mDiff?.head.consumed ?? null;
+        const delta = mDiff?.delta ?? (baseVal !== null && headVal !== null ? headVal - baseVal : null);
+        memberRows.push({
+          fixture_id: contract.fixture_id,
+          logical_id: contract.logical_id,
+          contract_id: contract.head_contract_id || contract.contract_id,
+          function_name: fn.function_name,
+          case_id: fn.case_id,
+          base_consumed: baseVal,
+          head_consumed: headVal,
+          delta
+        });
+        if (!mDiff || mDiff.availability === "unavailable" || baseVal === null || headVal === null) {
+          allComparable = false;
+          if (!unavailableReason) {
+            unavailableReason = `Member ${contract.logical_id ?? contract.contract_id} / ${fn.function_name}${fn.case_id ? ` / ${fn.case_id}` : ""} ${key} is unavailable: ${mDiff?.reason ?? "measured value unavailable"}`;
+          }
+        } else {
+          baseSum += baseVal;
+          headSum += headVal;
+        }
+      }
+      breakdown[key] = memberRows;
+      if (!allComparable) {
+        metrics.push({
+          key,
+          base_consumed: null,
+          head_consumed: null,
+          delta: null,
+          pct: null,
+          regression: false,
+          availability: "unavailable",
+          reason: unavailableReason,
+          description: AGGREGATE_METRIC_DESCRIPTIONS[key]
+        });
+      } else {
+        const delta = headSum - baseSum;
+        const regression = delta > 0;
+        const pct = baseSum === 0 ? delta > 0 ? null : 0 : delta / baseSum * 100;
+        metrics.push({
+          key,
+          base_consumed: baseSum,
+          head_consumed: headSum,
+          delta,
+          pct,
+          regression,
+          availability: "comparable",
+          description: AGGREGATE_METRIC_DESCRIPTIONS[key]
+        });
+      }
+    }
+    const hasRegression = metrics.some((m) => m.regression);
+    const provenance = commonSource ? {
+      source: commonSource,
+      protocol_version: commonProtocol ?? 0,
+      network_passphrase: commonNetwork ?? "",
+      compute_config_sha256: commonComputeConfig
+    } : void 0;
+    aggregateDiffs.push({
+      name,
+      description: aggDef.description,
+      members: aggDef.members,
+      member_count: resolvedMembers.length,
+      breakdown,
+      metrics,
+      provenance,
+      hasRegression
+    });
+  }
+  diff.aggregates = aggregateDiffs;
+  if (aggregateDiffs.some((a) => a.hasRegression)) {
+    diff.hasRegression = true;
+  }
+  return aggregateDiffs;
+}
+function diffBenchmarks(base, head, config2) {
   const baseMap = contractMap(base);
   const headMap = contractMap(head);
   if (base.length > 0 && head.length > 0 && base[0].schema_version !== void 0 && head[0].schema_version !== void 0 && base[0].schema_version !== head[0].schema_version) {
@@ -35939,12 +36200,16 @@ function diffBenchmarks(base, head) {
       hasRegression
     });
   }
-  return {
+  const diff = {
     contracts,
     hasRegression: contracts.some((c) => c.hasRegression),
     newContracts,
     removedContracts
   };
+  if (config2) {
+    computeAggregateDiffs(diff, config2);
+  }
+  return diff;
 }
 
 // src/config.ts
@@ -35976,15 +36241,30 @@ var FunctionThresholdsSchema = external_exports.record(
   external_exports.enum(METRIC_KEYS),
   RuleValueSchema
 );
+var BenchmarkSelectorSchema = external_exports.object({
+  fixture_id: external_exports.string().min(1).optional(),
+  logical_id: external_exports.string().min(1).optional(),
+  function_name: external_exports.string().min(1),
+  case_id: external_exports.string().min(1).optional()
+}).strict();
+var AggregateBudgetConfigSchema = external_exports.object({
+  description: external_exports.string().optional(),
+  members: external_exports.array(BenchmarkSelectorSchema).min(1),
+  limits: external_exports.record(external_exports.enum(METRIC_KEYS), external_exports.number().nonnegative()).optional(),
+  thresholds: external_exports.record(external_exports.enum(METRIC_KEYS), RuleValueSchema).optional()
+}).strict();
 var WeighinConfigSchema = external_exports.object({
   thresholds: external_exports.object({
     global: GlobalThresholdsSchema.optional(),
-    functions: external_exports.record(external_exports.string(), FunctionThresholdsSchema).optional()
+    functions: external_exports.record(external_exports.string(), FunctionThresholdsSchema).optional(),
+    aggregates: external_exports.record(external_exports.string(), FunctionThresholdsSchema).optional()
   }).strict().optional(),
   limits: external_exports.object({
     global: GlobalLimitsSchema.optional(),
-    functions: external_exports.record(external_exports.string(), FunctionLimitsSchema).optional()
-  }).strict().optional()
+    functions: external_exports.record(external_exports.string(), FunctionLimitsSchema).optional(),
+    aggregates: external_exports.record(external_exports.string(), FunctionLimitsSchema).optional()
+  }).strict().optional(),
+  aggregates: external_exports.record(external_exports.string(), AggregateBudgetConfigSchema).optional()
 }).strict();
 var U64_MAX = 18446744073709551615n;
 var I64_MIN = -9223372036854775808n;
@@ -36136,8 +36416,8 @@ var FixturesSpecSchema = external_exports.object({
 function formatZodError(error2, fileName) {
   const lines = [`Invalid WeighIn configuration in ${fileName}:`];
   for (const issue of error2.issues) {
-    const path7 = issue.path.join(".");
-    lines.push(`- ${path7 || "root"}: ${issue.message}`);
+    const path8 = issue.path.join(".");
+    lines.push(`- ${path8 || "root"}: ${issue.message}`);
   }
   return lines.join("\n");
 }
@@ -36162,7 +36442,15 @@ function canonical(value) {
   return value;
 }
 function parseFixtures(raw, fixturePath) {
-  const fixtures = FixturesSpecSchema.parse(JSON.parse(raw));
+  let fixtures;
+  try {
+    fixtures = FixturesSpecSchema.parse(JSON.parse(raw));
+  } catch (err) {
+    if (err instanceof ZodError) {
+      throw new Error(formatZodError(err, fixturePath));
+    }
+    throw err;
+  }
   const fixture_id = fixtures.id === void 0 ? `path:${relativePath(fixturePath)}` : `id:${fixtures.id}`;
   const contractIds = /* @__PURE__ */ new Set();
   const contracts = fixtures.contracts.map((contract) => {
@@ -36194,6 +36482,62 @@ function parseFixtures(raw, fixturePath) {
   return { ...fixtures, fixture_id, contracts };
 }
 
+// src/sdk-version.ts
+var fs = __toESM(require("fs"));
+var path2 = __toESM(require("path"));
+function findOwningLock(wasmPath) {
+  let dir = path2.dirname(path2.resolve(wasmPath));
+  let manifestPath = null;
+  for (; ; ) {
+    const manifest = path2.join(dir, "Cargo.toml");
+    const lock = path2.join(dir, "Cargo.lock");
+    if (manifestPath === null && fs.existsSync(manifest)) {
+      manifestPath = manifest;
+    }
+    if (fs.existsSync(lock)) {
+      return { manifestPath, lockPath: lock };
+    }
+    const parent = path2.dirname(dir);
+    if (parent === dir) {
+      return { manifestPath, lockPath: null };
+    }
+    dir = parent;
+  }
+}
+function parseSdkVersionsFromLock(lockContent) {
+  const versions = [];
+  const blocks = lockContent.split(/(?=^\[\[package\]\])/m);
+  for (const block of blocks) {
+    if (!/^\[\[package\]\]\nname = "soroban-sdk"\n/.test(block)) continue;
+    const m = block.match(/^version = "([^"]+)"/m);
+    if (m) versions.push(m[1]);
+  }
+  return [...new Set(versions)];
+}
+function readSdkVersionsFromLock(lockPath) {
+  try {
+    return parseSdkVersionsFromLock(fs.readFileSync(lockPath, "utf8"));
+  } catch {
+    return [];
+  }
+}
+function discoverSdkAssociations(wasmPaths) {
+  return wasmPaths.map((wasmPath) => {
+    const resolved = path2.resolve(wasmPath);
+    const { manifestPath, lockPath } = findOwningLock(resolved);
+    const versions = lockPath ? readSdkVersionsFromLock(lockPath) : [];
+    return { wasmPath: resolved, manifestPath, lockPath, versions };
+  });
+}
+function discoverSdkVersion(wasmPath) {
+  return formatSdkVersions(discoverSdkAssociations([wasmPath])[0].versions);
+}
+function formatSdkVersions(versions) {
+  if (versions.length === 0) return "unknown";
+  if (versions.length === 1) return versions[0];
+  return versions.join(", ");
+}
+
 // node_modules/@stellar/stellar-sdk/lib/esm/utils.js
 var Utils = class {
   /**
@@ -36214,7 +36558,7 @@ var Utils = class {
     return now >= Number.parseInt(minTime, 10) - gracePeriod && now <= Number.parseInt(maxTime, 10) + gracePeriod;
   }
   static sleep(ms) {
-    return new Promise((resolve6) => setTimeout(resolve6, ms));
+    return new Promise((resolve7) => setTimeout(resolve7, ms));
   }
 };
 
@@ -36537,8 +36881,8 @@ var CancelToken = class {
   }
   constructor(executor) {
     let resolvePromise;
-    this.promise = new Promise((resolve6) => {
-      resolvePromise = resolve6;
+    this.promise = new Promise((resolve7) => {
+      resolvePromise = resolve7;
     });
     executor((reason) => {
       this.reason = reason;
@@ -36848,7 +37192,7 @@ function createFetchClient(fetchConfig = {}) {
       return createFetchClient({ ...this.defaults, ...config2 });
     },
     makeRequest(config2) {
-      return new Promise((resolve6, reject) => {
+      return new Promise((resolve7, reject) => {
         function processRequest(finalConfig, res, rej) {
           const adapter = finalConfig.adapter || this.defaults.adapter;
           if (!adapter) {
@@ -36917,11 +37261,11 @@ function createFetchClient(fetchConfig = {}) {
             );
           }
           configPromise.then((resolvedConfig) => {
-            processRequest.call(this, resolvedConfig, resolve6, reject);
+            processRequest.call(this, resolvedConfig, resolve7, reject);
           }).catch(reject);
           return;
         }
-        processRequest.call(this, modifiedConfig, resolve6, reject);
+        processRequest.call(this, modifiedConfig, resolve7, reject);
       });
     },
     get(url, config2) {
@@ -47403,14 +47747,14 @@ function pathPaymentStrictReceive(opts) {
   } catch {
     throw new Error("destination is invalid");
   }
-  const path7 = opts.path ? opts.path : [];
+  const path8 = opts.path ? opts.path : [];
   const paymentOp = new types.PathPaymentStrictReceiveOp({
     sendAsset: opts.sendAsset.toXDRObject(),
     sendMax: toXDRAmount(opts.sendMax),
     destination,
     destAsset: opts.destAsset.toXDRObject(),
     destAmount: toXDRAmount(opts.destAmount),
-    path: path7.map((x) => x.toXDRObject())
+    path: path8.map((x) => x.toXDRObject())
   });
   const opAttributes = {
     sourceAccount: null,
@@ -47444,14 +47788,14 @@ function pathPaymentStrictSend(opts) {
   }
   const destAsset = opts.destAsset.toXDRObject();
   const destMin = toXDRAmount(opts.destMin);
-  const path7 = (opts.path ?? []).map((x) => x.toXDRObject());
+  const path8 = (opts.path ?? []).map((x) => x.toXDRObject());
   const payment2 = new types.PathPaymentStrictSendOp({
     sendAsset,
     sendAmount,
     destination,
     destAsset,
     destMin,
-    path: path7
+    path: path8
   });
   const opAttributes = {
     sourceAccount: null,
@@ -48370,9 +48714,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destAmount = fromXDRAmount(attrs.destAmount());
         result.path = [];
-        const path7 = attrs.path();
-        Object.keys(path7).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path7[pathKey]));
+        const path8 = attrs.path();
+        Object.keys(path8).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path8[pathKey]));
         });
         break;
       }
@@ -48384,9 +48728,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destMin = fromXDRAmount(attrs.destMin());
         result.path = [];
-        const path7 = attrs.path();
-        Object.keys(path7).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path7[pathKey]));
+        const path8 = attrs.path();
+        Object.keys(path8).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path8[pathKey]));
         });
         break;
       }
@@ -53184,8 +53528,8 @@ async function ensureAccountReady(rpcUrl, publicKey, signal) {
       throw signal.reason || new Error("Account readiness cancelled");
     const remaining = deadline - Date.now();
     if (remaining > 0)
-      await new Promise((resolve6, reject) => {
-        const timer = setTimeout(resolve6, Math.min(RETRY_MS, remaining));
+      await new Promise((resolve7, reject) => {
+        const timer = setTimeout(resolve7, Math.min(RETRY_MS, remaining));
         if (signal) {
           const onAbort = () => {
             clearTimeout(timer);
@@ -53211,8 +53555,8 @@ var SUPPORTED_NETWORK_PASSPHRASE = "Standalone Network ; February 2017";
 var SUPPORTED_PROTOCOL_VERSION = 28;
 
 // src/simulation.ts
-var fs = __toESM(require("fs"));
-var path2 = __toESM(require("path"));
+var fs2 = __toESM(require("fs"));
+var path3 = __toESM(require("path"));
 var crypto2 = __toESM(require("crypto"));
 var import_child_process = require("child_process");
 var sha2562 = (value) => crypto2.createHash("sha256").update(value).digest("hex");
@@ -53245,6 +53589,61 @@ var outputSchema = external_exports.object({
 function sameXdr(left, right) {
   const bytes = (value) => typeof value === "string" ? Buffer.from(value) : Buffer.isBuffer(value) ? value : value.toXDR("raw");
   return bytes(left).equals(bytes(right));
+}
+function validateFootprintKeys(readOnlyKeys, readWriteKeys, sourceLabel = "footprint") {
+  const seenReadOnly = /* @__PURE__ */ new Set();
+  const duplicateReadOnly = /* @__PURE__ */ new Set();
+  for (const key of readOnlyKeys) {
+    if (seenReadOnly.has(key)) {
+      duplicateReadOnly.add(key);
+    }
+    seenReadOnly.add(key);
+  }
+  if (duplicateReadOnly.size > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: duplicate key(s) in read-only footprint: [${[...duplicateReadOnly].join(", ")}]`
+    );
+  }
+  const seenReadWrite = /* @__PURE__ */ new Set();
+  const duplicateReadWrite = /* @__PURE__ */ new Set();
+  for (const key of readWriteKeys) {
+    if (seenReadWrite.has(key)) {
+      duplicateReadWrite.add(key);
+    }
+    seenReadWrite.add(key);
+  }
+  if (duplicateReadWrite.size > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: duplicate key(s) in read-write footprint: [${[...duplicateReadWrite].join(", ")}]`
+    );
+  }
+  const overlaps = [];
+  for (const key of seenReadWrite) {
+    if (seenReadOnly.has(key)) {
+      overlaps.push(key);
+    }
+  }
+  if (overlaps.length > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: key(s) present in both read-only and read-write footprints: [${overlaps.join(", ")}]`
+    );
+  }
+}
+function validateLedgerHeaderHash(historyEntry, rowHash) {
+  const headerBytes = historyEntry.header().toXDR();
+  const recomputedHash = crypto2.createHash("sha256").update(headerBytes).digest("hex");
+  const historyHash = historyEntry.hash().toString("hex");
+  if (historyHash !== recomputedHash) {
+    throw new Error(
+      `Ledger header hash mismatch: history-entry hash (${historyHash}) does not match SHA-256 of decoded header bytes (${recomputedHash})`
+    );
+  }
+  if (rowHash && rowHash.toLowerCase() !== recomputedHash.toLowerCase()) {
+    throw new Error(
+      `Ledger header hash mismatch: RPC response hash (${rowHash}) does not match SHA-256 of decoded header bytes (${recomputedHash})`
+    );
+  }
+  return { recomputedHash, historyHash };
 }
 function validateLedgerKeyEntryCorrespondence(keyXdr, dataXdr) {
   const key = types.LedgerKey.fromXDR(keyXdr, "base64");
@@ -53288,7 +53687,7 @@ function validateLedgerKeyEntryCorrespondence(keyXdr, dataXdr) {
   }
 }
 function execute(file, args, input, cwd, signal) {
-  return new Promise((resolve6, reject) => {
+  return new Promise((resolve7, reject) => {
     if (signal?.aborted) {
       return reject(
         signal.reason || new Error("Simulation helper execution cancelled")
@@ -53321,7 +53720,7 @@ function execute(file, args, input, cwd, signal) {
             failure.exitCode = typeof error2.code === "number" ? error2.code : void 0;
             reject(failure);
           }
-        } else resolve6(stdout);
+        } else resolve7(stdout);
       }
     );
     child.stdin?.on("error", () => {
@@ -53361,9 +53760,9 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
   }
   const override = explicitPath ?? process.env.WEIGHIN_HELPER_PATH;
   if (override) {
-    const file = path2.resolve(override);
+    const file = path3.resolve(override);
     try {
-      fs.accessSync(file, fs.constants.X_OK);
+      fs2.accessSync(file, fs2.constants.X_OK);
     } catch {
       throw new Error(`Simulation helper missing or not executable: ${file}`);
     }
@@ -53374,9 +53773,9 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
       if (customBuild) {
         return customBuild();
       }
-      const directory = path2.resolve(__dirname, "../native/simulation");
-      const manifest = path2.join(directory, "Cargo.toml");
-      if (!fs.existsSync(manifest))
+      const directory = path3.resolve(__dirname, "../native/simulation");
+      const manifest = path3.join(directory, "Cargo.toml");
+      if (!fs2.existsSync(manifest))
         throw new Error(`Native simulation sources missing: ${manifest}`);
       console.log(
         "Building protocol-28 simulation helper (Rust 1.95.0, locked dependencies)..."
@@ -53393,12 +53792,12 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
           "--target",
           "x86_64-unknown-linux-gnu",
           "--target-dir",
-          path2.join(directory, "target")
+          path3.join(directory, "target")
         ],
         void 0,
         directory
       );
-      return path2.join(
+      return path3.join(
         directory,
         "target/x86_64-unknown-linux-gnu/release/weighin-simulation"
       );
@@ -53415,13 +53814,13 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
 }
 function captureHelperIdentity(helperPath) {
   try {
-    const stats = fs.statSync(helperPath);
+    const stats = fs2.statSync(helperPath);
     if (!stats.isFile()) {
       throw new Error(
         `Simulation helper at ${helperPath} is not a regular file`
       );
     }
-    const bytes = fs.readFileSync(helperPath);
+    const bytes = fs2.readFileSync(helperPath);
     return sha2562(bytes);
   } catch (err) {
     if (err instanceof Error && err.message.startsWith("Simulation helper at")) {
@@ -53433,13 +53832,22 @@ function captureHelperIdentity(helperPath) {
   }
 }
 async function simulateSnapshot(input, helperPath, signal) {
-  const stdout = await execute(
-    helperPath,
-    [],
-    JSON.stringify(input),
-    void 0,
-    signal
-  );
+  let stdout;
+  try {
+    stdout = await execute(
+      helperPath,
+      [],
+      JSON.stringify(input),
+      void 0,
+      signal
+    );
+  } catch (failure) {
+    const envelope = parseHelperFailure(failure);
+    if (envelope) {
+      throw new Error(`Native helper ${envelope.status}: ${envelope.message}`);
+    }
+    throw failure;
+  }
   let output;
   try {
     output = outputSchema.parse(JSON.parse(stdout));
@@ -53465,6 +53873,11 @@ async function simulateSnapshot(input, helperPath, signal) {
       "Invalid simulation helper output: resource fields disagree with transaction-data XDR"
     );
   }
+  validateFootprintKeys(
+    output.read_only_keys,
+    output.read_write_keys,
+    "simulation helper footprint"
+  );
   types.ScVal.fromXDR(output.retval_xdr, "base64");
   for (const event of output.contract_events_xdr) {
     if (types.ContractEvent.fromXDR(event, "base64").type().name === "diagnostic") {
@@ -53706,11 +54119,10 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
         context3 ? `Simulation returned invalid transaction data for ${context3}: ${detail}` : `Simulation returned invalid transaction data: ${detail}`
       );
     }
-    for (const key of [
-      ...resources.footprint().readOnly(),
-      ...resources.footprint().readWrite()
-    ])
-      keys.add(key.toXDR("base64"));
+    const roKeys = resources.footprint().readOnly().map((k) => k.toXDR("base64"));
+    const rwKeys = resources.footprint().readWrite().map((k) => k.toXDR("base64"));
+    validateFootprintKeys(roKeys, rwKeys, "RPC simulation footprint");
+    for (const key of [...roKeys, ...rwKeys]) keys.add(key);
     const requested = [...keys].sort();
     const rows = /* @__PURE__ */ new Map();
     let drift = false;
@@ -53741,8 +54153,8 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
         console.warn(
           `Transient captive-core ledger-read failure; discarding snapshot and retrying capture (${transientReadFailures}/3, ${delay}ms): ${failure instanceof Error ? failure.message : failure}`
         );
-        await new Promise((resolve6, reject) => {
-          const timer = setTimeout(resolve6, delay);
+        await new Promise((resolve7, reject) => {
+          const timer = setTimeout(resolve7, delay);
           if (signal) {
             const onAbort = () => {
               clearTimeout(timer);
@@ -53782,7 +54194,13 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
     }
     if (drift) continue;
     const headers = external_exports.object({
-      ledgers: external_exports.array(external_exports.object({ sequence: integer, headerXdr: encoded }))
+      ledgers: external_exports.array(
+        external_exports.object({
+          sequence: integer,
+          headerXdr: encoded,
+          hash: external_exports.string().optional()
+        })
+      )
     }).parse(
       await callRpc(
         rpcUrl,
@@ -53819,6 +54237,7 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
     if (header.ledgerSeq() !== simulation.latestLedger || header.ledgerVersion() !== network.protocolVersion) {
       throw new Error("Snapshot header ledger/protocol mismatch");
     }
+    validateLedgerHeaderHash(historyEntry, row.hash);
     const missingConfigs = configNames.filter((name) => {
       const key = configNameToKey.get(name);
       const row2 = rows.get(key);
@@ -53994,7 +54413,8 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
         input_sha256: sha2562(JSON.stringify(input)),
         seed: input.seed,
         auth_mode: output.auth_mode,
-        host_features: output.host_features
+        host_features: output.host_features,
+        source_account: transaction.source
       }
     };
   }
@@ -54014,6 +54434,11 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
 // src/measurement.ts
 var DEFAULT_RPC_URL = "http://localhost:8000/rpc";
 function metricsFromSimulation(output, limits) {
+  validateFootprintKeys(
+    output.read_only_keys,
+    output.read_write_keys,
+    "measured simulation footprint"
+  );
   const measured = (consumed, limit, source, limit_source) => ({
     availability: "measured",
     consumed,
@@ -54092,6 +54517,18 @@ function metricsFromSimulation(output, limits) {
       "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
     )
   };
+}
+function normalizeSourceAccount(publicKey) {
+  if (typeof publicKey !== "string" || !publicKey.trim()) {
+    throw new Error("Invalid invocation source account: expected a public key");
+  }
+  const trimmed = publicKey.trim();
+  if (!StrKey.isValidEd25519PublicKey(trimmed)) {
+    throw new Error(
+      "Invalid invocation source account: expected an Ed25519 account public key (G...)"
+    );
+  }
+  return trimmed;
 }
 function toScVal(arg) {
   const type = arg.type.toLowerCase();
@@ -54192,12 +54629,12 @@ function calculateContractId(deployerAddress, salt) {
 }
 async function getOrInitAccount(keyFile, rpcUrl, signal) {
   let keypair;
-  if (fs2.existsSync(keyFile)) {
-    const secret = fs2.readFileSync(keyFile, "utf8").trim();
+  if (fs3.existsSync(keyFile)) {
+    const secret = fs3.readFileSync(keyFile, "utf8").trim();
     keypair = Keypair.fromSecret(secret);
   } else {
     keypair = Keypair.random();
-    fs2.writeFileSync(keyFile, keypair.secret(), { mode: 384 });
+    fs3.writeFileSync(keyFile, keypair.secret(), { mode: 384 });
   }
   await ensureAccountReady(rpcUrl, keypair.publicKey(), signal);
   return keypair;
@@ -54211,8 +54648,8 @@ async function waitForTransaction(server, txHash, signal) {
     if (tx.status !== "NOT_FOUND") {
       return tx;
     }
-    await new Promise((resolve6, reject) => {
-      const timer = setTimeout(resolve6, 1e3);
+    await new Promise((resolve7, reject) => {
+      const timer = setTimeout(resolve7, 1e3);
       if (signal) {
         const onAbort = () => {
           clearTimeout(timer);
@@ -54298,20 +54735,250 @@ async function submitAndConfirm(server, prepared, phase, rpcUrl, signal) {
   }
 }
 async function isContractDeployed(server, contractId) {
+  const contractScAddress = Address.fromString(contractId).toScAddress();
+  const ledgerKey = types.LedgerKey.contractData(
+    new types.LedgerKeyContractData({
+      contract: contractScAddress,
+      key: types.ScVal.scvLedgerKeyContractInstance(),
+      durability: types.ContractDataDurability.persistent()
+    })
+  );
   try {
-    const contractScAddress = Address.fromString(contractId).toScAddress();
-    const ledgerKey = types.LedgerKey.contractData(
-      new types.LedgerKeyContractData({
-        contract: contractScAddress,
-        key: types.ScVal.scvLedgerKeyContractInstance(),
-        durability: types.ContractDataDurability.persistent()
-      })
-    );
     const res = await server.getLedgerEntries(ledgerKey);
-    return !!(res.entries && res.entries.length > 0);
-  } catch {
-    return false;
+    if (!res || typeof res !== "object" || !Array.isArray(res.entries)) {
+      throw new Error(
+        `Deployment probe returned an invalid ledger response: ${JSON.stringify(res)}`
+      );
+    }
+    if (res.entries.length === 0) return false;
+    if (res.entries.length > 1) {
+      throw new Error(
+        `Deployment probe returned ${res.entries.length} entries for ${contractId}; expected at most one matching contract instance`
+      );
+    }
+    const entry = res.entries[0];
+    if (!entry || typeof entry !== "object") {
+      throw new Error(
+        `Deployment probe returned a malformed entry for ${contractId}: ${JSON.stringify(entry)}`
+      );
+    }
+    const entryKey = typeof entry.key === "string" ? entry.key : typeof entry.key?.toXDR === "function" ? entry.key.toXDR("base64") : void 0;
+    const entryValue = entry.xdr ?? entry.val;
+    const entryXdr = typeof entryValue === "string" ? entryValue : typeof entryValue?.toXDR === "function" ? entryValue.toXDR("base64") : void 0;
+    if (typeof entryKey !== "string" || typeof entryXdr !== "string") {
+      throw new Error(
+        `Deployment probe returned a missing key/xdr payload for ${contractId}: ${JSON.stringify(entry)}`
+      );
+    }
+    if (entryKey !== ledgerKey.toXDR("base64")) {
+      throw new Error(
+        `Deployment probe returned an unrelated ledger entry for ${contractId}; expected instance key ${ledgerKey.toXDR("base64")}, got ${entryKey}`
+      );
+    }
+    let ledgerEntry;
+    try {
+      ledgerEntry = types.LedgerEntryData.fromXDR(entryXdr, "base64");
+    } catch (error2) {
+      throw new Error(
+        `Deployment probe returned invalid XDR for ${contractId}: ${error2.message}`
+      );
+    }
+    if (ledgerEntry.switch().name !== "contractData") {
+      throw new Error(
+        `Deployment probe returned ${ledgerEntry.switch().name} for ${contractId}; expected contractData`
+      );
+    }
+    const contractData = ledgerEntry.contractData();
+    if (!contractData) {
+      throw new Error(
+        `Deployment probe returned a contractData record without payload for ${contractId}`
+      );
+    }
+    const instanceKey = contractData.key();
+    if (instanceKey.toXDR("base64") !== types.ScVal.scvLedgerKeyContractInstance().toXDR("base64")) {
+      throw new Error(
+        `Deployment probe returned a non-instance contractData entry for ${contractId}`
+      );
+    }
+    if (contractData.contract().toXDR("base64") !== contractScAddress.toXDR("base64")) {
+      throw new Error(
+        `Deployment probe returned a different contract for ${contractId}; expected ${contractScAddress.toXDR("base64")}`
+      );
+    }
+    return true;
+  } catch (error2) {
+    if (error2 instanceof Error && error2.message.startsWith("Deployment probe")) {
+      throw error2;
+    }
+    throw new Error(
+      `Deployment probe failed for contract ${contractId}: ${error2 instanceof Error ? error2.message : String(error2)}`
+    );
   }
+}
+async function ensureContractDeployed(options) {
+  const { server, deployer, deployerAddress, wasmBytes, wasmHash, salt } = options;
+  const deployed = await isContractDeployed(server, options.contractId);
+  if (deployed) {
+    console.log(`Already deployed at ${options.contractId}`);
+    return;
+  }
+  console.log(`Installing WASM...`);
+  let account = await server.getAccount(deployer.publicKey());
+  const uploadTx = new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
+  }).addOperation(Operation.uploadContractWasm({ wasm: wasmBytes })).setTimeout(30).build();
+  let preparedUpload;
+  try {
+    preparedUpload = await server.prepareTransaction(uploadTx);
+  } catch (err) {
+    console.error(
+      `WASM upload preparation failed at ${sanitizeEndpoint(options.rpcUrl)}: ${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)}`
+    );
+    throw err;
+  }
+  preparedUpload.sign(deployer);
+  await submitAndConfirm(
+    server,
+    preparedUpload,
+    "WASM upload",
+    options.rpcUrl,
+    options.signal
+  );
+  console.log(`WASM installed. Deploying contract instance...`);
+  account = await server.getAccount(deployer.publicKey());
+  const createTx = new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
+  }).addOperation(
+    Operation.createCustomContract({
+      wasmHash,
+      address: deployerAddress,
+      salt
+    })
+  ).setTimeout(30).build();
+  const preparedCreate = await server.prepareTransaction(createTx);
+  preparedCreate.sign(deployer);
+  await submitAndConfirm(
+    server,
+    preparedCreate,
+    "contract creation",
+    options.rpcUrl,
+    options.signal
+  );
+  console.log(`Deployed at ${options.contractId}`);
+}
+async function buildInvocationTransaction(options) {
+  const { server, sourceAccount, contractId, invocation } = options;
+  if (options.signal?.aborted) {
+    throw options.signal.reason || new Error("Measurement cancelled");
+  }
+  let account;
+  try {
+    account = await server.getAccount(sourceAccount);
+  } catch (err) {
+    throw new Error(
+      `Invocation source account is not available on the network: ${sourceAccount} (${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)})`
+    );
+  }
+  const argsSc = invocation.args.map(toScVal);
+  return new TransactionBuilder(account, {
+    fee: "1000000",
+    networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
+  }).addOperation(
+    Operation.invokeContractFunction({
+      contract: contractId,
+      function: invocation.function_name,
+      args: argsSc
+    })
+  ).setTimeout(30).build();
+}
+var WASM_MAGIC = Buffer.from([
+  0,
+  97,
+  115,
+  109,
+  1,
+  0,
+  0,
+  0
+]);
+function resolveWasmPath(fixturesDir, declaredWasmPath, options) {
+  const wasmPath = path4.resolve(fixturesDir, declaredWasmPath);
+  if (fs3.existsSync(wasmPath)) {
+    return wasmPath;
+  }
+  const allowOptIn = options?.allowCrossTargetSubstitution ?? (process.env.WEIGHIN_ALLOW_CROSS_TARGET_SUBSTITUTION === "true" || process.env.WEIGHIN_ALLOW_CROSS_TARGET_SUBSTITUTION === "1");
+  if (allowOptIn) {
+    let altPath = "";
+    if (wasmPath.includes("wasm32-unknown-unknown")) {
+      altPath = wasmPath.replace("wasm32-unknown-unknown", "wasm32v1-none");
+    } else if (wasmPath.includes("wasm32v1-none")) {
+      altPath = wasmPath.replace("wasm32v1-none", "wasm32-unknown-unknown");
+    }
+    if (altPath && fs3.existsSync(altPath)) {
+      console.warn(
+        `Warning: declared WASM artifact not found at ${wasmPath}; substituting alternate target artifact at ${altPath}`
+      );
+      return altPath;
+    }
+  }
+  throw new Error(
+    `WASM not found: ${wasmPath}
+Build the contract before running measurements.`
+  );
+}
+function validateWasmArtifact(fixturesDir, declaredWasmPath, options) {
+  const resolvedPath = resolveWasmPath(fixturesDir, declaredWasmPath, options);
+  let stat;
+  try {
+    stat = fs3.statSync(resolvedPath);
+  } catch (err) {
+    throw new Error(
+      `WASM artifact inaccessible at ${resolvedPath}: ${err.message}`
+    );
+  }
+  if (!stat.isFile()) {
+    throw new Error(`WASM artifact at ${resolvedPath} is not a regular file`);
+  }
+  const fd = fs3.openSync(resolvedPath, "r");
+  try {
+    const buffer = Buffer.alloc(8);
+    const bytesRead = fs3.readSync(fd, buffer, 0, 8, 0);
+    if (bytesRead < 8 || !buffer.equals(WASM_MAGIC)) {
+      throw new Error(
+        `Invalid WASM header at ${resolvedPath}: expected magic header \\0asm\\x01\\x00\\x00\\x00`
+      );
+    }
+  } finally {
+    fs3.closeSync(fd);
+  }
+  return { resolvedPath };
+}
+function preflightContractArtifacts(fixturesDir, contracts, fixtureId, options) {
+  const resolvedPaths = /* @__PURE__ */ new Map();
+  const errors = [];
+  for (const contract of contracts) {
+    const contractLabel2 = contract.logical_id ?? (contract.id ? `id:${contract.id}` : `wasm:${contract.wasm_path}`);
+    const context3 = `${fixtureId} / ${contractLabel2}`;
+    try {
+      const { resolvedPath } = validateWasmArtifact(
+        fixturesDir,
+        contract.wasm_path,
+        options
+      );
+      resolvedPaths.set(contract.wasm_path, resolvedPath);
+    } catch (err) {
+      errors.push(`[${context3}] ${err.message}`);
+    }
+  }
+  if (errors.length > 0) {
+    throw new Error(
+      `Preflight validation failed for configured contract WASM artifacts:
+${errors.join("\n")}`
+    );
+  }
+  return resolvedPaths;
 }
 async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcUrl) {
   let opts;
@@ -54319,7 +54986,7 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     opts = {
       fixturesPath: fixturesPathOrOptions,
       gitCommit: gitCommit ?? "unknown",
-      sdkVersion: sdkVersion ?? "unknown",
+      sdkVersion,
       rpcUrl
     };
   } else {
@@ -54329,12 +54996,18 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     throw opts.signal.reason || new Error("Measurement cancelled by caller");
   }
   const effectiveRpcUrl = opts.rpcUrl ?? DEFAULT_RPC_URL;
-  const fixturesDir = path3.dirname(path3.resolve(opts.fixturesPath));
-  const keyFile = opts.keyFile ?? path3.join(fixturesDir, ".weighin-temp-key");
-  const rawFixtures = fs2.readFileSync(opts.fixturesPath, "utf8");
+  const fixturesDir = path4.dirname(path4.resolve(opts.fixturesPath));
+  const keyFile = opts.keyFile ?? path4.join(fixturesDir, ".weighin-temp-key");
+  const rawFixtures = fs3.readFileSync(opts.fixturesPath, "utf8");
   const fixturesSpec = parseFixtures(
     rawFixtures,
-    opts.fixtureId ?? path3.relative(process.cwd(), path3.resolve(opts.fixturesPath))
+    opts.fixtureId ?? path4.relative(process.cwd(), path4.resolve(opts.fixturesPath))
+  );
+  const resolvedWasmPaths = preflightContractArtifacts(
+    fixturesDir,
+    fixturesSpec.contracts,
+    fixturesSpec.fixture_id,
+    { allowCrossTargetSubstitution: opts.allowCrossTargetSubstitution }
   );
   const server = new rpc_exports.Server(effectiveRpcUrl, { allowHttp: true });
   const deployer = await getOrInitAccount(
@@ -54343,26 +55016,19 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     opts.signal
   );
   const deployerAddress = Address.fromString(deployer.publicKey());
+  let invocationSourceAccount = deployer.publicKey();
+  if (opts.invocationSourceAccount !== void 0) {
+    invocationSourceAccount = normalizeSourceAccount(
+      opts.invocationSourceAccount
+    );
+    if (invocationSourceAccount !== deployer.publicKey()) {
+      console.log(`Invocation source account: ${invocationSourceAccount}`);
+    }
+  }
   const results = [];
   for (const contractSpec of fixturesSpec.contracts) {
-    let wasmPath = path3.resolve(fixturesDir, contractSpec.wasm_path);
-    if (!fs2.existsSync(wasmPath)) {
-      let altPath = "";
-      if (wasmPath.includes("wasm32-unknown-unknown")) {
-        altPath = wasmPath.replace("wasm32-unknown-unknown", "wasm32v1-none");
-      } else if (wasmPath.includes("wasm32v1-none")) {
-        altPath = wasmPath.replace("wasm32v1-none", "wasm32-unknown-unknown");
-      }
-      if (altPath && fs2.existsSync(altPath)) {
-        wasmPath = altPath;
-      } else {
-        throw new Error(
-          `WASM not found: ${wasmPath}
-Build the contract before running measurements.`
-        );
-      }
-    }
-    const wasmBytes = fs2.readFileSync(wasmPath);
+    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path);
+    const wasmBytes = fs3.readFileSync(wasmPath);
     const wasmHash = crypto3.createHash("sha256").update(wasmBytes).digest();
     const wasmSha256 = wasmHash.toString("hex");
     console.log(`WASM: ${wasmPath}`);
@@ -54370,74 +55036,31 @@ Build the contract before running measurements.`
     const salt = crypto3.createHash("sha256").update(wasmHash).digest();
     const contractId = calculateContractId(deployer.publicKey(), salt);
     console.log(`Contract ID: ${contractId}`);
-    const deployed = await isContractDeployed(server, contractId);
-    if (!deployed) {
-      console.log(`Installing WASM...`);
-      let account = await server.getAccount(deployer.publicKey());
-      const uploadTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
-      }).addOperation(Operation.uploadContractWasm({ wasm: wasmBytes })).setTimeout(30).build();
-      let preparedUpload;
-      try {
-        preparedUpload = await server.prepareTransaction(uploadTx);
-      } catch (err) {
-        console.error(
-          `WASM upload preparation failed at ${sanitizeEndpoint(effectiveRpcUrl)}: ${redactEndpointSecrets(String(err?.message ?? err), effectiveRpcUrl)}`
-        );
-        throw err;
-      }
-      preparedUpload.sign(deployer);
-      await submitAndConfirm(
-        server,
-        preparedUpload,
-        "WASM upload",
-        effectiveRpcUrl,
-        opts.signal
-      );
-      console.log(`WASM installed. Deploying contract instance...`);
-      account = await server.getAccount(deployer.publicKey());
-      const createTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
-      }).addOperation(
-        Operation.createCustomContract({
-          wasmHash,
-          address: deployerAddress,
-          salt
-        })
-      ).setTimeout(30).build();
-      const preparedCreate = await server.prepareTransaction(createTx);
-      preparedCreate.sign(deployer);
-      await submitAndConfirm(
-        server,
-        preparedCreate,
-        "contract creation",
-        effectiveRpcUrl,
-        opts.signal
-      );
-      console.log(`Deployed at ${contractId}`);
-    } else {
-      console.log(`Already deployed at ${contractId}`);
-    }
+    await ensureContractDeployed({
+      server,
+      deployer,
+      deployerAddress,
+      wasmBytes,
+      wasmHash,
+      salt,
+      contractId,
+      rpcUrl: effectiveRpcUrl,
+      signal: opts.signal
+    });
     const benchmarks = [];
     for (const invokeSpec of contractSpec.invocations) {
       if (opts.signal?.aborted) {
         throw opts.signal.reason || new Error("Measurement cancelled by caller");
       }
       console.log(`Simulating ${invokeSpec.function_name}...`);
-      const account = await server.getAccount(deployer.publicKey());
-      const argsSc = invokeSpec.args.map(toScVal);
-      const invokeTx = new TransactionBuilder(account, {
-        fee: "1000000",
-        networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
-      }).addOperation(
-        Operation.invokeContractFunction({
-          contract: contractId,
-          function: invokeSpec.function_name,
-          args: argsSc
-        })
-      ).setTimeout(30).build();
+      const invokeTx = await buildInvocationTransaction({
+        server,
+        sourceAccount: invocationSourceAccount,
+        contractId,
+        invocation: invokeSpec,
+        rpcUrl: effectiveRpcUrl,
+        signal: opts.signal
+      });
       const helperPath = await resolveSimulationHelper(opts.helperPath);
       const { output, provenance, limits } = await measureInvocation(
         effectiveRpcUrl,
@@ -54458,13 +55081,14 @@ Build the contract before running measurements.`
         wasm_sha256: wasmSha256
       });
     }
+    const sorobanSdkVersion = opts.sdkVersion !== void 0 ? opts.sdkVersion : discoverSdkVersion(wasmPath);
     results.push({
       schema_version: 4,
       fixture_id: fixturesSpec.fixture_id,
       logical_id: contractSpec.logical_id,
       contract_id: contractId,
       git_commit: opts.gitCommit,
-      soroban_sdk_version: opts.sdkVersion,
+      soroban_sdk_version: sorobanSdkVersion,
       timestamp: Math.floor(Date.now() / 1e3),
       benchmarks
     });
@@ -54486,10 +55110,23 @@ var ruleSchema = external_exports.union([
 var metricRules = external_exports.object(
   Object.fromEntries(METRIC_KEYS.map((key) => [key, ruleSchema.optional()]))
 ).strict();
+var benchmarkSelectorSchema = external_exports.object({
+  fixture_id: external_exports.string().min(1).optional(),
+  logical_id: external_exports.string().min(1).optional(),
+  function_name: external_exports.string().min(1),
+  case_id: external_exports.string().min(1).optional()
+}).strict();
+var aggregateBudgetConfigSchema = external_exports.object({
+  description: external_exports.string().optional(),
+  members: external_exports.array(benchmarkSelectorSchema).min(1),
+  limits: external_exports.record(external_exports.enum(METRIC_KEYS), percentage).optional(),
+  thresholds: metricRules.optional()
+}).strict();
 var configSchema = external_exports.object({
   limits: external_exports.object({
     global: external_exports.record(external_exports.enum(METRIC_KEYS), percentage).optional(),
-    functions: external_exports.record(external_exports.string().min(1), external_exports.record(external_exports.enum(METRIC_KEYS), percentage)).optional()
+    functions: external_exports.record(external_exports.string().min(1), external_exports.record(external_exports.enum(METRIC_KEYS), percentage)).optional(),
+    aggregates: external_exports.record(external_exports.string().min(1), external_exports.record(external_exports.enum(METRIC_KEYS), percentage)).optional()
   }).strict().optional(),
   thresholds: external_exports.object({
     global: external_exports.object({
@@ -54497,8 +55134,10 @@ var configSchema = external_exports.object({
       max_allowed_cpu_increase_pct: percentage.optional(),
       max_allowed_memory_increase_pct: percentage.optional()
     }).strict().optional(),
-    functions: external_exports.record(external_exports.string().min(1), metricRules).optional()
-  }).strict().optional()
+    functions: external_exports.record(external_exports.string().min(1), metricRules).optional(),
+    aggregates: external_exports.record(external_exports.string().min(1), metricRules).optional()
+  }).strict().optional(),
+  aggregates: external_exports.record(external_exports.string().min(1), aggregateBudgetConfigSchema).optional()
 }).strict();
 function validateConfig(value) {
   const parsed = configSchema.safeParse(value);
@@ -54581,12 +55220,106 @@ var GLOBAL_RULE_MAP = [
 ];
 function enforceThresholds(diff, config2) {
   if (config2 !== null) config2 = validateConfig(config2);
-  if (!config2?.thresholds && !config2?.limits) return [];
+  if (!config2?.thresholds && !config2?.limits && !config2?.aggregates) return [];
   const global2 = config2?.thresholds?.global ?? {};
   const perFunction = config2?.thresholds?.functions ?? {};
   const globalLimits = config2?.limits?.global ?? {};
   const functionLimits = config2?.limits?.functions ?? {};
   const violations = [];
+  const hasAggregatesConfig = Boolean(config2?.aggregates && Object.keys(config2.aggregates).length > 0) || Boolean(
+    config2?.limits?.aggregates && Object.keys(config2.limits.aggregates).length > 0
+  ) || Boolean(
+    config2?.thresholds?.aggregates && Object.keys(config2.thresholds.aggregates).length > 0
+  );
+  if (hasAggregatesConfig) {
+    if (!diff.aggregates) {
+      computeAggregateDiffs(diff, config2);
+    }
+    const aggregateLimits = config2?.limits?.aggregates ?? {};
+    const aggregateThresholds = config2?.thresholds?.aggregates ?? {};
+    for (const aggDiff of diff.aggregates ?? []) {
+      const name = aggDiff.name;
+      const aggConfig = config2?.aggregates?.[name];
+      const limits = { ...aggConfig?.limits, ...aggregateLimits[name] };
+      const thresholds = {
+        ...aggConfig?.thresholds,
+        ...aggregateThresholds[name]
+      };
+      for (const [metricKeyStr, limit] of Object.entries(limits)) {
+        const metricKey = metricKeyStr;
+        if (limit === void 0) continue;
+        const aggMetric = aggDiff.metrics.find((m) => m.key === metricKey);
+        if (!aggMetric || aggMetric.availability === "unavailable" || aggMetric.head_consumed === null) {
+          violations.push({
+            aggregate_id: name,
+            metric: metricKey,
+            delta: null,
+            pct: null,
+            rule: `absolute_limit(${limit})`,
+            rule_source: `aggregates.${name}.limits.${metricKey}`,
+            message: `${metricKey} unavailable; cannot evaluate configured aggregate absolute limit: ${aggMetric?.reason ?? "measured value unavailable"}`
+          });
+        } else if (aggMetric.head_consumed > limit) {
+          violations.push({
+            aggregate_id: name,
+            metric: metricKey,
+            delta: aggMetric.head_consumed - limit,
+            pct: null,
+            rule: `absolute_limit(${limit})`,
+            rule_source: `aggregates.${name}.limits.${metricKey}`,
+            message: `${metricKey} exceeded aggregate absolute limit: limit ${limit}, actual ${aggMetric.head_consumed}`
+          });
+        }
+      }
+      for (const [metricKeyStr, rule] of Object.entries(thresholds)) {
+        const metricKey = metricKeyStr;
+        if (rule === void 0) continue;
+        const ruleStr = typeof rule === "number" ? `allow_${rule}_percent_increase` : rule;
+        if (ruleStr === "ignore") continue;
+        const aggMetric = aggDiff.metrics.find((m) => m.key === metricKey);
+        if (!aggMetric || aggMetric.availability === "unavailable") {
+          violations.push({
+            aggregate_id: name,
+            metric: metricKey,
+            delta: null,
+            pct: null,
+            rule: ruleStr,
+            rule_source: `aggregates.${name}.thresholds.${metricKey}`,
+            message: `${metricKey} unavailable; cannot evaluate configured aggregate policy: ${aggMetric?.reason ?? "measured value unavailable"}`
+          });
+          continue;
+        }
+        if (!aggMetric.regression) continue;
+        if (ruleStr === "strict_zero_tolerance") {
+          violations.push({
+            aggregate_id: name,
+            metric: metricKey,
+            delta: aggMetric.delta,
+            pct: aggMetric.pct,
+            rule: ruleStr,
+            rule_source: `aggregates.${name}.thresholds.${metricKey}`,
+            message: `${metricKey} increased by ${aggMetric.delta} (strict zero tolerance)`
+          });
+          continue;
+        }
+        const allowedPct = typeof rule === "number" ? rule : parseAllowPct(ruleStr);
+        if (allowedPct !== null) {
+          if (aggMetric.pct === null || aggMetric.pct > allowedPct) {
+            const pctStr = aggMetric.pct === null ? "Infinity" : aggMetric.pct.toFixed(2);
+            violations.push({
+              aggregate_id: name,
+              metric: metricKey,
+              delta: aggMetric.delta,
+              pct: aggMetric.pct,
+              rule: ruleStr,
+              rule_source: `aggregates.${name}.thresholds.${metricKey}`,
+              message: `${metricKey} increased by ${pctStr}% (limit ${allowedPct}%)`
+            });
+          }
+        }
+      }
+    }
+  }
   const comparedNames = new Set(
     diff.contracts.flatMap(
       (contract) => contract.functions.map((fn) => fn.function_name)
@@ -54688,9 +55421,193 @@ function enforceThresholds(diff, config2) {
   }
   return violations;
 }
+function resolveEffectivePolicy(diff, config2, origin) {
+  if (!config2) {
+    return {
+      status: "absent",
+      report_only: true,
+      rules: []
+    };
+  }
+  const global2 = config2.thresholds?.global ?? {};
+  const perFunction = config2.thresholds?.functions ?? {};
+  const globalLimits = config2.limits?.global ?? {};
+  const functionLimits = config2.limits?.functions ?? {};
+  const hasRules = Boolean(global2.fail_on_any_regression) || GLOBAL_RULE_MAP.some(({ field }) => global2[field] !== void 0) || Object.keys(perFunction).length > 0 || Object.keys(globalLimits).length > 0 || Object.keys(functionLimits).length > 0;
+  if (!hasRules) {
+    return {
+      status: "empty",
+      mode: origin?.mode,
+      path: origin?.path,
+      revision: origin?.revision,
+      content_sha256: origin?.content_sha256,
+      report_only: true,
+      rules: []
+    };
+  }
+  const rules = [];
+  for (const [metric, limit] of Object.entries(globalLimits)) {
+    if (limit !== void 0) {
+      rules.push({
+        target: "global",
+        metric,
+        rule: `absolute_limit(${limit})`,
+        source: "global"
+      });
+    }
+  }
+  if (global2.fail_on_any_regression) {
+    for (const key of METRIC_KEYS) {
+      rules.push({
+        target: "global",
+        metric: key,
+        rule: "fail_on_any_regression",
+        source: "global"
+      });
+    }
+  }
+  for (const { field, metric, toRule } of GLOBAL_RULE_MAP) {
+    const val = global2[field];
+    if (typeof val === "number") {
+      rules.push({
+        target: "global",
+        metric,
+        rule: toRule(val),
+        source: "global"
+      });
+    }
+  }
+  for (const contract of diff.contracts) {
+    for (const fn of contract.functions) {
+      const fnLimits = functionLimits[fn.function_name];
+      if (fnLimits) {
+        for (const [metric, limit] of Object.entries(fnLimits)) {
+          if (limit !== void 0) {
+            rules.push({
+              target: fn.function_name,
+              metric,
+              rule: `absolute_limit(${limit})`,
+              source: "function_override"
+            });
+          }
+        }
+      }
+      const fnOverrides = perFunction[fn.function_name];
+      if (fnOverrides) {
+        for (const [metric, ruleVal] of Object.entries(fnOverrides)) {
+          if (ruleVal !== void 0) {
+            rules.push({
+              target: fn.function_name,
+              metric,
+              rule: ruleVal,
+              source: ruleVal === "ignore" ? "ignore" : "function_override"
+            });
+          }
+        }
+      }
+    }
+  }
+  return {
+    status: "active",
+    mode: origin?.mode,
+    path: origin?.path,
+    revision: origin?.revision,
+    content_sha256: origin?.content_sha256,
+    report_only: false,
+    fail_on_any_regression: global2.fail_on_any_regression,
+    rules
+  };
+}
 
 // src/comment.ts
 var COMMENT_MARKER = "<!-- weighin-report -->";
+var GITHUB_ACTIONS_BOT = {
+  login: "github-actions[bot]",
+  id: 41898282,
+  type: "Bot"
+};
+async function resolveExpectedAuthor(octokit, mode) {
+  if (mode === "github-actions") {
+    return { id: GITHUB_ACTIONS_BOT.id };
+  }
+  if (mode === "authenticated-user") {
+    let data;
+    try {
+      const response = await octokit.rest.users.getAuthenticated();
+      data = response.data;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err ?? "unknown error");
+      throw new Error(
+        `comment-author-mode is "authenticated-user" but the authenticated user could not be resolved: ${message}`
+      );
+    }
+    const user = data;
+    if (!user || typeof user.id !== "number" || !Number.isInteger(user.id) || user.id <= 0) {
+      throw new Error(
+        'comment-author-mode is "authenticated-user" but GET /user returned an unusable identity (missing or non-positive numeric id). Ensure the supplied token belongs to a regular user or bot account with a valid numeric ID.'
+      );
+    }
+    return { id: user.id };
+  }
+  throw new Error(
+    `Unsupported comment-author-mode: "${mode}". Supported values are "github-actions" and "authenticated-user".`
+  );
+}
+async function upsertPrComment(token, numberOrBody, bodyOrOptions, maybeOptions) {
+  const github = await Promise.resolve().then(() => (init_github(), github_exports));
+  let body;
+  let prNumberInput;
+  let options;
+  if (typeof numberOrBody === "number") {
+    prNumberInput = numberOrBody;
+    body = bodyOrOptions;
+    options = maybeOptions ?? {};
+  } else {
+    body = numberOrBody;
+    prNumberInput = void 0;
+    options = bodyOrOptions ?? {};
+  }
+  const core4 = options.core ?? await Promise.resolve().then(() => __toESM(require_core()));
+  const mode = options.commentAuthorMode ?? "github-actions";
+  if (mode !== "github-actions" && mode !== "authenticated-user") {
+    throw new Error(
+      `Unsupported comment-author-mode: "${mode}". Supported values are "github-actions" and "authenticated-user".`
+    );
+  }
+  const prNumber = prNumberInput !== void 0 ? prNumberInput : github.context.payload.pull_request?.number;
+  if (!prNumber) {
+    core4.warning("Not in a pull_request context; skipping PR comment.");
+    return;
+  }
+  const octokit = github.getOctokit(token);
+  const { owner, repo } = github.context.repo;
+  const expectedAuthor = await resolveExpectedAuthor(octokit, mode);
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner,
+    repo,
+    issue_number: prNumber
+  });
+  const existing = comments.find(
+    (comment) => comment.body?.includes(COMMENT_MARKER) && comment.user?.id === expectedAuthor.id
+  );
+  if (existing) {
+    await octokit.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: existing.id,
+      body
+    });
+    core4.info(`Updated PR comment #${existing.id}`);
+  } else {
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body
+    });
+    core4.info("Created new PR comment");
+  }
+}
 var METRIC_LABELS = {
   cpu_instructions: "CPU Instructions",
   memory_bytes: "Memory Bytes",
@@ -54808,7 +55725,7 @@ function compareFunctions(a, b) {
   return compareCodePoints(a.function_name, b.function_name) || compareCodePoints(a.case_id, b.case_id);
 }
 function compareViolations(a, b) {
-  return compareCodePoints(a.fixture_id, b.fixture_id) || compareCodePoints(a.logical_id, b.logical_id) || compareCodePoints(a.contract_id, b.contract_id) || compareCodePoints(a.function_name, b.function_name) || compareCodePoints(a.case_id, b.case_id) || compareCodePoints(a.metric, b.metric);
+  return compareCodePoints(a.aggregate_id, b.aggregate_id) || compareCodePoints(a.fixture_id, b.fixture_id) || compareCodePoints(a.logical_id, b.logical_id) || compareCodePoints(a.contract_id, b.contract_id) || compareCodePoints(a.function_name, b.function_name) || compareCodePoints(a.case_id, b.case_id) || compareCodePoints(a.metric, b.metric);
 }
 function renderComment(diff, violations, baseRef, headSha, policyOrigin) {
   const lines = [];
@@ -54817,7 +55734,39 @@ function renderComment(diff, violations, baseRef, headSha, policyOrigin) {
   const statusText = sortedViolations.length > 0 ? `**${sortedViolations.length} threshold violation${sortedViolations.length > 1 ? "s" : ""}**` : "**All thresholds passed**";
   lines.push(`## ${statusEmoji} WeighIn Benchmark Report`);
   lines.push("");
-  if (policyOrigin) {
+  const effectivePolicy = policyOrigin && "status" in policyOrigin ? policyOrigin : void 0;
+  if (effectivePolicy) {
+    if (effectivePolicy.status === "absent") {
+      lines.push(
+        "Policy status: **absent** (no policy configuration found; report-only mode)."
+      );
+      lines.push("");
+    } else if (effectivePolicy.status === "empty") {
+      lines.push(
+        `Policy status: **loaded-empty** from **${effectivePolicy.mode ?? "head"}** \`${effectivePolicy.path ?? "weighin.toml"}\` at \`${effectivePolicy.revision ?? "unknown"}\`; content SHA256 \`${effectivePolicy.content_sha256 ?? ""}\` (no threshold rules configured; report-only mode).`
+      );
+      lines.push("");
+    } else {
+      lines.push(
+        `Policy source: **${effectivePolicy.mode}** \`${effectivePolicy.path}\` at \`${effectivePolicy.revision}\`; content SHA256 \`${effectivePolicy.content_sha256}\`.`
+      );
+      lines.push("");
+      if (effectivePolicy.rules.length > 0) {
+        lines.push("<details><summary>Effective Policy Rules</summary>");
+        lines.push("");
+        lines.push("| Target | Metric | Effective Rule | Source |");
+        lines.push("| :--- | :--- | :--- | :--- |");
+        for (const r of effectivePolicy.rules) {
+          lines.push(
+            `| \`${r.target}\` | ${METRIC_LABELS[r.metric] ?? r.metric} | \`${r.rule}\` | ${r.source} |`
+          );
+        }
+        lines.push("");
+        lines.push("</details>");
+        lines.push("");
+      }
+    }
+  } else if (policyOrigin) {
     lines.push(
       `Policy source: **${policyOrigin.mode}** \`${policyOrigin.path}\` at \`${policyOrigin.revision}\`; content SHA256 \`${policyOrigin.content_sha256}\`.`
     );
@@ -54831,14 +55780,89 @@ function renderComment(diff, violations, baseRef, headSha, policyOrigin) {
     lines.push("### \u274C Violations");
     lines.push("");
     for (const v of sortedViolations) {
-      const measured = diff.contracts.find((c) => contractLabel(c) === contractLabel(v))?.functions.find(
-        (fn) => fn.function_name === v.function_name && fn.case_id === v.case_id
-      )?.metrics.find((m) => m.key === v.metric);
-      lines.push(
-        `- **\`${contractLabel(v)} / ${benchmarkLabel(v)}\` / ${measured ? metricLabel(measured) : METRIC_LABELS[v.metric]}**: ${v.message}`
-      );
+      if (v.aggregate_id) {
+        lines.push(
+          `- **\`Aggregate: ${v.aggregate_id}\` / ${METRIC_LABELS[v.metric]}**: ${v.message}`
+        );
+      } else {
+        const measured = diff.contracts.find((c) => contractLabel(c) === contractLabel(v))?.functions.find(
+          (fn) => fn.function_name === v.function_name && fn.case_id === v.case_id
+        )?.metrics.find((m) => m.key === v.metric);
+        lines.push(
+          `- **\`${contractLabel(v)} / ${benchmarkLabel(v)}\` / ${measured ? metricLabel(measured) : METRIC_LABELS[v.metric]}**: ${v.message}`
+        );
+      }
     }
     lines.push("");
+  }
+  if (diff.aggregates && diff.aggregates.length > 0) {
+    lines.push("### Aggregate Resource Budgets");
+    lines.push("");
+    for (const agg of diff.aggregates) {
+      lines.push(
+        `#### \`Aggregate: ${agg.name}\` (${agg.member_count} member${agg.member_count === 1 ? "" : "s"})`
+      );
+      lines.push("");
+      if (agg.description) {
+        lines.push(`> ${agg.description}`);
+        lines.push("");
+      }
+      if (agg.provenance) {
+        lines.push(
+          `Compute source: ${agg.provenance.source}; protocol ${agg.provenance.protocol_version}; network \`${agg.provenance.network_passphrase}\`.`
+        );
+        lines.push("");
+      }
+      lines.push(
+        "| | Metric | Base (Sum) | Head (Sum) | Delta | Change | Semantic Unit |"
+      );
+      lines.push("|---|---|---|---|---|---|---|");
+      for (const m of agg.metrics) {
+        const status = m.availability === "unavailable" ? "\u26AA" : m.regression ? "\u{1F534}" : "\u{1F7E2}";
+        const baseStr = m.base_consumed === null ? "Unavailable" : m.base_consumed.toLocaleString("en-US");
+        const headStr = m.head_consumed === null ? "Unavailable" : m.head_consumed.toLocaleString("en-US");
+        const deltaStr = m.delta === null ? "Unavailable" : m.delta > 0 ? `+${m.delta.toLocaleString("en-US")}` : m.delta.toLocaleString("en-US");
+        const pctStr = m.pct === null ? m.delta !== null && m.delta > 0 ? "+Infinity%" : "0.0%" : `${m.pct >= 0 ? "+" : ""}${m.pct.toFixed(1)}%`;
+        lines.push(
+          `| ${status} | ${METRIC_LABELS[m.key]} | ${baseStr} | ${headStr} | ${deltaStr} | ${pctStr} | ${m.description} |`
+        );
+      }
+      lines.push("");
+      const unavailableMetrics = agg.metrics.filter(
+        (m) => m.availability === "unavailable"
+      );
+      if (unavailableMetrics.length > 0) {
+        for (const m of unavailableMetrics) {
+          lines.push(`- **${METRIC_LABELS[m.key]} unavailable**: ${m.reason}`);
+        }
+        lines.push("");
+      }
+      lines.push("<details><summary>Member breakdown</summary>");
+      lines.push("");
+      lines.push(
+        "| Member | Function | Case | CPU Instructions (Base \u2192 Head) | Memory Bytes (Base \u2192 Head) |"
+      );
+      lines.push("|---|---|---|---|---|");
+      for (let i = 0; i < agg.member_count; i++) {
+        const cpuRow = agg.breakdown.cpu_instructions[i];
+        const memRow = agg.breakdown.memory_bytes[i];
+        const memberName = cpuRow.logical_id ?? cpuRow.contract_id ?? `member-${i + 1}`;
+        const cpuBase = cpuRow.base_consumed !== null ? cpuRow.base_consumed.toLocaleString("en-US") : "Unavailable";
+        const cpuHead = cpuRow.head_consumed !== null ? cpuRow.head_consumed.toLocaleString("en-US") : "Unavailable";
+        const memBase = memRow.base_consumed !== null ? memRow.base_consumed.toLocaleString("en-US") : "Unavailable";
+        const memHead = memRow.head_consumed !== null ? memRow.head_consumed.toLocaleString("en-US") : "Unavailable";
+        lines.push(
+          `| \`${memberName}\` | \`${cpuRow.function_name}\` | \`${cpuRow.case_id ?? "default"}\` | ${cpuBase} \u2192 ${cpuHead} | ${memBase} \u2192 ${memHead} |`
+        );
+      }
+      lines.push("");
+      lines.push(
+        "> Note: Summed invocation memory reflects total allocation across sequential invocations, not peak concurrent memory."
+      );
+      lines.push("");
+      lines.push("</details>");
+      lines.push("");
+    }
   }
   const sortedNewContracts = [...diff.newContracts].sort(compareCodePoints);
   const sortedRemovedContracts = [...diff.removedContracts].sort(
@@ -54916,22 +55940,140 @@ var core = __toESM(require_core());
 var exec3 = __toESM(require_exec());
 
 // src/build.ts
-var fs3 = __toESM(require("fs"));
-var path4 = __toESM(require("path"));
+var fs4 = __toESM(require("fs"));
+var path5 = __toESM(require("path"));
 var os = __toESM(require("os"));
 var import_crypto = require("crypto");
 var exec = __toESM(require_exec());
+var CargoTargetSchema = external_exports.object({
+  name: external_exports.string().optional(),
+  crate_types: external_exports.array(external_exports.string())
+}).passthrough();
+var CargoPackageSchema = external_exports.object({
+  id: external_exports.string().min(1, "package id must not be empty"),
+  name: external_exports.string().min(1, "package name must not be empty"),
+  manifest_path: external_exports.string().min(1, "manifest_path must not be empty"),
+  targets: external_exports.array(CargoTargetSchema)
+}).passthrough();
+var CargoMetadataSchema = external_exports.object({
+  packages: external_exports.array(CargoPackageSchema),
+  workspace_members: external_exports.array(external_exports.string())
+}).passthrough();
+function validateCargoMetadata(raw, manifest) {
+  const result = CargoMetadataSchema.safeParse(raw);
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => `${i.path.join(".") || "metadata"}: ${i.message}`).join("; ");
+    throw new Error(`Invalid Cargo metadata for ${manifest}: ${issues}`);
+  }
+  const metadata = result.data;
+  const packageMap = /* @__PURE__ */ new Map();
+  for (const pkg of metadata.packages) {
+    if (!fs4.existsSync(pkg.manifest_path)) {
+      throw new Error(
+        `Cargo package ${pkg.name} has unusable manifest_path ${pkg.manifest_path}: file does not exist`
+      );
+    }
+    packageMap.set(pkg.id, pkg);
+  }
+  for (const memberId of metadata.workspace_members) {
+    if (!packageMap.has(memberId)) {
+      throw new Error(
+        `Cargo metadata for ${manifest} contains foreign workspace member ${memberId} not found in packages list`
+      );
+    }
+  }
+  return metadata;
+}
+function getCanonicalPath(filePath) {
+  const normalized = path5.normalize(filePath);
+  let current = normalized;
+  const segments = [];
+  while (current && !fs4.existsSync(current)) {
+    const parent = path5.dirname(current);
+    if (parent === current) break;
+    segments.unshift(path5.basename(current));
+    current = parent;
+  }
+  try {
+    const realCurrent = fs4.existsSync(current) ? fs4.realpathSync(current) : current;
+    return segments.length > 0 ? path5.join(realCurrent, ...segments) : realCurrent;
+  } catch {
+    return normalized;
+  }
+}
+function snapshotContractInputs(packageDir) {
+  const hashes2 = /* @__PURE__ */ new Map();
+  function scanDir(dir) {
+    if (!fs4.existsSync(dir)) return;
+    const entries = fs4.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === "target" || entry.name === "node_modules" || entry.name === ".git") {
+        continue;
+      }
+      const fullPath = path5.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scanDir(fullPath);
+      } else if (entry.isFile()) {
+        if (entry.name === "Cargo.toml" || entry.name === "Cargo.lock" || entry.name.endsWith(".rs")) {
+          try {
+            const hash2 = (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(fullPath)).digest("hex");
+            hashes2.set(fullPath, hash2);
+          } catch {
+          }
+        }
+      }
+    }
+  }
+  scanDir(packageDir);
+  let current = path5.dirname(packageDir);
+  while (current && current !== packageDir) {
+    const parentToml = path5.join(current, "Cargo.toml");
+    const parentLock = path5.join(current, "Cargo.lock");
+    if (fs4.existsSync(parentToml)) {
+      hashes2.set(
+        parentToml,
+        (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(parentToml)).digest("hex")
+      );
+    }
+    if (fs4.existsSync(parentLock)) {
+      hashes2.set(
+        parentLock,
+        (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(parentLock)).digest("hex")
+      );
+    }
+    if (fs4.existsSync(path5.join(current, ".git"))) break;
+    const parent = path5.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  return { packageDir, hashes: hashes2 };
+}
+function assertContractInputsNotMutated(snapshot) {
+  for (const [filePath, expectedHash] of snapshot.hashes.entries()) {
+    if (!fs4.existsSync(filePath)) {
+      throw new Error(
+        `Default contract build mutated tracked inputs: input file was deleted during build: ${filePath}`
+      );
+    }
+    const currentHash = (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(filePath)).digest("hex");
+    if (currentHash !== expectedHash) {
+      throw new Error(
+        `Default contract build mutated tracked inputs: ${path5.basename(filePath)} was modified during build at ${filePath}`
+      );
+    }
+  }
+}
 function verifyBuildStorage(directory, bytes = 1024 * 1024) {
-  const probePath = path4.join(directory, ".weighin-storage-probe");
+  const probePath = path5.join(directory, ".weighin-storage-probe");
   const expected = Buffer.alloc(bytes, 165);
   let descriptor;
   try {
-    descriptor = fs3.openSync(probePath, "wx", 384);
-    fs3.writeFileSync(descriptor, expected);
-    fs3.fsyncSync(descriptor);
-    fs3.closeSync(descriptor);
+    descriptor = fs4.openSync(probePath, "wx", 384);
+    fs4.writeFileSync(descriptor, expected);
+    fs4.fsyncSync(descriptor);
+    fs4.closeSync(descriptor);
     descriptor = void 0;
-    if (!fs3.readFileSync(probePath).equals(expected))
+    if (!fs4.readFileSync(probePath).equals(expected))
       throw new Error(
         "temporary-file contents did not survive a write/read round trip"
       );
@@ -54940,19 +56082,54 @@ function verifyBuildStorage(directory, bytes = 1024 * 1024) {
       `Build temporary storage is unusable at ${directory}: ${error2.message}. Provide healthy temporary storage (TMPDIR on Unix); refusing to accept optimizer output.`
     );
   } finally {
-    if (descriptor !== void 0) fs3.closeSync(descriptor);
-    fs3.rmSync(probePath, { force: true });
+    if (descriptor !== void 0) fs4.closeSync(descriptor);
+    fs4.rmSync(probePath, { force: true });
   }
 }
-async function buildContracts(fixturesPath, rustToolchain) {
+async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchain) {
+  let fixturesPath;
+  let root;
+  let toolchain;
+  if (typeof fixturesPathOrOptions === "object" && fixturesPathOrOptions !== null) {
+    fixturesPath = fixturesPathOrOptions.fixturesPath;
+    root = fixturesPathOrOptions.workspaceRoot;
+    toolchain = fixturesPathOrOptions.rustToolchain;
+  } else {
+    fixturesPath = fixturesPathOrOptions;
+    root = workspaceRoot ?? "";
+    toolchain = rustToolchain;
+  }
+  if (!root || !root.trim()) {
+    throw new Error(
+      "Workspace root is required to prevent build escapes; provide an explicit directory"
+    );
+  }
+  const resolvedRoot = path5.resolve(root);
+  if (!fs4.existsSync(resolvedRoot)) {
+    throw new Error(`Workspace root does not exist: ${root}`);
+  }
+  const rootStat = fs4.statSync(resolvedRoot);
+  if (!rootStat.isDirectory()) {
+    throw new Error(`Workspace root is not a directory: ${root}`);
+  }
+  const canonicalRoot = fs4.realpathSync(resolvedRoot);
+  const resolvedFixturesPath = path5.resolve(canonicalRoot, fixturesPath);
+  if (!fs4.existsSync(resolvedFixturesPath)) {
+    throw new Error(`Fixtures file not found: ${fixturesPath}`);
+  }
+  const canonicalFixturesFile = fs4.realpathSync(resolvedFixturesPath);
+  const relFixtures = path5.relative(canonicalRoot, canonicalFixturesFile);
+  if (relFixtures.startsWith("..") || path5.isAbsolute(relFixtures)) {
+    throw new Error(`Fixtures path escapes workspace root: ${fixturesPath}`);
+  }
   const fixtures = parseFixtures(
-    fs3.readFileSync(fixturesPath, "utf8"),
-    path4.basename(fixturesPath)
+    fs4.readFileSync(canonicalFixturesFile, "utf8"),
+    path5.basename(canonicalFixturesFile)
   );
-  const fixturesDir = path4.dirname(path4.resolve(fixturesPath));
+  const fixturesDir = path5.dirname(canonicalFixturesFile);
   const env = {
     ...process.env,
-    ...rustToolchain ? { RUSTUP_TOOLCHAIN: rustToolchain } : {}
+    ...toolchain ? { RUSTUP_TOOLCHAIN: toolchain } : {}
   };
   async function command(tool, args, cwd, commandEnv = env) {
     let stdout = "", stderr = "";
@@ -54983,13 +56160,6 @@ async function buildContracts(fixturesPath, rustToolchain) {
       process.stdout.write(stdout + stderr);
     return stdout.trim();
   }
-  const rustVersion = await command("rustc", ["--version"], fixturesDir);
-  const rust = rustVersion.match(/^rustc (\d+)\.(\d+)\./);
-  if (!rust || Number(rust[1]) < 1 || Number(rust[1]) === 1 && Number(rust[2]) < 84) {
-    throw new Error(
-      `Rust 1.84+ is required for wasm32v1-none; got ${rustVersion}`
-    );
-  }
   const stellarVersion = await command("stellar", ["--version"], fixturesDir);
   const stellar = stellarVersion.match(/stellar (\d+)\.(\d+)\.(\d+)/);
   if (!stellar || Number(stellar[1]) < 28 || Number(stellar[1]) === 28 && Number(stellar[2]) < 1) {
@@ -54997,43 +56167,134 @@ async function buildContracts(fixturesPath, rustToolchain) {
       `Stellar CLI 28.1+ with optimization support is required; got ${stellarVersion}`
     );
   }
+  const packageRustVersions = /* @__PURE__ */ new Map();
+  async function probePackageCompiler(packageDir) {
+    let version2 = packageRustVersions.get(packageDir);
+    if (!version2) {
+      version2 = await command("rustc", ["--version"], packageDir);
+      const rust = version2.match(/^rustc (\d+)\.(\d+)\./);
+      if (!rust || Number(rust[1]) < 1 || Number(rust[1]) === 1 && Number(rust[2]) < 84) {
+        throw new Error(
+          `Rust 1.84+ is required for wasm32v1-none; got ${version2}`
+        );
+      }
+      packageRustVersions.set(packageDir, version2);
+    }
+    return version2;
+  }
+  function validateDestinationPath(destination, contractWasmPath) {
+    const relFromRoot = path5.relative(canonicalRoot, destination);
+    if (relFromRoot.startsWith("..") || path5.isAbsolute(relFromRoot)) {
+      throw new Error(
+        `WASM destination escapes workspace root for wasm_path ${contractWasmPath}: ${destination}`
+      );
+    }
+    let check = destination;
+    while (check !== canonicalRoot && path5.relative(canonicalRoot, check) !== "") {
+      try {
+        const lstat = fs4.lstatSync(check);
+        if (lstat.isSymbolicLink()) {
+          const canonicalCheck = fs4.realpathSync(check);
+          const relCheck = path5.relative(canonicalRoot, canonicalCheck);
+          if (relCheck.startsWith("..") || path5.isAbsolute(relCheck)) {
+            throw new Error(
+              `WASM destination symlink escapes workspace root for wasm_path ${contractWasmPath}: ${check} -> ${canonicalCheck}`
+            );
+          }
+        }
+      } catch (err) {
+        if (err.code !== "ENOENT") throw err;
+      }
+      const parent = path5.dirname(check);
+      if (parent === check) break;
+      check = parent;
+    }
+  }
   const plans = [];
   const metadataCache = /* @__PURE__ */ new Map();
+  const destinationOwnership = /* @__PURE__ */ new Map();
   for (const contract of fixtures.contracts) {
-    const destination = path4.resolve(fixturesDir, contract.wasm_path);
-    let dir = path4.dirname(destination);
-    while (!fs3.existsSync(path4.join(dir, "Cargo.toml"))) {
-      const parent = path4.dirname(dir);
-      if (parent === dir)
+    const destination = path5.normalize(
+      path5.resolve(fixturesDir, contract.wasm_path)
+    );
+    const canonicalDestination = getCanonicalPath(destination);
+    validateDestinationPath(destination, contract.wasm_path);
+    let dir = path5.dirname(destination);
+    let manifest = null;
+    while (true) {
+      const relDir = path5.relative(canonicalRoot, dir);
+      if (relDir.startsWith("..") || path5.isAbsolute(relDir)) {
         throw new Error(
-          `No Cargo.toml found for wasm_path ${contract.wasm_path}`
+          `Manifest search escaped workspace root for wasm_path ${contract.wasm_path}`
         );
+      }
+      if (fs4.existsSync(dir)) {
+        const canonicalDir = fs4.realpathSync(dir);
+        const relCanonical = path5.relative(canonicalRoot, canonicalDir);
+        if (relCanonical.startsWith("..") || path5.isAbsolute(relCanonical)) {
+          throw new Error(
+            `Manifest search traversed symlink escaping workspace root for wasm_path ${contract.wasm_path}`
+          );
+        }
+      }
+      const candidate = path5.join(dir, "Cargo.toml");
+      if (fs4.existsSync(candidate)) {
+        const canonicalManifest = fs4.realpathSync(candidate);
+        const relManifest = path5.relative(canonicalRoot, canonicalManifest);
+        if (relManifest.startsWith("..") || path5.isAbsolute(relManifest)) {
+          throw new Error(
+            `Cargo.toml symlink escapes workspace root for wasm_path ${contract.wasm_path}`
+          );
+        }
+        manifest = candidate;
+        break;
+      }
+      const currentCanonical = fs4.existsSync(dir) ? fs4.realpathSync(dir) : path5.resolve(dir);
+      if (currentCanonical === canonicalRoot || path5.relative(canonicalRoot, currentCanonical) === "") {
+        break;
+      }
+      const parent = path5.dirname(dir);
+      if (parent === dir) {
+        break;
+      }
       dir = parent;
     }
-    const manifest = path4.join(dir, "Cargo.toml");
+    if (!manifest) {
+      throw new Error(
+        `No Cargo.toml found for wasm_path ${contract.wasm_path}`
+      );
+    }
     let packages = metadataCache.get(manifest);
     if (!packages) {
-      const metadata = JSON.parse(
-        await command(
-          "cargo",
-          [
-            "metadata",
-            "--no-deps",
-            "--locked",
-            "--format-version",
-            "1",
-            "--manifest-path",
-            manifest
-          ],
-          dir
-        )
-      );
+      let rawMetadata;
+      try {
+        rawMetadata = JSON.parse(
+          await command(
+            "cargo",
+            [
+              "metadata",
+              "--no-deps",
+              "--locked",
+              "--format-version",
+              "1",
+              "--manifest-path",
+              manifest
+            ],
+            dir
+          )
+        );
+      } catch (error2) {
+        throw new Error(
+          `Failed to parse Cargo metadata for ${manifest}: ${error2.message}`
+        );
+      }
+      const metadata = validateCargoMetadata(rawMetadata, manifest);
       packages = metadata.packages.filter(
         (pkg2) => metadata.workspace_members.includes(pkg2.id) && pkg2.targets.some((target) => target.crate_types.includes("cdylib"))
       );
       metadataCache.set(manifest, packages);
     }
-    const destinationName = path4.basename(destination);
+    const destinationName = path5.basename(destination);
     const matches = [];
     for (const pkg2 of packages) {
       const cdylibTargets = pkg2.targets.filter(
@@ -55059,16 +56320,53 @@ async function buildContracts(fixturesPath, rustToolchain) {
         `wasm_path ${contract.wasm_path} must identify exactly one Cargo cdylib package; found ${matches.length}`
       );
     const { pkg, targetName } = matches[0];
-    plans.push({ destination, pkg, targetName });
+    const canonicalPkgManifest = fs4.realpathSync(pkg.manifest_path);
+    const relPkg = path5.relative(canonicalRoot, canonicalPkgManifest);
+    if (relPkg.startsWith("..") || path5.isAbsolute(relPkg)) {
+      throw new Error(
+        `Cargo package ${pkg.name} manifest escapes workspace root: ${pkg.manifest_path}`
+      );
+    }
+    const existing = destinationOwnership.get(canonicalDestination);
+    if (existing) {
+      if (existing.pkg.id !== pkg.id || existing.pkg.manifest_path !== pkg.manifest_path) {
+        throw new Error(
+          `Conflicting build destinations: ${contract.wasm_path} resolves to ${canonicalDestination} which is already claimed by package ${existing.pkg.name} (${existing.pkg.manifest_path})`
+        );
+      }
+    } else {
+      destinationOwnership.set(canonicalDestination, {
+        pkg,
+        wasm_path: contract.wasm_path
+      });
+    }
+    const packageDir = path5.dirname(pkg.manifest_path);
+    await probePackageCompiler(packageDir);
+    plans.push({
+      destination,
+      canonicalDestination,
+      pkg,
+      targetName,
+      wasmPath: contract.wasm_path
+    });
   }
   const artifacts = /* @__PURE__ */ new Map();
+  const writtenDestinations = /* @__PURE__ */ new Map();
   const results = [];
-  for (const { destination, pkg, targetName } of plans) {
+  for (const {
+    destination,
+    canonicalDestination,
+    pkg,
+    targetName,
+    wasmPath
+  } of plans) {
+    const packageDir = path5.dirname(pkg.manifest_path);
+    const rustVersion = await probePackageCompiler(packageDir);
     let wasm = artifacts.get(pkg.manifest_path);
     if (!wasm) {
       let outputDir;
       try {
-        outputDir = fs3.mkdtempSync(path4.join(os.tmpdir(), "weighin-build-"));
+        outputDir = fs4.mkdtempSync(path5.join(os.tmpdir(), "weighin-build-"));
       } catch (error2) {
         throw new Error(
           `Cannot create build temporary storage: ${error2.message}`
@@ -55076,6 +56374,9 @@ async function buildContracts(fixturesPath, rustToolchain) {
       }
       try {
         verifyBuildStorage(outputDir);
+        const inputSnapshot = snapshotContractInputs(
+          path5.dirname(pkg.manifest_path)
+        );
         await command(
           "stellar",
           [
@@ -55090,22 +56391,34 @@ async function buildContracts(fixturesPath, rustToolchain) {
             "--out-dir",
             outputDir
           ],
-          path4.dirname(pkg.manifest_path),
+          path5.dirname(pkg.manifest_path),
           { ...env, TMPDIR: outputDir, TMP: outputDir, TEMP: outputDir }
         );
-        wasm = fs3.readFileSync(
-          path4.join(outputDir, `${targetName.replace(/-/g, "_")}.wasm`)
+        assertContractInputsNotMutated(inputSnapshot);
+        wasm = fs4.readFileSync(
+          path5.join(outputDir, `${targetName.replace(/-/g, "_")}.wasm`)
         );
         verifyBuildStorage(outputDir, Math.max(1024 * 1024, wasm.length));
         if (!wasm.subarray(0, 8).equals(Buffer.from([0, 97, 115, 109, 1, 0, 0, 0])))
           throw new Error("Stellar build did not produce a valid WASM module");
         artifacts.set(pkg.manifest_path, wasm);
       } finally {
-        fs3.rmSync(outputDir, { recursive: true, force: true });
+        fs4.rmSync(outputDir, { recursive: true, force: true });
       }
     }
-    fs3.mkdirSync(path4.dirname(destination), { recursive: true });
-    fs3.writeFileSync(destination, wasm);
+    validateDestinationPath(destination, wasmPath);
+    const prevWritten = writtenDestinations.get(canonicalDestination);
+    if (prevWritten) {
+      if (!prevWritten.equals(wasm)) {
+        throw new Error(
+          `Conflicting build output for destination ${destination}: bytes disagree across declarations`
+        );
+      }
+    } else {
+      fs4.mkdirSync(path5.dirname(destination), { recursive: true });
+      fs4.writeFileSync(destination, wasm);
+      writtenDestinations.set(canonicalDestination, wasm);
+    }
     const record = {
       wasm_path: destination,
       manifest_path: pkg.manifest_path,
@@ -55147,22 +56460,74 @@ async function buildForRevision(fixturesPath, worktreeRoot, rustToolchain, build
     }
     return;
   }
-  await buildContracts(fixturesPath, rustToolchain);
+  await buildContracts(fixturesPath, worktreeRoot, rustToolchain);
 }
 
 // src/report.ts
-var fs4 = __toESM(require("fs"));
-var path5 = __toESM(require("path"));
+var crypto5 = __toESM(require("crypto"));
+var fs5 = __toESM(require("fs"));
+var path6 = __toESM(require("path"));
 var core2 = __toESM(require_core());
+var TEMPORARY_FILE_ATTEMPTS = 5;
+function temporaryReportPath(targetPath) {
+  const unique = `${process.pid.toString(36)}-${crypto5.randomBytes(8).toString("hex")}`;
+  return path6.join(
+    path6.dirname(targetPath),
+    `.${path6.basename(targetPath)}.${unique}.tmp`
+  );
+}
+function createOwnedTemporaryFile(targetPath) {
+  let lastError;
+  for (let attempt = 0; attempt < TEMPORARY_FILE_ATTEMPTS; attempt++) {
+    const candidate = temporaryReportPath(targetPath);
+    try {
+      const fd = fs5.openSync(candidate, "wx", 438);
+      return { path: candidate, fd };
+    } catch (error2) {
+      lastError = error2;
+      if (error2?.code !== "EEXIST") throw error2;
+    }
+  }
+  throw lastError;
+}
+function removeOwnedTemporaryFile(temporaryPath) {
+  try {
+    fs5.unlinkSync(temporaryPath);
+  } catch (error2) {
+    if (error2?.code === "ENOENT") return;
+    core2.warning(
+      `Could not remove temporary report file ${temporaryPath}: ${error2.message}`
+    );
+  }
+}
+function writeFileAtomically(targetPath, body) {
+  const temporary = createOwnedTemporaryFile(targetPath);
+  let closed = false;
+  try {
+    fs5.writeFileSync(temporary.fd, body, "utf8");
+    fs5.closeSync(temporary.fd);
+    closed = true;
+    fs5.renameSync(temporary.path, targetPath);
+  } catch (error2) {
+    if (!closed) {
+      try {
+        fs5.closeSync(temporary.fd);
+      } catch {
+      }
+    }
+    removeOwnedTemporaryFile(temporary.path);
+    throw error2;
+  }
+}
 function writeReportFile(reportPathInput, headWorkspace, body) {
   if (!reportPathInput) return;
-  const targetPath = path5.resolve(headWorkspace, reportPathInput);
+  const targetPath = path6.resolve(headWorkspace, reportPathInput);
   try {
-    const parentDir = path5.dirname(targetPath);
-    if (!fs4.existsSync(parentDir)) {
-      fs4.mkdirSync(parentDir, { recursive: true });
+    const parentDir = path6.dirname(targetPath);
+    if (!fs5.existsSync(parentDir)) {
+      fs5.mkdirSync(parentDir, { recursive: true });
     }
-    fs4.writeFileSync(targetPath, body, "utf8");
+    writeFileAtomically(targetPath, body);
     core2.info(`Wrote Markdown report to ${targetPath}`);
   } catch (err) {
     throw new Error(
@@ -55202,6 +56567,73 @@ function buildPrMetadata(repository, prNumber, headSha) {
     prNumber,
     headSha
   };
+}
+
+// src/git-utils.ts
+var exec5 = __toESM(require_exec());
+async function capture(cmd, args, cwd) {
+  let out = "";
+  await exec5.exec(cmd, args, {
+    cwd,
+    listeners: {
+      stdout: (d) => {
+        out += d.toString();
+      }
+    },
+    silent: true
+  });
+  return out.trim();
+}
+async function captureRaw(cmd, args, cwd) {
+  let out = "";
+  await exec5.exec(cmd, args, {
+    cwd,
+    silent: true,
+    listeners: {
+      stdout: (d) => {
+        out += d.toString();
+      }
+    }
+  });
+  return out;
+}
+function parseTrackedChanges(status) {
+  return status.split("\n").filter((line) => line.trim() && !line.startsWith("??")).map((line) => {
+    const path8 = line.slice(3).trim();
+    const rename = path8.indexOf(" -> ");
+    return rename === -1 ? path8 : path8.slice(rename + 4);
+  });
+}
+async function isWorkspaceClean(dir) {
+  try {
+    const status = await captureRaw(
+      "git",
+      ["status", "--porcelain", "--untracked-files=no"],
+      dir
+    );
+    return parseTrackedChanges(status).length === 0;
+  } catch {
+    return false;
+  }
+}
+async function getModifiedFiles(dir) {
+  try {
+    const status = await captureRaw(
+      "git",
+      ["status", "--porcelain", "--untracked-files=no"],
+      dir
+    );
+    return parseTrackedChanges(status);
+  } catch {
+    return [];
+  }
+}
+async function getHeadSha(dir) {
+  try {
+    return await capture("git", ["rev-parse", "HEAD"], dir);
+  } catch {
+    return "unknown";
+  }
 }
 
 // src/action.ts
@@ -55272,12 +56704,12 @@ async function validateBaseRef(repoRoot, ref) {
     );
   }
   if (/^[0-9a-fA-F]{7,40}$/.test(ref)) return;
-  const branchRef = await exec5.exec(
+  const branchRef = await exec7.exec(
     "git",
     ["check-ref-format", `refs/heads/${ref}`],
     { cwd: repoRoot, ignoreReturnCode: true, silent: true }
   );
-  const tagRef = await exec5.exec(
+  const tagRef = await exec7.exec(
     "git",
     ["check-ref-format", `refs/tags/${ref}`],
     { cwd: repoRoot, ignoreReturnCode: true, silent: true }
@@ -55289,31 +56721,31 @@ async function validateBaseRef(repoRoot, ref) {
   }
 }
 function isPathWithin(root, candidate) {
-  const relative3 = path6.relative(root, candidate);
-  return relative3 === "" || relative3 !== ".." && !relative3.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relative3);
+  const relative4 = path7.relative(root, candidate);
+  return relative4 === "" || relative4 !== ".." && !relative4.startsWith(`..${path7.sep}`) && !path7.isAbsolute(relative4);
 }
 function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) {
   const invalidPathMessage = `fixtures-path for ${revision} must be a relative path inside the ${revision} worktree`;
-  if (!fixturesPathInput.trim() || path6.isAbsolute(fixturesPathInput) || path6.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
+  if (!fixturesPathInput.trim() || path7.isAbsolute(fixturesPathInput) || path7.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
     throw new Error(invalidPathMessage);
   }
-  const root = path6.resolve(worktreeRoot);
-  const resolved = path6.resolve(root, fixturesPathInput);
+  const root = path7.resolve(worktreeRoot);
+  const resolved = path7.resolve(root, fixturesPathInput);
   if (!isPathWithin(root, resolved)) throw new Error(invalidPathMessage);
   try {
-    const realRoot = fs5.realpathSync(root);
+    const realRoot = fs6.realpathSync(root);
     let current = root;
-    for (const segment of path6.relative(root, resolved).split(path6.sep)) {
+    for (const segment of path7.relative(root, resolved).split(path7.sep)) {
       if (!segment) continue;
-      current = path6.join(current, segment);
+      current = path7.join(current, segment);
       let currentStats;
       try {
-        currentStats = fs5.lstatSync(current);
+        currentStats = fs6.lstatSync(current);
       } catch (error2) {
         if (error2.code === "ENOENT") break;
         throw error2;
       }
-      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs5.realpathSync(current))) {
+      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs6.realpathSync(current))) {
         throw new Error(invalidPathMessage);
       }
     }
@@ -55324,41 +56756,15 @@ function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) 
   }
   return resolved;
 }
-async function capture(cmd, args, cwd) {
-  let out = "";
-  await exec5.exec(cmd, args, {
-    cwd,
-    listeners: {
-      stdout: (d) => {
-        out += d.toString();
-      }
-    },
-    silent: true
-  });
-  return out.trim();
-}
-async function captureRaw(cmd, args, cwd) {
-  let out = "";
-  await exec5.exec(cmd, args, {
-    cwd,
-    silent: true,
-    listeners: {
-      stdout: (d) => {
-        out += d.toString();
-      }
-    }
-  });
-  return out;
-}
 async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
   if (!trustedRef && !trustedPath) {
-    const configPath = path6.resolve(repoDir, configPathRel || "weighin.toml");
-    const content2 = fs5.existsSync(configPath) ? fs5.readFileSync(configPath, "utf8") : "";
+    const configPath = path7.resolve(repoDir, configPathRel || "weighin.toml");
+    const content2 = fs6.existsSync(configPath) ? fs6.readFileSync(configPath, "utf8") : "";
     return {
       config: content2 ? loadConfigContent(content2, configPath) : null,
       origin: {
         mode: "head",
-        path: path6.relative(repoDir, configPath),
+        path: path7.relative(repoDir, configPath),
         revision: await getHeadSha(repoDir),
         content_sha256: policyContentSha256(content2)
       }
@@ -55394,19 +56800,12 @@ async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
     }
   };
 }
-async function getHeadSha(dir) {
-  try {
-    return await capture("git", ["rev-parse", "HEAD"], dir);
-  } catch {
-    return "unknown";
-  }
-}
 function getSdkVersion(repoDir) {
   for (const rel of ["Cargo.lock", "contract/Cargo.lock"]) {
-    const lockPath = path6.join(repoDir, rel);
+    const lockPath = path7.join(repoDir, rel);
     try {
-      if (fs5.existsSync(lockPath)) {
-        const lock = fs5.readFileSync(lockPath, "utf8");
+      if (fs6.existsSync(lockPath)) {
+        const lock = fs6.readFileSync(lockPath, "utf8");
         const m = lock.match(/name = "soroban-sdk"\nversion = "([^"]+)"/);
         if (m) return m[1];
       }
@@ -55416,13 +56815,13 @@ function getSdkVersion(repoDir) {
   return "unknown";
 }
 async function checkoutRef(repoRoot, ref, label) {
-  await exec5.exec("git", ["fetch", "--depth=1", "origin", ref], {
+  await exec7.exec("git", ["fetch", "--depth=1", "origin", ref], {
     cwd: repoRoot
   });
-  const dir = fs5.mkdtempSync(path6.join(os2.tmpdir(), `weighin-${label}-`));
+  const dir = fs6.mkdtempSync(path7.join(os2.tmpdir(), `weighin-${label}-`));
   core3.info(`Checking out ${ref} into ${dir}`);
   try {
-    await exec5.exec("git", ["worktree", "add", "--detach", dir, "FETCH_HEAD"], {
+    await exec7.exec("git", ["worktree", "add", "--detach", dir, "FETCH_HEAD"], {
       cwd: repoRoot
     });
   } catch (error2) {
@@ -55435,46 +56834,11 @@ async function checkoutRef(repoRoot, ref, label) {
 }
 async function removeWorktree(repoRoot, dir) {
   try {
-    await exec5.exec("git", ["worktree", "remove", "--force", dir], {
+    await exec7.exec("git", ["worktree", "remove", "--force", dir], {
       cwd: repoRoot
     });
   } catch {
     core3.warning(`Could not remove git worktree at ${dir}`);
-  }
-}
-var COMMENT_MARKER2 = "<!-- weighin-report -->";
-async function upsertPrComment(token, body) {
-  const octokit = getOctokit(token);
-  const { owner, repo } = context2.repo;
-  const prNumber = context2.payload.pull_request?.number;
-  if (!prNumber) {
-    core3.warning("Not in a pull_request context; skipping PR comment.");
-    return;
-  }
-  const { data: comments } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: prNumber
-  });
-  const existing = comments.find(
-    (c) => c.body?.includes(COMMENT_MARKER2)
-  );
-  if (existing) {
-    await octokit.rest.issues.updateComment({
-      owner,
-      repo,
-      comment_id: existing.id,
-      body
-    });
-    core3.info(`Updated PR comment #${existing.id}`);
-  } else {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body
-    });
-    core3.info("Created new PR comment");
   }
 }
 async function run() {
@@ -55489,12 +56853,23 @@ async function run() {
     const rpcUrl = core3.getInput("rpc-url") || "http://localhost:8000/rpc";
     configuredRpcUrl = rpcUrl;
     const githubToken = core3.getInput("github-token");
+    const commentAuthorModeRaw = core3.getInput("comment-author-mode") || "github-actions";
+    if (commentAuthorModeRaw !== "github-actions" && commentAuthorModeRaw !== "authenticated-user") {
+      throw new Error(
+        `Unsupported comment-author-mode: "${commentAuthorModeRaw}". Supported values are "github-actions" and "authenticated-user".`
+      );
+    }
+    const commentAuthorMode = commentAuthorModeRaw;
     const baseRefInput = core3.getInput("base-ref", { trimWhitespace: false });
     const rustToolchain = core3.getInput("rust-toolchain");
     const reportPathInput = core3.getInput("report-path");
     const metadataPathInput = core3.getInput("metadata-path");
     const buildCommand = core3.getInput("build-command");
     const skipBuild = parseOptionalBooleanInput("skip-build", false);
+    const allowCrossTargetSubstitution = parseOptionalBooleanInput(
+      "allow-cross-target-substitution",
+      false
+    );
     if (buildCommand && skipBuild) {
       throw new Error("build-command and skip-build cannot be used together");
     }
@@ -55506,9 +56881,9 @@ async function run() {
     }
     const baseRef = baseRefInput.trim() || context2.payload.pull_request?.base?.ref || "main";
     await validateBaseRef(headWorkspace, baseRef);
-    keyDir = fs5.mkdtempSync(path6.join(os2.tmpdir(), "weighin-key-"));
-    fs5.chmodSync(keyDir, 448);
-    sharedKeyFile = path6.join(keyDir, "weighin-deployer.key");
+    keyDir = fs6.mkdtempSync(path7.join(os2.tmpdir(), "weighin-key-"));
+    fs6.chmodSync(keyDir, 448);
+    sharedKeyFile = path7.join(keyDir, "weighin-deployer.key");
     core3.info(`Base ref:   ${baseRef}`);
     core3.info(`RPC URL:    ${sanitizeEndpoint(rpcUrl)}`);
     core3.info(`Fixtures:   ${fixturesPathRel}`);
@@ -55519,7 +56894,7 @@ async function run() {
       fixturesPathRel,
       "HEAD"
     );
-    const fixtureId = path6.relative(path6.resolve(headWorkspace), headFixturesPath).split(path6.sep).join("/");
+    const fixtureId = path7.relative(path7.resolve(headWorkspace), headFixturesPath).split(path7.sep).join("/");
     const policy = await loadPolicy(
       headWorkspace,
       configPathRel,
@@ -55527,12 +56902,22 @@ async function run() {
       trustedPolicyPath
     );
     const config2 = policy.config;
-    if (!fs5.existsSync(headFixturesPath)) {
+    if (!fs6.existsSync(headFixturesPath)) {
       throw new Error(`fixtures-path not found: ${headFixturesPath}`);
     }
     core3.startGroup("Building + measuring HEAD");
     const headSha = await getHeadSha(headWorkspace);
     core3.info(`HEAD SHA: ${headSha}`);
+    const isClean = await isWorkspaceClean(headWorkspace);
+    if (!isClean) {
+      const modifiedFiles = await getModifiedFiles(headWorkspace);
+      throw new Error(
+        `HEAD workspace has uncommitted changes. Benchmark measurements must reflect the reported git HEAD revision. Modified files:
+${modifiedFiles.map((f) => `  - ${f}`).join("\n")}
+
+Commit or stash changes before running benchmarks.`
+      );
+    }
     let headResults;
     try {
       await buildForRevision(
@@ -55548,7 +56933,8 @@ async function run() {
         gitCommit: headSha,
         sdkVersion: getSdkVersion(headWorkspace),
         rpcUrl,
-        keyFile: sharedKeyFile
+        keyFile: sharedKeyFile,
+        allowCrossTargetSubstitution
       });
     } catch (err) {
       throw new Error(`HEAD measurement failed: ${err.message}`);
@@ -55575,7 +56961,7 @@ async function run() {
         fixturesPathRel,
         "BASE"
       );
-      if (!fs5.existsSync(baseFixturesPath)) {
+      if (!fs6.existsSync(baseFixturesPath)) {
         throw new Error("fixtures-path not found in base ref");
       } else {
         await buildForRevision(
@@ -55591,7 +56977,8 @@ async function run() {
           gitCommit: baseSha,
           sdkVersion: getSdkVersion(baseDir),
           rpcUrl,
-          keyFile: sharedKeyFile
+          keyFile: sharedKeyFile,
+          allowCrossTargetSubstitution
         });
         for (const contract of baseResults) {
           for (const bench of contract.benchmarks) {
@@ -55632,20 +57019,25 @@ async function run() {
     validatedDiffJson = JSON.stringify(diff);
     core3.info(`Violations: ${violations.length}`);
     for (const v of violations) {
-      core3.error(
-        `[${contractLabel(v)} / ${v.function_name} / ${v.case_id}] ${v.message}`
-      );
+      if (v.aggregate_id) {
+        core3.error(`[aggregate: ${v.aggregate_id}] ${v.message}`);
+      } else {
+        core3.error(
+          `[${contractLabel(v)} / ${v.function_name} / ${v.case_id}] ${v.message}`
+        );
+      }
     }
     core3.endGroup();
     const result = violations.length > 0 ? "fail" : "pass";
     core3.setOutput("result", result);
     core3.setOutput("diff-json", validatedDiffJson);
+    const effectivePolicy = resolveEffectivePolicy(diff, config2, policy.origin);
     const body = renderComment(
       diff,
       violations,
       baseRef,
       headSha,
-      policy.origin
+      effectivePolicy
     );
     if (process.env.GITHUB_STEP_SUMMARY)
       await core3.summary.addRaw(body).write();
@@ -55653,11 +57045,11 @@ async function run() {
     if (metadataPathInput) {
       const prNumber = context2.payload.pull_request?.number;
       if (prNumber) {
-        const destination = path6.resolve(headWorkspace, metadataPathInput);
-        fs5.mkdirSync(path6.dirname(destination), { recursive: true });
+        const destination = path7.resolve(headWorkspace, metadataPathInput);
+        fs6.mkdirSync(path7.dirname(destination), { recursive: true });
         const { owner, repo } = context2.repo;
         const metadata = buildPrMetadata(`${owner}/${repo}`, prNumber, headSha);
-        fs5.writeFileSync(
+        fs6.writeFileSync(
           destination,
           JSON.stringify(metadata, null, 2),
           "utf8"
@@ -55667,7 +57059,10 @@ async function run() {
     if (githubToken) {
       core3.startGroup("Posting PR comment");
       try {
-        await upsertPrComment(githubToken, body);
+        await upsertPrComment(githubToken, body, {
+          commentAuthorMode,
+          core: core3
+        });
       } catch (err) {
         core3.warning(`Failed to post PR comment: ${err.message}`);
       }
@@ -55679,7 +57074,7 @@ async function run() {
   } finally {
     if (keyDir) {
       try {
-        fs5.rmSync(keyDir, { recursive: true, force: true });
+        fs6.rmSync(keyDir, { recursive: true, force: true });
         core3.info(`Removed owned deployer key directory: ${keyDir}`);
       } catch (err) {
         core3.warning(

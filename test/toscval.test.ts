@@ -58,12 +58,17 @@ describe("toScVal", () => {
     );
   });
 
-  it("parses recursive vectors", () => {
+  it("parses recursive vectors and accepts bounded large payloads", () => {
+    const largeValues = Array.from({ length: 256 }, (_, index) => ({
+      type: "u32",
+      value: index,
+    }));
     const v = toScVal({
       type: "vec",
       value: [
         { type: "u32", value: 1 },
         { type: "vec", value: [{ type: "bool", value: true }] },
+        ...largeValues,
       ],
     });
     expect(v.switch().name).toBe("scvVec");
@@ -72,6 +77,9 @@ describe("toScVal", () => {
     if (arr) {
       expect(arr[0].switch().name).toBe("scvU32");
       expect(arr[1].switch().name).toBe("scvVec");
+      expect(arr[2].switch().name).toBe("scvU32");
+      expect(arr[2].u32()).toBe(0);
+      expect(arr[arr.length - 1].u32()).toBe(255);
     }
 
     expect(() => toScVal({ type: "vec", value: "not-array" })).toThrow(
@@ -80,6 +88,12 @@ describe("toScVal", () => {
     expect(() => toScVal({ type: "vec", value: [{ type: "u32" }] })).toThrow(
       /Invalid vector element at index 0/,
     );
+    expect(() =>
+      toScVal({
+        type: "vec",
+        value: [{ type: "map", value: [{ key: { type: "u32", value: 1 } }] }],
+      }),
+    ).toThrow(/Invalid map entry at index 0/);
   });
 
   it("parses recursive maps", () => {
