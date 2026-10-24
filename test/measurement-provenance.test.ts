@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import records from "../docs/experiments/metric-provenance/measurements.json";
 
-describe("current schema-4 measurements", () => {
+describe("archived schema-4 measurements", () => {
   it("keeps unsupported metrics explicitly unavailable rather than zero", () => {
     for (const contract of records) {
       expect(contract.schema_version).toBe(4);

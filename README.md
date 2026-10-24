@@ -255,7 +255,11 @@ HEAD has an undefined percentage in the report and violates finite percentage
 rules. Unknown/invalid policy keys fail. A nonignored rule without a matched
 function fails. Unavailable metrics required by a policy fail; global
 `fail_on_any_regression = true` needs explicit per-function ignores for the three
-unavailable metrics. Prefer targeted rules as in the quick start.
+unavailable metrics. Absolute caps are evaluated on matched BASE/HEAD
+benchmarks; a configured global cap fails with an actionable error if there are
+no matched benchmarks, rather than silently passing. New or removed cases alone
+do not evaluate absolute caps. An absent policy and an explicitly empty global
+limits table remain report-only. Prefer targeted rules as in the quick start.
 Omitting `config-path` still loads the default file if it exists.
 
 ## Benchmark Identity

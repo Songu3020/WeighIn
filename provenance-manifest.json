@@ -86,7 +86,7 @@
     },
     {
       "path": "src/diff.ts",
-      "sha256": "e266a6660e1e09b25b283c0adde2401f771fbdd2216a4f50a819310ced09143e"
+      "sha256": "71951faad895affbf131eba11cb0ceee2769000d6fa3016444996de812839524"
     },
     {
       "path": "src/endpoint.ts",
@@ -115,7 +115,7 @@
     },
     {
       "path": "src/record-schema.ts",
-      "sha256": "dcc5f0e4bc22f02aeb69df0c728b182808dc34ebf1ae068020f271b48466aa73"
+      "sha256": "296290f8e53aca64d8b65798bdfe822083af02a99b398144aec1682a4974969a"
     },
     {
       "path": "src/report.ts",
@@ -137,7 +137,7 @@
     },
     {
       "path": "src/threshold.ts",
-      "sha256": "815882d56065516b950b4917de7b6f27a9a37554e9ae9689f64729f1b0ceb511"
+      "sha256": "9fbabcda31da3ed2dd8d0fd49beea695f7d85d1bb0ead75d10a3752350c03067"
     }
   ]
 }
