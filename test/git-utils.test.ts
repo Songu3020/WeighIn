@@ -122,7 +122,55 @@ describe("git-utils", () => {
       });
 
       const result = await getModifiedFiles("/test");
-      expect(result).toEqual(["src/contract.rs", "new.txt", "untracked.txt"]);
+      expect(result).toEqual(["src/contract.rs", "new.txt"]);
+    });
+
+    it("does not report untracked files", async () => {
+      vi.mocked(exec.exec).mockImplementation(async (cmd, args, options) => {
+        if (args[0] === "status") {
+          const listeners = options?.listeners as any;
+          if (listeners?.stdout) {
+            listeners.stdout(Buffer.from("?? weighin-report.md\n"));
+          }
+          return 0;
+        }
+        return 0;
+      });
+
+      expect(await getModifiedFiles("/test")).toEqual([]);
+      expect(await isWorkspaceClean("/test")).toBe(true);
+    });
+
+    it("keeps the full path of unstaged modifications", async () => {
+      vi.mocked(exec.exec).mockImplementation(async (cmd, args, options) => {
+        if (args[0] === "status") {
+          const listeners = options?.listeners as any;
+          if (listeners?.stdout) {
+            listeners.stdout(Buffer.from(" M contract/src/lib.rs\n"));
+          }
+          return 0;
+        }
+        return 0;
+      });
+
+      const result = await getModifiedFiles("/test");
+      expect(result).toEqual(["contract/src/lib.rs"]);
+    });
+
+    it("reports the new path of a renamed file", async () => {
+      vi.mocked(exec.exec).mockImplementation(async (cmd, args, options) => {
+        if (args[0] === "status") {
+          const listeners = options?.listeners as any;
+          if (listeners?.stdout) {
+            listeners.stdout(Buffer.from("R  old.rs -> new.rs\n"));
+          }
+          return 0;
+        }
+        return 0;
+      });
+
+      const result = await getModifiedFiles("/test");
+      expect(result).toEqual(["new.rs"]);
     });
 
     it("returns empty array when git command fails", async () => {

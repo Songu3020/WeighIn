@@ -109,8 +109,17 @@ Module._load = function (name, parent, ...args) {
             const result = spawnSync("git", argv, { encoding: "utf8" });
             return result.status ?? 1;
           }
+          // The unit workspace is a clean checkout unless a mode makes it dirty.
           if (command === "git" && argv[0] === "status") {
-            options.listeners?.stdout?.(Buffer.from(""));
+            options.listeners?.stdout?.(
+              Buffer.from(
+                mode === "dirty-head"
+                  ? " M contract/src/lib.rs\n"
+                  : mode === "untracked-head"
+                    ? "?? weighin-report.md\n"
+                    : "",
+              ),
+            );
             return 0;
           }
           const isBase = !(
