@@ -37,7 +37,10 @@ function scenario(t, options = {}) {
   fs.writeFileSync(path.join(dir, "key"), Keypair.random().secret(), {
     mode: 0o600,
   });
-  fs.writeFileSync(path.join(dir, "contract.wasm"), Buffer.from("test-only-wasm"));
+  fs.writeFileSync(
+    path.join(dir, "contract.wasm"),
+    Buffer.from("test-only-wasm"),
+  );
   fs.writeFileSync(
     path.join(dir, "fixtures.json"),
     JSON.stringify({
@@ -67,7 +70,11 @@ function scenario(t, options = {}) {
     t.mock.method(globalThis, "setTimeout", (callback) =>
       setImmediate(callback),
     );
-  t.mock.method(require("../dist/account"), "ensureAccountReady", async () => {});
+  t.mock.method(
+    require("../dist/account"),
+    "ensureAccountReady",
+    async () => {},
+  );
   t.mock.method(rpc.Server.prototype, "getAccount", async (address) => {
     order.push("getAccount");
     return new Account(address, "1");
@@ -90,10 +97,19 @@ function scenario(t, options = {}) {
     state.poll++;
     return { status: options.poll ? options.poll(hash) : "SUCCESS" };
   });
-  t.mock.method(rpc.Server.prototype, "simulateTransaction", async () => {
-    order.push("simulateTransaction");
-    throw new Error("reached invocation");
-  });
+  t.mock.method(
+    require("../dist/simulation"),
+    "resolveSimulationHelper",
+    async () => "/fake/helper",
+  );
+  t.mock.method(
+    require("../dist/simulation"),
+    "measureInvocation",
+    async () => {
+      order.push("simulateTransaction");
+      throw new Error("reached invocation");
+    },
+  );
 
   return {
     order,
