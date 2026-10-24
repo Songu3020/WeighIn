@@ -24,16 +24,16 @@ export const METRIC_KEYS = [
 export type MetricKey = (typeof METRIC_KEYS)[number];
 
 /** Current measurement record schema emitted by `runMeasurement`. */
-export const CURRENT_RECORD_SCHEMA_VERSION = 4 as const;
+export const CURRENT_RECORD_SCHEMA_VERSION = 5 as const;
 
 /** Explicitly versioned measurement record schemas accepted by WeighIn. */
-export const SUPPORTED_RECORD_SCHEMA_VERSIONS = [2, 3, 4] as const;
+export const SUPPORTED_RECORD_SCHEMA_VERSIONS = [2, 3, 4, 5] as const;
 
 export type RecordSchemaVersion =
   (typeof SUPPORTED_RECORD_SCHEMA_VERSIONS)[number];
 
 /** All accepted saved measurement envelopes, including legacy unversioned records. */
-export const SUPPORTED_MEASUREMENT_ENVELOPES = ["legacy", 2, 3, 4] as const;
+export const SUPPORTED_MEASUREMENT_ENVELOPES = ["legacy", 2, 3, 4, 5] as const;
 
 export type MeasurementEnvelopeVersion =
   (typeof SUPPORTED_MEASUREMENT_ENVELOPES)[number];
@@ -46,7 +46,7 @@ export const RUNTIME_RECORD_INVARIANTS = [
     id: "UNIQUE_CONTRACT_IDENTITY",
     scope: "record_set",
     description:
-      'Within a saved measurement array, no two ContractBenchmark entries may share the same comparison key (["legacy", contract_id] for legacy records or ["logical", fixture_id, logical_id] for schema 2/3/4 records).',
+      'Within a saved measurement array, no two ContractBenchmark entries may share the same comparison key (["legacy", contract_id] for legacy records or ["logical", fixture_id, logical_id] for schema 2/3/4/5 records).',
   },
   {
     id: "UNIQUE_BENCHMARK_IDENTITY",
@@ -58,13 +58,13 @@ export const RUNTIME_RECORD_INVARIANTS = [
     id: "HOMOGENEOUS_ENVELOPE_VERSION",
     scope: "record_set",
     description:
-      "All ContractBenchmark entries within a single saved measurement array must use the same envelope version (legacy, 2, 3, or 4).",
+      "All ContractBenchmark entries within a single saved measurement array must use the same envelope version (legacy, 2, 3, 4, or 5).",
   },
   {
     id: "COMPARISON_ENVIRONMENT_COMPATIBILITY",
     scope: "comparison",
     description:
-      "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4 per-metric availability/source/limit/limit_source/limit_reason.",
+      "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4/5 per-metric availability/source/limit/limit_source/limit_reason. Schema 5 additionally requires each metric's source and limit provenance to match its approved mapping.",
   },
   {
     id: "SAFE_INTEGER_BOUNDS",
@@ -183,6 +183,82 @@ const PROVENANCE_REQUIRED_STRINGS = [
   "auth_mode",
 ] as const;
 
+type ApprovedMetricProvenance =
+  | {
+      availability: "measured";
+      source: string;
+      limitSource: string;
+    }
+  | {
+      availability: "measured";
+      source: string;
+      limitReason: string;
+    }
+  | {
+      availability: "unavailable";
+      reason: string;
+    };
+
+const APPROVED_METRIC_PROVENANCE: Record<MetricKey, ApprovedMetricProvenance> =
+  {
+    cpu_instructions: {
+      availability: "measured",
+      source: "soroban-simulation.simulated_instructions",
+      limitSource: "ConfigSettingContractComputeV0.txMaxInstructions",
+    },
+    memory_bytes: {
+      availability: "measured",
+      source: "soroban-simulation.simulated_memory",
+      limitSource: "ConfigSettingContractComputeV0.txMemoryLimit",
+    },
+    ledger_read_entries: {
+      availability: "measured",
+      source: "SorobanResources.footprint.readOnly.length + readWrite.length",
+      limitSource: "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries",
+    },
+    ledger_read_bytes: {
+      availability: "measured",
+      source: "SorobanResources.diskReadBytes (identity adjustment)",
+      limitSource: "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes",
+    },
+    ledger_write_entries: {
+      availability: "measured",
+      source: "SorobanResources.footprint.readWrite.length",
+      limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries",
+    },
+    ledger_write_bytes: {
+      availability: "measured",
+      source: "SorobanResources.writeBytes (identity adjustment)",
+      limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteBytes",
+    },
+    historical_data_read_bytes: {
+      availability: "unavailable",
+      reason:
+        "Protocol 28 exposes historical-data fees, not a historical read consumption resource",
+    },
+    contract_data_hard_limit: {
+      availability: "unavailable",
+      reason:
+        "No verified instance-only post-invocation size and corresponding limit mapping",
+    },
+    tx_size_bytes: {
+      availability: "unavailable",
+      reason:
+        "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted",
+    },
+    events_count: {
+      availability: "measured",
+      source: "successful non-diagnostic ContractEvents.length",
+      limitReason: "Protocol 28 has no independent event-count cap",
+    },
+    event_data_bytes: {
+      availability: "measured",
+      source:
+        "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+      limitSource: "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes",
+    },
+  };
+
 const METRIC_KEY_SET = new Set<string>(METRIC_KEYS);
 const SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
 /** Ed25519 account public keys (StrKey "G..." form). */
@@ -211,7 +287,8 @@ export function detectRecordEnvelopeVersion(
   if (
     record.schema_version === 2 ||
     record.schema_version === 3 ||
-    record.schema_version === 4
+    record.schema_version === 4 ||
+    record.schema_version === 5
   ) {
     return record.schema_version;
   }
@@ -313,7 +390,7 @@ function validateProvenanceObject(
       path: `${pPath}.resource_limits_sha256`,
       version,
       code: "INVALID_RESOURCE_LIMITS_DIGEST",
-      message: "Schema 4 requires resource_limits_sha256",
+      message: `Schema ${version} requires resource_limits_sha256`,
     });
   }
 
@@ -398,14 +475,15 @@ export function inspectMeasurementRecord(
     if (
       value.schema_version !== 2 &&
       value.schema_version !== 3 &&
-      value.schema_version !== 4
+      value.schema_version !== 4 &&
+      value.schema_version !== 5
     ) {
       diagnostics.push({
         path: `${basePath}.schema_version`,
         version: "unknown",
         code: "UNSUPPORTED_SCHEMA_VERSION",
         message:
-          "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark",
+          "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark",
       });
     }
     if (!nonblank(value.fixture_id)) {
@@ -414,7 +492,7 @@ export function inspectMeasurementRecord(
         version,
         code: "MISSING_FIXTURE_ID",
         message:
-          "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark",
+          "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark",
       });
     }
     if (!nonblank(value.logical_id)) {
@@ -423,7 +501,7 @@ export function inspectMeasurementRecord(
         version,
         code: "MISSING_LOGICAL_ID",
         message:
-          "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark",
+          "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark",
       });
     }
     if (benchmarksArray) {
@@ -434,13 +512,13 @@ export function inspectMeasurementRecord(
             version,
             code: "MISSING_CASE_ID",
             message:
-              "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark",
+              "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark",
           });
         }
       });
     }
     if (
-      (version === 2 || version === 3 || version === 4) &&
+      (version === 2 || version === 3 || version === 4 || version === 5) &&
       nonblank(value.fixture_id) &&
       nonblank(value.logical_id)
     ) {
@@ -653,7 +731,7 @@ export function inspectMeasurementRecord(
       }
     }
 
-    if (version === 3 || version === 4) {
+    if (version === 3 || version === 4 || version === 5) {
       if (!benchmark.provenance) {
         diagnostics.push({
           path: `${bPath}.provenance`,
@@ -692,7 +770,10 @@ export function inspectMeasurementRecord(
             });
           }
 
-          if (version === 4 && metricVal.availability === "measured") {
+          if (
+            (version === 4 || version === 5) &&
+            metricVal.availability === "measured"
+          ) {
             if (
               metricVal.limit === null
                 ? !nonblank(metricVal.limit_reason)
@@ -705,15 +786,24 @@ export function inspectMeasurementRecord(
                     : `${mPath}.limit_source`,
                 version,
                 code: "MISSING_METRIC_LIMIT_PROVENANCE",
-                message: `Schema 4 requires explicit limit provenance for ${key}`,
+                message: `Schema ${version} requires explicit limit provenance for ${key}`,
               });
             }
+          }
+          if (version === 5) {
+            validateApprovedMetricProvenance(
+              key,
+              metricVal,
+              mPath,
+              version,
+              diagnostics,
+            );
           }
         }
       }
 
       if (
-        version === 4 &&
+        (version === 4 || version === 5) &&
         isPlainObject(benchmark.provenance) &&
         !SHA256_HEX_PATTERN.test(
           benchmark.provenance.resource_limits_sha256 ?? "",
@@ -727,7 +817,7 @@ export function inspectMeasurementRecord(
             path: `${bPath}.provenance.resource_limits_sha256`,
             version,
             code: "MISSING_RESOURCE_LIMITS_DIGEST",
-            message: "Schema 4 requires resource_limits_sha256",
+            message: `Schema ${version} requires resource_limits_sha256`,
           });
         }
       }
@@ -752,6 +842,85 @@ export function inspectMeasurementRecord(
     record: value as unknown as ContractBenchmark,
     diagnostics: [],
   };
+}
+
+function validateApprovedMetricProvenance(
+  key: MetricKey,
+  metric: Record<string, any>,
+  path: string,
+  version: MeasurementEnvelopeVersion | "unknown",
+  diagnostics: RecordValidationDiagnostic[],
+): void {
+  const approved = APPROVED_METRIC_PROVENANCE[key];
+  const allowedFields =
+    approved.availability === "unavailable"
+      ? ["availability", "consumed", "limit", "reason"]
+      : [
+          "availability",
+          "consumed",
+          "limit",
+          "source",
+          "limitSource" in approved ? "limit_source" : "limit_reason",
+        ];
+  const expectedValues: Record<string, string> =
+    approved.availability === "unavailable"
+      ? { availability: approved.availability, reason: approved.reason }
+      : {
+          availability: approved.availability,
+          source: approved.source,
+          ...("limitSource" in approved
+            ? { limit_source: approved.limitSource }
+            : { limit_reason: approved.limitReason }),
+        };
+
+  for (const field of [
+    "availability",
+    "source",
+    "limit_source",
+    "limit_reason",
+    "reason",
+  ]) {
+    const expected = expectedValues[field];
+    if (
+      metric[field] !== expected &&
+      (expected !== undefined || metric[field] !== undefined)
+    ) {
+      diagnostics.push({
+        path: `${path}.${field}`,
+        version,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} has unapproved ${field} provenance`,
+      });
+    }
+  }
+
+  if (
+    (approved.availability === "unavailable" && metric.limit !== null) ||
+    (approved.availability === "measured" &&
+      "limitReason" in approved &&
+      metric.limit !== null) ||
+    (approved.availability === "measured" &&
+      "limitSource" in approved &&
+      metric.limit === null)
+  ) {
+    diagnostics.push({
+      path: `${path}.limit`,
+      version,
+      code: "UNAPPROVED_METRIC_PROVENANCE",
+      message: `Schema 5 metric ${key} has an unapproved limit shape`,
+    });
+  }
+
+  for (const field of Object.keys(metric)) {
+    if (!allowedFields.includes(field)) {
+      diagnostics.push({
+        path: `${path}.${field}`,
+        version,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} contains unsupported provenance field ${field}`,
+      });
+    }
+  }
 }
 
 /**
@@ -986,12 +1155,53 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
     "host_features",
   ];
 
+  const schema5MetricSchema = (key: MetricKey) => {
+    const approved = APPROVED_METRIC_PROVENANCE[key];
+    const required =
+      approved.availability === "unavailable"
+        ? ["availability", "consumed", "limit", "reason"]
+        : [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limitSource" in approved ? "limit_source" : "limit_reason",
+          ];
+    const properties: Record<string, unknown> =
+      approved.availability === "unavailable"
+        ? {
+            availability: { const: "unavailable" },
+            consumed: { type: "null" },
+            limit: { type: "null" },
+            reason: { const: approved.reason },
+          }
+        : {
+            availability: { const: "measured" },
+            consumed: { $ref: "#/$defs/SafeNonNegativeInteger" },
+            limit:
+              "limitSource" in approved
+                ? { $ref: "#/$defs/SafeNonNegativeInteger" }
+                : { type: "null" },
+            source: { const: approved.source },
+            ...("limitSource" in approved
+              ? { limit_source: { const: approved.limitSource } }
+              : { limit_reason: { const: approved.limitReason } }),
+          };
+
+    return {
+      type: "object",
+      additionalProperties: false,
+      required,
+      properties,
+    };
+  };
+
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: "https://weighin.dev/schemas/measurement-records.schema.json",
     title: "WeighIn Saved Measurement Records",
     description:
-      "Authoritative versioned schema for WeighIn saved measurement record arrays across legacy unversioned, schema_version 2, schema_version 3, and schema_version 4 envelopes.",
+      "Authoritative versioned schema for WeighIn saved measurement record arrays across legacy unversioned, schema_version 2, schema_version 3, schema_version 4, and schema_version 5 envelopes.",
     type: "array",
     items: {
       $ref: "#/$defs/ContractBenchmark",
@@ -1186,6 +1396,14 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
         required: [...METRIC_KEYS],
         properties: metricsProperties("#/$defs/Schema4MetricValue"),
       },
+      Schema5Metrics: {
+        type: "object",
+        additionalProperties: false,
+        required: [...METRIC_KEYS],
+        properties: Object.fromEntries(
+          METRIC_KEYS.map((key) => [key, schema5MetricSchema(key)]),
+        ),
+      },
       Schema3ComputeProvenance: {
         type: "object",
         additionalProperties: false,
@@ -1193,6 +1411,12 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
         properties: provenanceBaseProperties,
       },
       Schema4ComputeProvenance: {
+        type: "object",
+        additionalProperties: false,
+        required: [...provenanceSchema3Required, "resource_limits_sha256"],
+        properties: provenanceBaseProperties,
+      },
+      Schema5ComputeProvenance: {
         type: "object",
         additionalProperties: false,
         required: [...provenanceSchema3Required, "resource_limits_sha256"],
@@ -1255,6 +1479,24 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
           metrics: { $ref: "#/$defs/Schema4Metrics" },
           wasm_sha256: { $ref: "#/$defs/NonBlankString" },
           provenance: { $ref: "#/$defs/Schema4ComputeProvenance" },
+        },
+      },
+      Schema5BenchmarkResult: {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "function_name",
+          "case_id",
+          "metrics",
+          "wasm_sha256",
+          "provenance",
+        ],
+        properties: {
+          function_name: { $ref: "#/$defs/NonBlankString" },
+          case_id: { $ref: "#/$defs/NonBlankString" },
+          metrics: { $ref: "#/$defs/Schema5Metrics" },
+          wasm_sha256: { $ref: "#/$defs/NonBlankString" },
+          provenance: { $ref: "#/$defs/Schema5ComputeProvenance" },
         },
       },
       LegacyContractBenchmark: {
@@ -1367,6 +1609,35 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
           },
         },
       },
+      Schema5ContractBenchmark: {
+        title: "Schema5ContractBenchmark",
+        "x-weighin-envelope-version": 5,
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "schema_version",
+          "fixture_id",
+          "logical_id",
+          "contract_id",
+          "git_commit",
+          "soroban_sdk_version",
+          "timestamp",
+          "benchmarks",
+        ],
+        properties: {
+          schema_version: { const: 5 },
+          fixture_id: { $ref: "#/$defs/NonBlankString" },
+          logical_id: { $ref: "#/$defs/NonBlankString" },
+          contract_id: { $ref: "#/$defs/NonBlankString" },
+          git_commit: { $ref: "#/$defs/NonBlankString" },
+          soroban_sdk_version: { $ref: "#/$defs/NonBlankString" },
+          timestamp: { $ref: "#/$defs/SafeNonNegativeInteger" },
+          benchmarks: {
+            type: "array",
+            items: { $ref: "#/$defs/Schema5BenchmarkResult" },
+          },
+        },
+      },
       ContractBenchmark: {
         description:
           "Discriminated union of supported WeighIn saved contract measurement envelopes.",
@@ -1375,6 +1646,7 @@ export function getMeasurementRecordJsonSchema(): Record<string, any> {
           { $ref: "#/$defs/Schema2ContractBenchmark" },
           { $ref: "#/$defs/Schema3ContractBenchmark" },
           { $ref: "#/$defs/Schema4ContractBenchmark" },
+          { $ref: "#/$defs/Schema5ContractBenchmark" },
         ],
       },
     },

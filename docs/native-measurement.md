@@ -1,4 +1,4 @@
-# Native simulation measurement (schema 4)
+# Native simulation measurement (schema 5)
 
 WeighIn now measures consumed CPU and memory with the official
 `soroban-simulation` / `soroban-env-host` 28.0.1 libraries. The initial supported
@@ -136,7 +136,7 @@ Measurement and helper operations accept an optional `signal?: AbortSignal` acro
 
 ## Schema migration
 
-`ContractBenchmark.schema_version` is now **4**. See the
+`ContractBenchmark.schema_version` is now **5**. See the
 [metric audit and migration](metric-provenance.md) for the complete mapping. The stable comparison tuple from
 schema 2 remains `(fixture_id, logical_id, function_name, case_id)`; runtime
 `contract_id` and WASM hash remain diagnostics.
@@ -159,6 +159,11 @@ network cap: its measured value has `limit: null` and `limit_reason`. Other meas
 metrics provide `limit_source` from captured configuration. These meanings are
 spelled out in the metric audit; footprint counts are not host-call counts.
 
+Schema 5 validates exact approved source and cap labels per metric; a pair of
+matching but fabricated labels is rejected. Historical schema-4 records remain
+valid as schema 4 and are not rewritten. Schema versions cannot be mixed, so
+remeasure both revisions with the current producer when migrating.
+
 Consumers must handle null consumption/limits. Diff records expose
 `availability: comparable | unavailable`; unavailable comparisons have null
 `delta`/`pct` and a reason, with no invented improvement/regression.
@@ -168,9 +173,8 @@ ledger, seed and auth settings, plus a resource-limit hash. Diff/report records 
 
 Existing schema-2 results can compare with other schema-2 results, and legacy
 results retain their old runtime matching. Schema 2 is never silently compared
-with newer schemas: earlier numeric fields do not establish the same source semantics.
-Schema-3 records retain their existing behavior when compared to schema 3; mixing
-schema 3 and 4 fails explicitly.
+with newer schemas: earlier numeric fields do not establish the same source
+semantics. Schema 3, 4, and 5 remain separate envelopes and cannot be mixed.
 Unmatched records are validated too. New/removed benchmark behavior is unchanged.
 
 ## Policies and reports
@@ -218,7 +222,7 @@ See [integration evidence](experiments/native-integration/verification.json),
 [the regression report](experiments/native-integration/report.md), and the explicit
 live harness `tests/experiments/verify-integration.cjs`.
 
-The historical schema-3 evidence below remains unchanged. Current schema-4 proof
+The historical schema-3 evidence below remains unchanged. The previous schema-4 proof
 and raw IO/event verification are linked from the metric audit.
 
 The harness runs genuine prebuilt bundled-contract BASE/temporary persistent-write

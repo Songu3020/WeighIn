@@ -88,6 +88,43 @@ contract interface. The path is relative to the fixture file. The default
 builder finds the owning Cargo manifest; merely renaming an unrelated artifact
 is not supported.
 
+A contract that calls another deployed contract declares it in `depends_on`
+(explicit contract ids) and takes its address from the committed setup instead
+of a hardcoded value:
+
+```json
+{
+  "id": "pool-suite",
+  "contracts": [{
+    "id": "pool",
+    "wasm_path": "contract/target/wasm32v1-none/release/pool.wasm",
+    "depends_on": ["token"],
+    "invocations": [{
+      "id": "deposit",
+      "function_name": "deposit",
+      "args": [
+        {"type": "address", "binding": {"contract": "token"}},
+        {"type": "i128", "value": "100"}
+      ]
+    }]
+  }, {
+    "id": "token",
+    "wasm_path": "contract/target/wasm32v1-none/release/token.wasm",
+    "invocations": [{"id": "name", "function_name": "name", "args": []}]
+  }]
+}
+```
+
+Every revision deploys each contract once, dependencies first, and commits the
+whole setup before any measured invocation. Unknown, duplicate, self or cyclic
+dependencies, and bindings to an undeclared dependency, are rejected before any
+side effect; a failed prerequisite aborts its dependents. A binding takes the
+dependency's committed create return value (its contract address), optionally
+narrowed by `select` steps such as `[{"field": "admin"}, {"index": 0}]`, and
+must decode to the declared `type`; a missing value, malformed path or type
+mismatch fails explicitly. Case identity uses the binding declaration, never
+the runtime address. See the [setup plan proof](docs/setup-plan.md).
+
 `weighin.toml`:
 
 ```toml
@@ -218,7 +255,11 @@ HEAD has an undefined percentage in the report and violates finite percentage
 rules. Unknown/invalid policy keys fail. A nonignored rule without a matched
 function fails. Unavailable metrics required by a policy fail; global
 `fail_on_any_regression = true` needs explicit per-function ignores for the three
-unavailable metrics. Prefer targeted rules as in the quick start.
+unavailable metrics. Absolute caps are evaluated on matched BASE/HEAD
+benchmarks; a configured global cap fails with an actionable error if there are
+no matched benchmarks, rather than silently passing. New or removed cases alone
+do not evaluate absolute caps. An absent policy and an explicitly empty global
+limits table remain report-only. Prefer targeted rules as in the quick start.
 Omitting `config-path` still loads the default file if it exists.
 
 ## Benchmark Identity

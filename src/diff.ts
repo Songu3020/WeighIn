@@ -628,7 +628,7 @@ export function computeAggregateDiffs(
 /**
  * Compute a structural diff between a base and head measurement run.
  *
- * Versions 2–4 contracts match by (fixture_id, logical_id), and invocations by
+ * Versions 2–5 contracts match by (fixture_id, logical_id), and invocations by
  * (function_name, case_id). Runtime addresses and WASM hashes may differ.
  * Legacy results only match other legacy results by runtime address/function;
  * mixed schemas never guess a match. Additions/removals are not regressions.

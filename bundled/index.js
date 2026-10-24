@@ -35209,6 +35209,7 @@ var METRIC_KEYS = [
   "events_count",
   "event_data_bytes"
 ];
+var CURRENT_RECORD_SCHEMA_VERSION = 5;
 var MeasurementRecordValidationError = class extends Error {
   path;
   version;
@@ -35285,6 +35286,60 @@ var PROVENANCE_REQUIRED_STRINGS = [
   "input_sha256",
   "auth_mode"
 ];
+var APPROVED_METRIC_PROVENANCE = {
+  cpu_instructions: {
+    availability: "measured",
+    source: "soroban-simulation.simulated_instructions",
+    limitSource: "ConfigSettingContractComputeV0.txMaxInstructions"
+  },
+  memory_bytes: {
+    availability: "measured",
+    source: "soroban-simulation.simulated_memory",
+    limitSource: "ConfigSettingContractComputeV0.txMemoryLimit"
+  },
+  ledger_read_entries: {
+    availability: "measured",
+    source: "SorobanResources.footprint.readOnly.length + readWrite.length",
+    limitSource: "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+  },
+  ledger_read_bytes: {
+    availability: "measured",
+    source: "SorobanResources.diskReadBytes (identity adjustment)",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+  },
+  ledger_write_entries: {
+    availability: "measured",
+    source: "SorobanResources.footprint.readWrite.length",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+  },
+  ledger_write_bytes: {
+    availability: "measured",
+    source: "SorobanResources.writeBytes (identity adjustment)",
+    limitSource: "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+  },
+  historical_data_read_bytes: {
+    availability: "unavailable",
+    reason: "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+  },
+  contract_data_hard_limit: {
+    availability: "unavailable",
+    reason: "No verified instance-only post-invocation size and corresponding limit mapping"
+  },
+  tx_size_bytes: {
+    availability: "unavailable",
+    reason: "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+  },
+  events_count: {
+    availability: "measured",
+    source: "successful non-diagnostic ContractEvents.length",
+    limitReason: "Protocol 28 has no independent event-count cap"
+  },
+  event_data_bytes: {
+    availability: "measured",
+    source: "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+    limitSource: "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+  }
+};
 var METRIC_KEY_SET = new Set(METRIC_KEYS);
 var SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/;
 var ACCOUNT_PUBLIC_KEY_PATTERN = /^G[A-Z2-7]{55}$/;
@@ -35298,7 +35353,7 @@ function detectRecordEnvelopeVersion(record) {
   if (!isPlainObject3(record)) return "unknown";
   const hasLogical = record.schema_version !== void 0 || record.fixture_id !== void 0 || record.logical_id !== void 0;
   if (!hasLogical) return "legacy";
-  if (record.schema_version === 2 || record.schema_version === 3 || record.schema_version === 4) {
+  if (record.schema_version === 2 || record.schema_version === 3 || record.schema_version === 4 || record.schema_version === 5) {
     return record.schema_version;
   }
   return "unknown";
@@ -35372,7 +35427,7 @@ function validateProvenanceObject(provenance, version2, pPath, diagnostics) {
       path: `${pPath}.resource_limits_sha256`,
       version: version2,
       code: "INVALID_RESOURCE_LIMITS_DIGEST",
-      message: "Schema 4 requires resource_limits_sha256"
+      message: `Schema ${version2} requires resource_limits_sha256`
     });
   }
   if (provenance.source_account !== void 0 && (typeof provenance.source_account !== "string" || !ACCOUNT_PUBLIC_KEY_PATTERN.test(provenance.source_account))) {
@@ -35427,12 +35482,12 @@ function inspectMeasurementRecord(value, index) {
       contractKey = JSON.stringify(["legacy", value.contract_id]);
     }
   } else {
-    if (value.schema_version !== 2 && value.schema_version !== 3 && value.schema_version !== 4) {
+    if (value.schema_version !== 2 && value.schema_version !== 3 && value.schema_version !== 4 && value.schema_version !== 5) {
       diagnostics.push({
         path: `${basePath}.schema_version`,
         version: "unknown",
         code: "UNSUPPORTED_SCHEMA_VERSION",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (!nonblank(value.fixture_id)) {
@@ -35440,7 +35495,7 @@ function inspectMeasurementRecord(value, index) {
         path: `${basePath}.fixture_id`,
         version: version2,
         code: "MISSING_FIXTURE_ID",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (!nonblank(value.logical_id)) {
@@ -35448,7 +35503,7 @@ function inspectMeasurementRecord(value, index) {
         path: `${basePath}.logical_id`,
         version: version2,
         code: "MISSING_LOGICAL_ID",
-        message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+        message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
       });
     }
     if (benchmarksArray) {
@@ -35458,12 +35513,12 @@ function inspectMeasurementRecord(value, index) {
             path: `${basePath}.benchmarks[${bIdx}].case_id`,
             version: version2,
             code: "MISSING_CASE_ID",
-            message: "Version 2/3/4 results require fixture_id, logical_id, and case_id for every benchmark"
+            message: "Version 2/3/4/5 results require fixture_id, logical_id, and case_id for every benchmark"
           });
         }
       });
     }
-    if ((version2 === 2 || version2 === 3 || version2 === 4) && nonblank(value.fixture_id) && nonblank(value.logical_id)) {
+    if ((version2 === 2 || version2 === 3 || version2 === 4 || version2 === 5) && nonblank(value.fixture_id) && nonblank(value.logical_id)) {
       contractKey = JSON.stringify([
         "logical",
         value.fixture_id,
@@ -35641,7 +35696,7 @@ function inspectMeasurementRecord(value, index) {
         }
       }
     }
-    if (version2 === 3 || version2 === 4) {
+    if (version2 === 3 || version2 === 4 || version2 === 5) {
       if (!benchmark.provenance) {
         diagnostics.push({
           path: `${bPath}.provenance`,
@@ -35670,19 +35725,28 @@ function inspectMeasurementRecord(value, index) {
               message: `Schema ${version2} requires explicit availability and measured source for ${key}`
             });
           }
-          if (version2 === 4 && metricVal.availability === "measured") {
+          if ((version2 === 4 || version2 === 5) && metricVal.availability === "measured") {
             if (metricVal.limit === null ? !nonblank(metricVal.limit_reason) : !nonblank(metricVal.limit_source)) {
               diagnostics.push({
                 path: metricVal.limit === null ? `${mPath}.limit_reason` : `${mPath}.limit_source`,
                 version: version2,
                 code: "MISSING_METRIC_LIMIT_PROVENANCE",
-                message: `Schema 4 requires explicit limit provenance for ${key}`
+                message: `Schema ${version2} requires explicit limit provenance for ${key}`
               });
             }
           }
+          if (version2 === 5) {
+            validateApprovedMetricProvenance(
+              key,
+              metricVal,
+              mPath,
+              version2,
+              diagnostics
+            );
+          }
         }
       }
-      if (version2 === 4 && isPlainObject3(benchmark.provenance) && !SHA256_HEX_PATTERN.test(
+      if ((version2 === 4 || version2 === 5) && isPlainObject3(benchmark.provenance) && !SHA256_HEX_PATTERN.test(
         benchmark.provenance.resource_limits_sha256 ?? ""
       )) {
         const alreadyReported = diagnostics.some(
@@ -35693,7 +35757,7 @@ function inspectMeasurementRecord(value, index) {
             path: `${bPath}.provenance.resource_limits_sha256`,
             version: version2,
             code: "MISSING_RESOURCE_LIMITS_DIGEST",
-            message: "Schema 4 requires resource_limits_sha256"
+            message: `Schema ${version2} requires resource_limits_sha256`
           });
         }
       }
@@ -35716,6 +35780,56 @@ function inspectMeasurementRecord(value, index) {
     record: value,
     diagnostics: []
   };
+}
+function validateApprovedMetricProvenance(key, metric, path7, version2, diagnostics) {
+  const approved = APPROVED_METRIC_PROVENANCE[key];
+  const allowedFields = approved.availability === "unavailable" ? ["availability", "consumed", "limit", "reason"] : [
+    "availability",
+    "consumed",
+    "limit",
+    "source",
+    "limitSource" in approved ? "limit_source" : "limit_reason"
+  ];
+  const expectedValues = approved.availability === "unavailable" ? { availability: approved.availability, reason: approved.reason } : {
+    availability: approved.availability,
+    source: approved.source,
+    ..."limitSource" in approved ? { limit_source: approved.limitSource } : { limit_reason: approved.limitReason }
+  };
+  for (const field of [
+    "availability",
+    "source",
+    "limit_source",
+    "limit_reason",
+    "reason"
+  ]) {
+    const expected = expectedValues[field];
+    if (metric[field] !== expected && (expected !== void 0 || metric[field] !== void 0)) {
+      diagnostics.push({
+        path: `${path7}.${field}`,
+        version: version2,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} has unapproved ${field} provenance`
+      });
+    }
+  }
+  if (approved.availability === "unavailable" && metric.limit !== null || approved.availability === "measured" && "limitReason" in approved && metric.limit !== null || approved.availability === "measured" && "limitSource" in approved && metric.limit === null) {
+    diagnostics.push({
+      path: `${path7}.limit`,
+      version: version2,
+      code: "UNAPPROVED_METRIC_PROVENANCE",
+      message: `Schema 5 metric ${key} has an unapproved limit shape`
+    });
+  }
+  for (const field of Object.keys(metric)) {
+    if (!allowedFields.includes(field)) {
+      diagnostics.push({
+        path: `${path7}.${field}`,
+        version: version2,
+        code: "UNAPPROVED_METRIC_PROVENANCE",
+        message: `Schema 5 metric ${key} contains unsupported provenance field ${field}`
+      });
+    }
+  }
 }
 function inspectMeasurementRecords(value) {
   if (!Array.isArray(value)) {
@@ -36326,25 +36440,26 @@ function validateLargeInt(type, val) {
   }
   return null;
 }
+var INVOCATION_ARG_TYPES = [
+  "symbol",
+  "string",
+  "u32",
+  "i32",
+  "bool",
+  "u64",
+  "i64",
+  "u128",
+  "i128",
+  "address",
+  "bytes",
+  "vec",
+  "map"
+];
 var InvocationArgSchema = external_exports.lazy(
   () => external_exports.object({
     type: external_exports.preprocess(
       (val) => typeof val === "string" ? val.toLowerCase() : val,
-      external_exports.enum([
-        "symbol",
-        "string",
-        "u32",
-        "i32",
-        "bool",
-        "u64",
-        "i64",
-        "u128",
-        "i128",
-        "address",
-        "bytes",
-        "vec",
-        "map"
-      ])
+      external_exports.enum(INVOCATION_ARG_TYPES)
     ),
     value: external_exports.any()
   }).strict().superRefine((data, ctx) => {
@@ -36421,14 +36536,38 @@ var InvocationArgSchema = external_exports.lazy(
   })
 );
 var idSchema = external_exports.string().refine((value) => value.trim().length > 0, "ID must not be blank");
+var BindingSelectorStepSchema = external_exports.union([
+  external_exports.object({ field: external_exports.string().min(1) }).strict(),
+  external_exports.object({ index: external_exports.number().int().nonnegative() }).strict()
+]);
+var BoundInvocationArgSchema = external_exports.object({
+  type: external_exports.preprocess(
+    (val) => typeof val === "string" ? val.toLowerCase() : val,
+    external_exports.enum(INVOCATION_ARG_TYPES)
+  ),
+  binding: external_exports.object({
+    contract: idSchema,
+    select: external_exports.array(BindingSelectorStepSchema).optional()
+  }).strict()
+}).strict();
+var TopLevelInvocationArgSchema = external_exports.unknown().transform((val, ctx) => {
+  const schema = val !== null && typeof val === "object" && "binding" in val ? BoundInvocationArgSchema : InvocationArgSchema;
+  const result = schema.safeParse(val);
+  if (!result.success) {
+    result.error.issues.forEach((issue) => ctx.addIssue(issue));
+    return external_exports.NEVER;
+  }
+  return result.data;
+});
 var InvocationSpecSchema = external_exports.object({
   id: idSchema.optional(),
   function_name: external_exports.string().min(1),
-  args: external_exports.array(InvocationArgSchema)
+  args: external_exports.array(TopLevelInvocationArgSchema)
 }).strict();
 var ContractSpecSchema = external_exports.object({
   id: idSchema.optional(),
   wasm_path: external_exports.string().min(1),
+  depends_on: external_exports.array(idSchema).optional(),
   invocations: external_exports.array(InvocationSpecSchema).min(1)
 }).strict();
 var FixturesSpecSchema = external_exports.object({
@@ -36485,10 +36624,9 @@ function parseFixtures(raw, fixturePath) {
     contractIds.add(logical_id);
     const caseIds = /* @__PURE__ */ new Set();
     const invocations = contract.invocations.map((invocation) => {
-      const args = invocation.args.map((arg) => ({
-        type: arg.type.toLowerCase(),
-        value: canonical(arg.value)
-      }));
+      const args = invocation.args.map(
+        (arg) => "binding" in arg ? { type: arg.type.toLowerCase(), binding: canonical(arg.binding) } : { type: arg.type.toLowerCase(), value: canonical(arg.value) }
+      );
       const case_id = invocation.id === void 0 ? `args:${JSON.stringify(args)}` : `id:${invocation.id}`;
       const key = JSON.stringify([invocation.function_name, case_id]);
       if (caseIds.has(key)) {
@@ -54420,6 +54558,159 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
   throw exhaustionError;
 }
 
+// src/setup-plan.ts
+var SCVAL_ARM = {
+  address: "scvAddress",
+  bool: "scvBool",
+  string: "scvString",
+  symbol: "scvSymbol",
+  u32: "scvU32",
+  i32: "scvI32",
+  u64: "scvU64",
+  i64: "scvI64",
+  u128: "scvU128",
+  i128: "scvI128",
+  bytes: "scvBytes",
+  vec: "scvVec",
+  map: "scvMap"
+};
+function planSetupOrder(fixtureId, contracts) {
+  const fail = (message) => {
+    throw new Error(`Invalid setup plan in ${fixtureId}: ${message}`);
+  };
+  const byId = /* @__PURE__ */ new Map();
+  for (const contract of contracts) {
+    if (contract.id !== void 0) byId.set(contract.id, contract);
+  }
+  const dependencies = /* @__PURE__ */ new Map();
+  for (const contract of contracts) {
+    const declared = contract.depends_on ?? [];
+    const seen = /* @__PURE__ */ new Set();
+    const resolved = declared.map((id) => {
+      if (seen.has(id))
+        fail(`${contract.logical_id} lists dependency "${id}" more than once`);
+      seen.add(id);
+      if (id === contract.id)
+        fail(`${contract.logical_id} cannot depend on itself`);
+      const dependency = byId.get(id);
+      if (!dependency)
+        fail(
+          `${contract.logical_id} depends on unknown contract id "${id}"; dependencies must name another contract's explicit id`
+        );
+      return dependency;
+    });
+    dependencies.set(contract, resolved);
+    for (const invocation of contract.invocations) {
+      invocation.args.forEach((arg, index) => {
+        if (!("binding" in arg)) return;
+        if (!seen.has(arg.binding.contract))
+          fail(
+            `${contract.logical_id} / ${invocation.case_id} argument ${index} binds "${arg.binding.contract}", which is not a declared dependency of this contract`
+          );
+      });
+    }
+  }
+  const order = [];
+  const placed = /* @__PURE__ */ new Set();
+  while (order.length < contracts.length) {
+    const next = contracts.find(
+      (contract) => !placed.has(contract) && dependencies.get(contract).every((dep) => placed.has(dep))
+    );
+    if (!next) {
+      const cycle = contracts.filter((contract) => !placed.has(contract)).map((contract) => contract.logical_id);
+      fail(`dependency cycle among ${cycle.join(", ")}`);
+    }
+    placed.add(next);
+    order.push(next);
+  }
+  return order;
+}
+function dependentsOf(failed, order) {
+  const aborted = /* @__PURE__ */ new Set([failed.logical_id]);
+  const result = [];
+  const byId = new Map(
+    order.filter((contract) => contract.id !== void 0).map((contract) => [contract.id, contract.logical_id])
+  );
+  for (const contract of order) {
+    const blocked = (contract.depends_on ?? []).some(
+      (id) => aborted.has(byId.get(id))
+    );
+    if (blocked && !aborted.has(contract.logical_id)) {
+      aborted.add(contract.logical_id);
+      result.push(contract);
+    }
+  }
+  return result;
+}
+function describePath(select, upTo) {
+  return "$" + select.slice(0, upTo).map((step) => "index" in step ? `[${step.index}]` : `.${step.field}`).join("");
+}
+function resolveBinding(binding, declaredType, result) {
+  const label = `binding to "${binding.contract}"`;
+  if (!result) {
+    throw new Error(
+      `Cannot resolve ${label}: the dependency has no committed setup result`
+    );
+  }
+  if (result.return_xdr === void 0) {
+    throw new Error(
+      `Cannot resolve ${label}: the committed setup of ${result.logical_id} returned no value`
+    );
+  }
+  let value;
+  try {
+    value = types.ScVal.fromXDR(result.return_xdr, "base64");
+  } catch (error2) {
+    throw new Error(
+      `Cannot resolve ${label}: the setup return of ${result.logical_id} is not valid ScVal XDR (${error2.message})`
+    );
+  }
+  const select = binding.select ?? [];
+  select.forEach((step, position) => {
+    const at = describePath(select, position);
+    const arm = value.switch().name;
+    if ("index" in step) {
+      if (arm !== "scvVec" || !value.vec()) {
+        throw new Error(
+          `Cannot resolve ${label}: ${at} is ${arm}, not a vec, so index ${step.index} cannot be selected`
+        );
+      }
+      const items = value.vec();
+      if (step.index >= items.length) {
+        throw new Error(
+          `Cannot resolve ${label}: index ${step.index} is out of range at ${at} (length ${items.length})`
+        );
+      }
+      value = items[step.index];
+      return;
+    }
+    if (arm !== "scvMap" || !value.map()) {
+      throw new Error(
+        `Cannot resolve ${label}: ${at} is ${arm}, not a map, so field "${step.field}" cannot be selected`
+      );
+    }
+    const entry = value.map().find((candidate) => {
+      const key = candidate.key();
+      const keyArm = key.switch().name;
+      return (keyArm === "scvSymbol" || keyArm === "scvString") && (keyArm === "scvSymbol" ? key.sym() : key.str()).toString() === step.field;
+    });
+    if (!entry) {
+      throw new Error(
+        `Cannot resolve ${label}: field "${step.field}" does not exist at ${at}`
+      );
+    }
+    value = entry.val();
+  });
+  const expected = SCVAL_ARM[declaredType];
+  const actual = value.switch().name;
+  if (actual !== expected) {
+    throw new Error(
+      `Cannot resolve ${label}: ${describePath(select, select.length)} is ${actual}, but the argument declares ${declaredType}`
+    );
+  }
+  return value;
+}
+
 // src/measurement.ts
 var DEFAULT_RPC_URL = "http://localhost:8000/rpc";
 function metricsFromSimulation(output, limits) {
@@ -54722,6 +55013,7 @@ async function submitAndConfirm(server, prepared, phase, rpcUrl, signal) {
       `${phase} transaction ${submission.hash} did not succeed (status=${confirmed.status})`
     );
   }
+  return confirmed;
 }
 async function isContractDeployed(server, contractId) {
   const contractScAddress = Address.fromString(contractId).toScAddress();
@@ -54809,7 +55101,10 @@ async function ensureContractDeployed(options) {
   const deployed = await isContractDeployed(server, options.contractId);
   if (deployed) {
     console.log(`Already deployed at ${options.contractId}`);
-    return;
+    return {
+      source: "existing_instance",
+      return_xdr: Address.fromString(options.contractId).toScVal().toXDR("base64")
+    };
   }
   console.log(`Installing WASM...`);
   let account = await server.getAccount(deployer.publicKey());
@@ -54848,7 +55143,7 @@ async function ensureContractDeployed(options) {
   ).setTimeout(30).build();
   const preparedCreate = await server.prepareTransaction(createTx);
   preparedCreate.sign(deployer);
-  await submitAndConfirm(
+  const created = await submitAndConfirm(
     server,
     preparedCreate,
     "contract creation",
@@ -54856,6 +55151,10 @@ async function ensureContractDeployed(options) {
     options.signal
   );
   console.log(`Deployed at ${options.contractId}`);
+  return {
+    source: "created",
+    return_xdr: created.returnValue?.toXDR("base64")
+  };
 }
 async function buildInvocationTransaction(options) {
   const { server, sourceAccount, contractId, invocation } = options;
@@ -54870,7 +55169,19 @@ async function buildInvocationTransaction(options) {
       `Invocation source account is not available on the network: ${sourceAccount} (${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)})`
     );
   }
-  const argsSc = invocation.args.map(toScVal);
+  const argsSc = invocation.args.map((arg) => {
+    if (!("binding" in arg)) return toScVal(arg);
+    if (!options.setupResults) {
+      throw new Error(
+        `Setup bindings are not available in this measurement path: ${invocation.function_name} binds "${arg.binding.contract}"`
+      );
+    }
+    return resolveBinding(
+      arg.binding,
+      arg.type.toLowerCase(),
+      options.setupResults.get(arg.binding.contract)
+    );
+  });
   return new TransactionBuilder(account, {
     fee: "1000000",
     networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE
@@ -54992,6 +55303,10 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     rawFixtures,
     opts.fixtureId ?? path4.relative(process.cwd(), path4.resolve(opts.fixturesPath))
   );
+  const setupOrder = planSetupOrder(
+    fixturesSpec.fixture_id,
+    fixturesSpec.contracts
+  );
   const resolvedWasmPaths = preflightContractArtifacts(
     fixturesDir,
     fixturesSpec.contracts,
@@ -55014,8 +55329,9 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
       console.log(`Invocation source account: ${invocationSourceAccount}`);
     }
   }
-  const results = [];
-  for (const contractSpec of fixturesSpec.contracts) {
+  const setupResults = /* @__PURE__ */ new Map();
+  const deployments = /* @__PURE__ */ new Map();
+  for (const contractSpec of setupOrder) {
     const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path);
     const wasmBytes = fs3.readFileSync(wasmPath);
     const wasmHash = crypto3.createHash("sha256").update(wasmBytes).digest();
@@ -55025,17 +55341,42 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     const salt = crypto3.createHash("sha256").update(wasmHash).digest();
     const contractId = calculateContractId(deployer.publicKey(), salt);
     console.log(`Contract ID: ${contractId}`);
-    await ensureContractDeployed({
-      server,
-      deployer,
-      deployerAddress,
-      wasmBytes,
-      wasmHash,
-      salt,
-      contractId,
-      rpcUrl: effectiveRpcUrl,
-      signal: opts.signal
-    });
+    let receipt;
+    try {
+      receipt = await ensureContractDeployed({
+        server,
+        deployer,
+        deployerAddress,
+        wasmBytes,
+        wasmHash,
+        salt,
+        contractId,
+        rpcUrl: effectiveRpcUrl,
+        signal: opts.signal
+      });
+    } catch (err) {
+      const aborted = dependentsOf(contractSpec, setupOrder);
+      if (opts.signal?.aborted || aborted.length === 0) throw err;
+      throw new Error(
+        `${err instanceof Error ? err.message : String(err)}
+Setup of ${contractSpec.logical_id} failed; aborted dependents: ${aborted.map((contract) => contract.logical_id).join(", ")}`,
+        { cause: err }
+      );
+    }
+    deployments.set(contractSpec.logical_id, { contractId, wasmSha256 });
+    if (contractSpec.id !== void 0) {
+      setupResults.set(contractSpec.id, {
+        logical_id: contractSpec.logical_id,
+        contract_id: contractId,
+        ...receipt
+      });
+    }
+  }
+  const results = [];
+  for (const contractSpec of fixturesSpec.contracts) {
+    const { contractId, wasmSha256 } = deployments.get(
+      contractSpec.logical_id
+    );
     const benchmarks = [];
     for (const invokeSpec of contractSpec.invocations) {
       if (opts.signal?.aborted) {
@@ -55048,7 +55389,8 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
         contractId,
         invocation: invokeSpec,
         rpcUrl: effectiveRpcUrl,
-        signal: opts.signal
+        signal: opts.signal,
+        setupResults
       });
       const simRes = await server.simulateTransaction(invokeTx);
       if (rpc_exports.Api.isSimulationError(simRes)) {
@@ -55079,7 +55421,7 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
     }
     const sorobanSdkVersion = opts.sdkVersion !== void 0 ? opts.sdkVersion : discoverSdkVersion(wasmPath);
     results.push({
-      schema_version: 4,
+      schema_version: CURRENT_RECORD_SCHEMA_VERSION,
       fixture_id: fixturesSpec.fixture_id,
       logical_id: contractSpec.logical_id,
       contract_id: contractId,
@@ -55335,9 +55677,9 @@ function enforceThresholds(diff, config2) {
       );
     }
   }
-  if ((global2.fail_on_any_regression || GLOBAL_RULE_MAP.some(({ field }) => global2[field] !== void 0)) && comparedNames.size === 0) {
+  if ((global2.fail_on_any_regression || GLOBAL_RULE_MAP.some(({ field }) => global2[field] !== void 0) || Object.keys(globalLimits).length > 0) && comparedNames.size === 0) {
     throw new Error(
-      "Cannot evaluate global policy: no matched BASE/HEAD benchmarks"
+      "Cannot evaluate configured global policy or limits: no matched BASE/HEAD benchmarks"
     );
   }
   for (const contract of diff.contracts) {

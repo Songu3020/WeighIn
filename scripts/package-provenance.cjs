@@ -22,7 +22,7 @@ function files(value) {
   if (fs.statSync(absolute).isFile()) return [value];
   return fs
     .readdirSync(absolute, { withFileTypes: true })
-    .flatMap((entry) => files(path.join(value, entry.name)));
+    .flatMap((entry) => files(path.posix.join(value, entry.name)));
 }
 function sha256(file) {
   return crypto
@@ -51,6 +51,15 @@ if (process.argv.includes("--verify")) {
   if (!fs.existsSync(manifestPath))
     throw new Error("provenance-manifest.json is missing");
   const actual = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  if (
+    typeof actual.source_revision !== "string" ||
+    (actual.source_revision !== "unavailable" &&
+      !/^[a-f0-9]{40}$/.test(actual.source_revision))
+  ) {
+    throw new Error(
+      "package provenance manifest has an invalid source_revision",
+    );
+  }
   // The recorded source revision and the tool identities describe the
   // checkout that produced the manifest. A pull request is verified from a
   // merge commit whose SHA the committed manifest cannot contain, and CI runs

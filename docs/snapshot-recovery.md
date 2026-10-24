@@ -38,6 +38,15 @@ LedgerKey. Account, trustline, offer, data, claimable-balance, contract-data
 checked. A missing row remains a valid absence; a present row of the wrong
 type or identity fails closed before native measurement.
 
+An explicitly absent row (`xdr: null`) states that the key does not exist, so it
+carries only its `key`. The native helper rejects an absent row that also sets
+`extension_xdr`, `last_modified` or `live_until`, naming the contradictory
+fields, instead of silently discarding that metadata; `live_until: null` is
+treated as unset. This check runs before the archived-state check, so a stale
+`live_until` on an absent row is reported as a contradiction. The adapter
+already sends absent rows as `{ key, xdr: null }`, so valid absent-key
+discovery is unchanged.
+
 ## Evidence
 
 Ten controlled behavior tests use real saved RPC/native records, with deliberate

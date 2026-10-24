@@ -23,10 +23,14 @@ and does not justify `pull_request_target` secret access.
 
 `npm run bundle` creates `provenance-manifest.json`, a deterministic manifest
 covering package metadata, lockfiles, action metadata, TypeScript sources,
-native helper sources, and both generated bundles. It records the source commit
-and Node/npm identities. `npm run provenance` independently recomputes and
-verifies every listed digest from a clean checkout. A stale bundle, changed
-lockfile, missing helper source, or altered package input fails verification.
+native helper sources, and both generated bundles. It records the Git revision
+observed when the bundle was generated and Node/npm identities. Because a
+committed manifest cannot contain the hash of the commit that contains it,
+`npm run provenance` validates the revision field's shape and independently
+recomputes every listed input digest rather than requiring that build-time
+revision to equal the later commit containing the manifest. A stale bundle,
+changed lockfile, missing helper source, or altered package input fails
+verification.
 
 The recorded `source_revision` and the `tools` block describe the checkout and
 the toolchain that produced the manifest. They are informational and are not

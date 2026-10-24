@@ -2,23 +2,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://weighin.dev/schemas/measurement-records.schema.json",
   "title": "WeighIn Saved Measurement Records",
-  "description": "Authoritative versioned schema for WeighIn saved measurement record arrays across legacy unversioned, schema_version 2, schema_version 3, and schema_version 4 envelopes.",
+  "description": "Authoritative versioned schema for WeighIn saved measurement record arrays across legacy unversioned, schema_version 2, schema_version 3, schema_version 4, and schema_version 5 envelopes.",
   "type": "array",
   "items": {
     "$ref": "#/$defs/ContractBenchmark"
   },
-  "x-weighin-current-version": 4,
+  "x-weighin-current-version": 5,
   "x-weighin-supported-versions": [
     "legacy",
     2,
     3,
-    4
+    4,
+    5
   ],
   "x-weighin-runtime-invariants": [
     {
       "id": "UNIQUE_CONTRACT_IDENTITY",
       "scope": "record_set",
-      "description": "Within a saved measurement array, no two ContractBenchmark entries may share the same comparison key ([\"legacy\", contract_id] for legacy records or [\"logical\", fixture_id, logical_id] for schema 2/3/4 records)."
+      "description": "Within a saved measurement array, no two ContractBenchmark entries may share the same comparison key ([\"legacy\", contract_id] for legacy records or [\"logical\", fixture_id, logical_id] for schema 2/3/4/5 records)."
     },
     {
       "id": "UNIQUE_BENCHMARK_IDENTITY",
@@ -28,12 +29,12 @@
     {
       "id": "HOMOGENEOUS_ENVELOPE_VERSION",
       "scope": "record_set",
-      "description": "All ContractBenchmark entries within a single saved measurement array must use the same envelope version (legacy, 2, 3, or 4)."
+      "description": "All ContractBenchmark entries within a single saved measurement array must use the same envelope version (legacy, 2, 3, 4, or 5)."
     },
     {
       "id": "COMPARISON_ENVIRONMENT_COMPATIBILITY",
       "scope": "comparison",
-      "description": "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4 per-metric availability/source/limit/limit_source/limit_reason."
+      "description": "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4/5 per-metric availability/source/limit/limit_source/limit_reason. Schema 5 additionally requires each metric's source and limit provenance to match its approved mapping."
     },
     {
       "id": "SAFE_INTEGER_BOUNDS",
@@ -494,6 +495,321 @@
         }
       }
     },
+    "Schema5Metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu_instructions",
+        "memory_bytes",
+        "ledger_read_entries",
+        "ledger_read_bytes",
+        "ledger_write_entries",
+        "ledger_write_bytes",
+        "historical_data_read_bytes",
+        "contract_data_hard_limit",
+        "tx_size_bytes",
+        "events_count",
+        "event_data_bytes"
+      ],
+      "properties": {
+        "cpu_instructions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "soroban-simulation.simulated_instructions"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractComputeV0.txMaxInstructions"
+            }
+          }
+        },
+        "memory_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "soroban-simulation.simulated_memory"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractComputeV0.txMemoryLimit"
+            }
+          }
+        },
+        "ledger_read_entries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "SorobanResources.footprint.readOnly.length + readWrite.length"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+            }
+          }
+        },
+        "ledger_read_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "SorobanResources.diskReadBytes (identity adjustment)"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+            }
+          }
+        },
+        "ledger_write_entries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "SorobanResources.footprint.readWrite.length"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+            }
+          }
+        },
+        "ledger_write_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "SorobanResources.writeBytes (identity adjustment)"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+            }
+          }
+        },
+        "historical_data_read_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "reason"
+          ],
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "consumed": {
+              "type": "null"
+            },
+            "limit": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+            }
+          }
+        },
+        "contract_data_hard_limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "reason"
+          ],
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "consumed": {
+              "type": "null"
+            },
+            "limit": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "No verified instance-only post-invocation size and corresponding limit mapping"
+            }
+          }
+        },
+        "tx_size_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "reason"
+          ],
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "consumed": {
+              "type": "null"
+            },
+            "limit": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+            }
+          }
+        },
+        "events_count": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_reason"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "type": "null"
+            },
+            "source": {
+              "const": "successful non-diagnostic ContractEvents.length"
+            },
+            "limit_reason": {
+              "const": "Protocol 28 has no independent event-count cap"
+            }
+          }
+        },
+        "event_data_bytes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "availability",
+            "consumed",
+            "limit",
+            "source",
+            "limit_source"
+          ],
+          "properties": {
+            "availability": {
+              "const": "measured"
+            },
+            "consumed": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "limit": {
+              "$ref": "#/$defs/SafeNonNegativeInteger"
+            },
+            "source": {
+              "const": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes"
+            },
+            "limit_source": {
+              "const": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+            }
+          }
+        }
+      }
+    },
     "Schema3ComputeProvenance": {
       "type": "object",
       "additionalProperties": false,
@@ -568,6 +884,80 @@
       }
     },
     "Schema4ComputeProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "source_version",
+        "protocol",
+        "helper_sha256",
+        "network_id",
+        "ledger",
+        "header_sha256",
+        "snapshot_sha256",
+        "config_sha256",
+        "compute_config_sha256",
+        "input_sha256",
+        "seed",
+        "auth_mode",
+        "host_features",
+        "resource_limits_sha256"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "source_version": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "protocol": {
+          "$ref": "#/$defs/SafePositiveInteger"
+        },
+        "helper_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "network_id": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "ledger": {
+          "$ref": "#/$defs/SafeNonNegativeInteger"
+        },
+        "header_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "snapshot_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "config_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "compute_config_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "input_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "seed": {
+          "$ref": "#/$defs/SeedArray"
+        },
+        "auth_mode": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "host_features": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NonBlankString"
+          }
+        },
+        "resource_limits_sha256": {
+          "$ref": "#/$defs/Sha256Hex"
+        },
+        "source_account": {
+          "$ref": "#/$defs/AccountPublicKey"
+        }
+      }
+    },
+    "Schema5ComputeProvenance": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -747,6 +1137,34 @@
         }
       }
     },
+    "Schema5BenchmarkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "function_name",
+        "case_id",
+        "metrics",
+        "wasm_sha256",
+        "provenance"
+      ],
+      "properties": {
+        "function_name": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "case_id": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "metrics": {
+          "$ref": "#/$defs/Schema5Metrics"
+        },
+        "wasm_sha256": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Schema5ComputeProvenance"
+        }
+      }
+    },
     "LegacyContractBenchmark": {
       "title": "LegacyContractBenchmark",
       "x-weighin-envelope-version": "legacy",
@@ -915,6 +1333,51 @@
         }
       }
     },
+    "Schema5ContractBenchmark": {
+      "title": "Schema5ContractBenchmark",
+      "x-weighin-envelope-version": 5,
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "fixture_id",
+        "logical_id",
+        "contract_id",
+        "git_commit",
+        "soroban_sdk_version",
+        "timestamp",
+        "benchmarks"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 5
+        },
+        "fixture_id": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "logical_id": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "contract_id": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "git_commit": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "soroban_sdk_version": {
+          "$ref": "#/$defs/NonBlankString"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/SafeNonNegativeInteger"
+        },
+        "benchmarks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Schema5BenchmarkResult"
+          }
+        }
+      }
+    },
     "ContractBenchmark": {
       "description": "Discriminated union of supported WeighIn saved contract measurement envelopes.",
       "oneOf": [
@@ -929,6 +1392,9 @@
         },
         {
           "$ref": "#/$defs/Schema4ContractBenchmark"
+        },
+        {
+          "$ref": "#/$defs/Schema5ContractBenchmark"
         }
       ]
     }

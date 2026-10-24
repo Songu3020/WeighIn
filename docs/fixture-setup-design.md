@@ -1,5 +1,15 @@
 # Committed fixture setup and typed dependency design
 
+> **Implementation status.** Named dependency planning (§2) and typed
+> committed-return bindings (§3) are implemented for fixture contracts by
+> issues #213 and #215: `depends_on`, the `binding` argument form, and the
+> setup/measurement split in `runMeasurement` (`src/setup-plan.ts`). The
+> implementation differs from this design where noted: ties in the topological
+> order keep fixture declaration order rather than sorting by id, so existing
+> independent fixtures deploy exactly as before; and bindings support
+> `field`/`index` selectors that are validated against the decoded value. See
+> the [setup plan proof](setup-plan.md).
+
 This document is the design and bounded feasibility proof for issues #39, #56,
 and #57. It does not add a production deployment graph, constructor executor,
 asset-contract deployer, generic expression language, or public-network setup.
