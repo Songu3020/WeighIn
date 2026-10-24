@@ -57,7 +57,7 @@ async function main(){
       {NODE_OPTIONS:'--require='+path.join(root,'tests/support/record-clean-delivery-io.cjs'),WEIGHIN_CLEAN_CAPTURE:capture});
     const results=JSON.parse(fs.readFileSync(path.join(capture,'results.json'))),native=JSON.parse(fs.readFileSync(path.join(capture,'native.json')));
     assert.equal(results.length,2);assert.equal(native.length,2);assert.ok(native.every(r=>r.file===helper));
-    for(const c of results){assert.equal(c.schema_version,4);assert.equal(c.benchmarks[0].metrics.cpu_instructions.consumed,266842);}
+    for(const c of results){assert.equal(c.schema_version,5);assert.equal(c.benchmarks[0].metrics.cpu_instructions.consumed,266842);}
     const migration=path.join(destination,'historical-migration');
     await checked('historical-migration',process.execPath,['tests/experiments/verify-fixture-migration.cjs',migration],checkout,
       {WEIGHIN_EXPERIMENT_RPC_URL:'http://localhost:8000/rpc',WEIGHIN_EXPERIMENT_CARGO_TARGET_DIR:path.join(checkout,'contract/target')});

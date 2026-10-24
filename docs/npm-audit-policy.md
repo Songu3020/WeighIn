@@ -72,12 +72,12 @@ contents, or credentials are written into it.
 ## Advisory remediation
 
 Because the gate is blocking and never changes versions itself, an advisory is
-cleared by a separate, deliberate dependency change: a lockfile resolution
-update inside an already allowed range, plus the regenerated CycloneDX
-inventory (`npm run inventory:generate`) and a matching
-`docs/dependency-inventory.json`. The regenerated inventory has to cover the new
-locked version, so the Cargo 1.95.0 toolchain and the locked native helper
-crates have to be available when it is generated.
+cleared by a separate, deliberate dependency change: update the lockfile within
+the declared range or deliberately bump an exact dependency pin to a patched
+version. Regenerate the CycloneDX inventory (`npm run inventory:generate`) and
+commit the matching `docs/dependency-inventory.json`. The regenerated inventory
+has to cover the new locked version, so the Cargo 1.95.0 toolchain and the
+locked native helper crates have to be available when it is generated.
 
 ## Distinction from native and image security
 

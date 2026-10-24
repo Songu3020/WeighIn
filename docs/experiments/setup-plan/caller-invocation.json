@@ -1,0 +1,27 @@
+{
+  "simulation": {
+    "contract_id": "CCPMC3A4KU2CSXIKXPQMIU5NYHGHT6EAG37ZC627D6TXOCI3KHQZHIPD",
+    "function_name": "run",
+    "args_xdr": [
+      "AAAAEgAAAAEppB2fWVF0xS+MMePGbSTk0rEl/qJosLlsHyImtOFp6w==",
+      "AAAAAwAAAAE="
+    ]
+  },
+  "native_footprint": {
+    "instances": [
+      "CAU2IHM7LFIXJRJPRQY6HRTNETSNFMJF72RGRMFZNQPSEJVU4FU6XG36",
+      "CCPMC3A4KU2CSXIKXPQMIU5NYHGHT6EAG37ZC627D6TXOCI3KHQZHIPD"
+    ],
+    "storage": [
+      {
+        "contract": "CAU2IHM7LFIXJRJPRQY6HRTNETSNFMJF72RGRMFZNQPSEJVU4FU6XG36",
+        "key": "counter"
+      },
+      {
+        "contract": "CCPMC3A4KU2CSXIKXPQMIU5NYHGHT6EAG37ZC627D6TXOCI3KHQZHIPD",
+        "key": "last"
+      }
+    ]
+  },
+  "retval_xdr": "AAAAEAAAAAEAAAABAAAAAwAAAAE="
+}
