@@ -1,19 +1,20 @@
 {
   "schema_version": 1,
   "purpose": "verifiable WeighIn package build provenance",
+  "source_revision": "d1645ff51fb979d6468fee88f2248795edde2a0e",
   "source_revision": "d882ca087705b15ad7e8c381a039dcf7789ac6a4",
   "tools": {
     "node": "v22.23.1",
     "npm": "12.0.2"
   "source_revision": "e0b7b3e48021af6b1d0f1c78ec65074a5ef8a148",
   "tools": {
-    "node": "v24.21.0",
-    "npm": "11.19.0"
+    "node": "v22.17.1",
+    "npm": "10.9.2"
   },
   "inputs": [
     {
       "path": "action.yml",
-      "sha256": "ca7d20495d8a4d02bbfa7953df9e6dc6fca09040a96aa80dd79896365b9e9f59"
+      "sha256": "9c6e4066837e332ea48dcdb2b40a75c6979a09336e0f77982723e4f60c1684f2"
     },
     {
       "path": "bundled/comment-action.js",
@@ -21,6 +22,7 @@
     },
     {
       "path": "bundled/index.js",
+      "sha256": "b8501f343b7315eb8f053c251f47de3b7ac7f043c2f60dd19f96186ee14093aa"
       "sha256": "8a9f95736a10f453afe2dfd02d354a7400bd78bfc82fa9e65498f77c6d883292"
       "sha256": "e0432feb946821a6c8d4997c03d3fd9f0903b8c7ea47ebd80ee40c88978475c3"
     },
@@ -50,7 +52,7 @@
     },
     {
       "path": "src/action.ts",
-      "sha256": "64fe5084dcc00ea09d7b37b9001f6696eaffa8ff175cd8f489782b7cac3e74a8"
+      "sha256": "5d6297a83d4e172c23a2782c7ac024c5a091728ef69810ca51034fe95feacc2b"
     },
     {
       "path": "src/audit-policy.ts",
@@ -108,6 +110,10 @@
     {
       "path": "src/network.ts",
       "sha256": "a79ec668430348b6c694b40dfe9a0dcc1b5de5495d3934b80c76bc814ee8e44f"
+    },
+    {
+      "path": "src/output-paths.ts",
+      "sha256": "d7e4f2d127e1822fc2b62280f1f6857bc49af553e04a9540bed06d15bf894290"
     },
     {
       "path": "src/pr-metadata.ts",

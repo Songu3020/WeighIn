@@ -665,3 +665,37 @@ test("Action rejects unknown fixture root field before build or deployment", () 
 
   return p.catch(() => {}); // let the test runner see it resolved
 });
+
+test("Action rejects a report-path that aliases the fixtures file and leaves it untouched", () => {
+  const result = action("measurement", policy, null, "fixtures.json");
+  assert.equal(result.status, 1);
+  assert.match(result.summary, /must not resolve to the same path/);
+  assert.doesNotMatch(result.reportContent ?? "", /Unsuccessful Comparison/);
+  assert.ok(JSON.parse(result.reportContent).contracts.length > 0);
+});
+
+test("Action rejects a report-path symlink to the fixtures file and leaves it untouched", () => {
+  const result = action(
+    "measurement",
+    policy,
+    null,
+    "link.md",
+    "fixtures.json",
+    ({ head }) => fs.symlinkSync(path.join(head, "fixtures.json"), path.join(head, "link.md")),
+  );
+  assert.equal(result.status, 1);
+  assert.match(result.summary, /symbolic link/);
+  assert.ok(JSON.parse(result.reportContent).contracts.length > 0);
+});
+
+test("Action rejects report-path and metadata-path that resolve to the same file", () => {
+  process.env["INPUT_METADATA-PATH"] = "same.out";
+  try {
+    const result = action("measurement", policy, null, "same.out");
+    assert.equal(result.status, 1);
+    assert.match(result.summary, /must not resolve to the same path/);
+    assert.doesNotMatch(result.reportContent ?? "", /Unsuccessful Comparison/);
+  } finally {
+    delete process.env["INPUT_METADATA-PATH"];
+  }
+});
