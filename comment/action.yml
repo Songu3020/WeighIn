@@ -10,6 +10,18 @@ inputs:
   github-token:
     description: 'GitHub token'
     required: true
+  comment-author-mode:
+    description: >
+      Which identity should own the report comment. Use "github-actions"
+      (default) when the comment is posted by the GitHub Actions bot via
+      GITHUB_TOKEN. Use "authenticated-user" when posting with a personal
+      access token or user OAuth token; in that mode the currently
+      authenticated user's numeric ID is resolved via GET /user.
+      Unsupported values fail the action before any comment mutation.
+      Custom installation-token writers and arbitrary third-party GitHub App
+      identities are not supported by either mode.
+    required: false
+    default: 'github-actions'
 runs:
   using: 'node24'
   main: '../bundled/comment-action.js'

@@ -24,6 +24,7 @@ describe("build selection", () => {
     );
     expect(buildContracts).toHaveBeenCalledWith(
       "/workspace/fixtures.json",
+      "/workspace",
       "1.95.0",
     );
   });

@@ -1,0 +1,7 @@
+{
+  "malformed_key_rejected": true,
+  "malformed_key_message": "[\n  {\n    \"code\": \"custom\",\n    \"message\": \"public_key must be an Ed25519 account public key (G...) of an account that exists on the network\",\n    \"path\": [\n      0,\n      \"public_key\"\n    ]\n  }\n]",
+  "malformed_key_rpc_calls": 0,
+  "missing_account_rejected": true,
+  "missing_account_message": "Source account missing is not available on the network: GALJ5VXJ3CA3M4LWEO76AMAODNM727JF43MZFSEKE3UFUV575QF6UBQ7 (Account not found: GALJ5VXJ3CA3M4LWEO76AMAODNM727JF43MZFSEKE3UFUV575QF6UBQ7)"
+}

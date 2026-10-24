@@ -480,7 +480,11 @@ describe("upsertPrComment public API with paginated transport", () => {
               });
               res.end(
                 JSON.stringify([
-                  { id: 102, body: `Existing report ${COMMENT_MARKER}` },
+                  {
+                    id: 102,
+                    body: `Existing report ${COMMENT_MARKER}`,
+                    user: { id: 41898282 },
+                  },
                 ]),
               );
             }

@@ -132,6 +132,55 @@ external query path, not funded settlement, populated pagination, deposit/releas
 or universal compatibility. The older local optimized proof remains separately
 attributed and unchanged.
 
+## Cross-contract nested invocation attribution
+
+The [nested invocation proof](nested-invocation.md) measures a real
+caller → callee host invocation in one top-level transaction on the pinned
+protocol-28 standalone network. The `nested-caller` `run` case calls
+`nested-callee` `work` through a runtime `Address` with no compile-time
+dependency on the callee crate.
+
+| Diagnostic | Callee alone | Nested (caller → callee) |
+|---|---|---|
+| WASM SHA256 | `7a889934…` | caller `de34030d…` |
+| Runtime contract ID | `CC4CPMMF…` | caller `CDDW2K52…` |
+| CPU cost-model instructions | 337,065 | 674,626 |
+| Memory cost-model bytes | 1,195,786 | 2,393,762 |
+| RO+RW footprint entries | 3 | 6 |
+| Write footprint entries | 1 | 2 |
+| Disk read bytes | 0 | 0 |
+| Charged events | 1 (`work`) | 2 (`work`, `caller`) |
+
+The nested footprint reuses all three callee keys unchanged and adds exactly the
+caller code, contract instance and single `last` storage key. The two charged
+events are ordered callee-then-caller, the callee event is byte-identical to the
+standalone callee event, and transaction data, return and ordered events agree
+with the parity-accepted raw RPC response. Six promoted metrics are verified
+against raw RPC; consumed CPU and memory have no direct RPC resource.
+
+An [address-swapped control](experiments/nested-invocation/control-diff.json)
+measured by a second deployer still pairs both contracts by explicit identity
+with eight zero deltas each, while the runtime IDs and the materialized callee
+address argument differ. A [callee-only regression](experiments/nested-invocation/regression-diff.json)
+(`7a889934…` → `67c62ccf…`) leaves the caller WASM (`de34030d…`) and runtime
+address (`CDDW2K52…`) unchanged and attributes the extra resources to both cases:
+nested CPU +29,329 and write bytes +80, callee CPU +28,882. A strict CPU policy
+yields exactly the two expected [violations](experiments/nested-invocation/violations.json).
+
+Three failure classes are retained — application (`Simulation failed for
+run_failing`), invalid input before simulation, and missing native helper after a
+successful simulation — alongside an [archived-state control](experiments/nested-invocation/archive-control.json)
+where expiring the captured callee instance entry makes the helper exit 1 with
+`archived ledger state is unsupported`. The
+[environment](experiments/nested-invocation/environment.json) records Node
+24.14.0, Stellar CLI 28.1.0, rustc 1.95.0, contract SDK 28.0.0 and native
+simulation 28.0.1. [Raw captures, replays, diffs, sources, WASMs and the
+checksum manifest](experiments/nested-invocation/verification.json) are retained
+and checked by `tests/nested-invocation.test.cjs` and
+`tests/native/nested-invocation.test.cjs`. Soroban charges the nested resources to
+the single top-level transaction, so the combined resources are attributed per
+contract but not split per contract.
+
 ## Tested environment — historical experiments
 
 The retained [hosted environment](experiments/hosted-comparison/regression/environment.json)
@@ -402,6 +451,20 @@ steps (ledgers 900–1000). Pre-threshold snapshots (900 → 925) have zero delt
 crossing the ledger threshold (900 → 1000) produces +52,966 CPU, +70,658 memory, +96 write
 bytes, and +36 event+return bytes (`REPEATABILITY_VARIATION_FOUND`), triggering all 6 configured
 policy violations without suppressing them for an unchanged artifact.
+
+## Source-account effect validation
+
+The [source-account effect proof](source-account-effects.md) measures one contract case under
+three valid source accounts on the pinned protocol-28 standalone network while the contract
+code, the arguments, the protocol, the calibration and the resource limits stay fixed. Durable
+evidence in [source-account-effects](experiments/source-account-effects/) retains the raw RPC
+captures, the native helper replays, the per-metric effects, an identical repeatability control
+and the fail-closed evidence for a malformed key and for an account that is not on the network.
+The source account changed no measured metric in that case
+(`cross_run_comparison_valid: true`), the repeatability control reported no changed metric, and
+the account is now recorded in `provenance.source_account` and compared with the other
+environment identities, so saved records measured under different accounts are reported as
+incompatible instead of being compared.
 
 ## Known boundaries
 

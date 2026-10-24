@@ -54,6 +54,19 @@ inputs:
     required: false
     default: ''
 
+  comment-author-mode:
+    description: >
+      Which identity should own the report comment. Use "github-actions"
+      (default) when the comment is posted by the GitHub Actions bot via
+      GITHUB_TOKEN. Use "authenticated-user" when posting with a personal
+      access token or user OAuth token; in that mode the currently
+      authenticated user's numeric ID is resolved via GET /user.
+      Unsupported values fail the action before any comment mutation.
+      Custom installation-token writers and arbitrary third-party GitHub App
+      identities are not supported by either mode.
+    required: false
+    default: 'github-actions'
+
   metadata-path:
     description: >
       Optional path where the action should write a JSON file containing the PR
@@ -80,7 +93,7 @@ inputs:
     default: ''
 
   report-path:
-    description: "Optional path where the generated Markdown benchmark report should be written"
+    description: "Optional path where the generated Markdown benchmark report should be written. The report is written to an owned temporary file in the destination directory and renamed into place, so an interrupted write keeps a previously published report unchanged."
     required: false
     default: ''
 
@@ -91,6 +104,11 @@ inputs:
 
   skip-build:
     description: "Skip compilation and use precompiled fixture WASMs in both revisions; bypasses default build checks. Accepts standard YAML 1.2 boolean spellings (true, True, TRUE, false, False, FALSE); defaults to false when omitted. Non-boolean values are rejected."
+    required: false
+    default: "false"
+
+  allow-cross-target-substitution:
+    description: "Explicitly allow falling back to wasm32-unknown-unknown if a declared wasm32v1-none artifact is missing. Defaults to false. When false (default), missing declared artifacts fail immediately."
     required: false
     default: "false"
 

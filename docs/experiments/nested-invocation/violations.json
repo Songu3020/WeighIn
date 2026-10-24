@@ -1,0 +1,26 @@
+[
+  {
+    "contract_id": "CCLVGBBKV335I43BSSKHABHBJNC3BEUTNME343HTJFYFJ37QKLQULIHZ",
+    "function_name": "work",
+    "metric": "cpu_instructions",
+    "delta": 28882,
+    "pct": 8.568673697951432,
+    "rule": "strict_zero_tolerance",
+    "message": "cpu_instructions increased by 28882 (strict zero tolerance)",
+    "fixture_id": "id:nested-invocation-suite",
+    "logical_id": "id:callee",
+    "case_id": "id:work-once"
+  },
+  {
+    "contract_id": "CDDW2K52YHC4IACBI3RMISKYZLURQUSGVP5KSCU2NRZQ5V6TYKP3YGGO",
+    "function_name": "run",
+    "metric": "cpu_instructions",
+    "delta": 29329,
+    "pct": 4.347445844067676,
+    "rule": "strict_zero_tolerance",
+    "message": "cpu_instructions increased by 29329 (strict zero tolerance)",
+    "fixture_id": "id:nested-invocation-suite",
+    "logical_id": "id:caller",
+    "case_id": "id:nested-work"
+  }
+]

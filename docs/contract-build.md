@@ -15,11 +15,19 @@ selects the target, filters specifications, injects metadata and optimizes its
 output. WeighIn fails if the CLI reports skipped optimization; it does not fall
 back to plain Cargo or the older target.
 
-## Artifact selection
+## Artifact selection and workspace boundary
 
-For each declared `wasm_path`, WeighIn locates the nearest owning Cargo manifest
-and reads locked Cargo workspace metadata. The WASM basename must identify
-exactly one workspace `cdylib` target using its Cargo target name (falling back
+The builder API (`buildContracts`) requires an explicit allowed workspace root.
+For each declared `wasm_path`, WeighIn validates that the resolved destination path
+remains strictly within the allowed workspace root, rejecting relative traversal
+escapes (`..`) and symlinks resolving outside the root before executing any commands
+or writing any artifacts.
+
+Manifest search ascends from the declared WASM destination toward the workspace root
+to locate the nearest owning `Cargo.toml`. Search stops at the workspace root boundary
+and never ascends past it to parent directories or filesystem root. Nested legitimate
+Cargo workspaces within the workspace root are fully supported. The WASM basename must
+identify exactly one workspace `cdylib` target using its Cargo target name (falling back
 to the package name when Cargo omits the target name). A package named
 `my-package` with `[lib] name = "contract-library"` emits
 `contract_library.wasm`. Packages with multiple `cdylib` targets are rejected
@@ -27,6 +35,28 @@ before compilation because the target output is ambiguous. Unknown/ambiguous
 names, missing manifests and build failures are errors. All declarations are
 resolved before builds start; unrelated workspace packages are not selected.
 Multiple declarations of one package share one build.
+
+Cargo workspace metadata (`cargo metadata --no-deps --locked --format-version 1`)
+is parsed and validated against a schema before selecting packages. WeighIn
+verifies that package IDs, names, manifest paths, target crate types, and workspace
+members conform to the expected shape, rejecting foreign workspace members,
+malformed targets, and nonexistent manifest paths with actionable diagnostics, while
+maintaining compatibility with valid version-1 metadata and unknown harmless fields.
+
+For each selected package, WeighIn probes the effective compiler compatibility
+within the distinct directory context of that package's manifest (`path.dirname(pkg.manifest_path)`),
+verifying Rust 1.84+ for each crate context. This ensures that any crate-local
+`rust-toolchain` or override configuration is evaluated in its proper directory context
+and rejected before building if incompatible. Explicit toolchain overrides passed via
+`rustToolchain` supply `RUSTUP_TOOLCHAIN` to both the compiler probe and build commands.
+
+All normalized destination paths are preflighted before any build commands or
+file writes. If multiple declarations resolve to the same canonical destination
+through path normalization or directory symlinks, they are permitted only when
+package ownership agrees (same package identity and manifest path); conflicting
+declarations targeting the same destination from different packages fail immediately.
+When repeated declarations target the same destination, WeighIn writes the artifact
+once and verifies that subsequent declarations produce byte-for-byte identical output.
 
 Each package builds into a fresh temporary output directory:
 

@@ -144,7 +144,7 @@ async function main(){
     const start=Date.now();console.log(`Run ${run}/5: clean reference build; empty Cargo target ${cargoTarget}`);
     const heartbeat=setInterval(()=>console.log(`Run ${run}/5: clean build in progress (${Math.round((Date.now()-start)/1000)} seconds)`),30000);
     let build;
-    try{[build]=await buildContracts(path.join(runDir,'weighin-fixtures.json'),'1.95.0');}finally{clearInterval(heartbeat);}
+    try{[build]=await buildContracts(path.join(runDir,'weighin-fixtures.json'),runDir,'1.95.0');}finally{clearInterval(heartbeat);}
     const buildDuration=Date.now()-start;
     const reference=await measure(path.join(runDir,'weighin-fixtures.json'));
     const audit=await measure(path.join(auditDir,'fixtures.json'));

@@ -21,12 +21,19 @@ const consumerTsconfig = {
   include: ['index.ts'],
 };
 
-let tarballPath, consumerDir;
+let tarballPath, consumerDir, packDir;
 
 before(() => {
-  const packResult = spawnSync('npm', ['pack'], { cwd: repoRoot, encoding: 'utf8', timeout: 120000 });
+  // Pack into a private directory so a parallel test file that packs into the repository
+  // root cannot delete this tarball while it is being installed.
+  packDir = fs.mkdtempSync(path.join(os.tmpdir(), 'weighin-types-pack-'));
+  const packResult = spawnSync('npm', ['pack', '--pack-destination', packDir], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    timeout: 120000,
+  });
   assert.equal(packResult.status, 0, `npm pack failed: ${packResult.stderr}`);
-  tarballPath = path.join(repoRoot, packResult.stdout.trim().split('\n').pop().trim());
+  tarballPath = path.join(packDir, packResult.stdout.trim().split('\n').pop().trim());
   consumerDir = fs.mkdtempSync(path.join(os.tmpdir(), 'weighin-types-consumer-'));
   fs.writeFileSync(
     path.join(consumerDir, 'package.json'),
@@ -46,6 +53,7 @@ before(() => {
 
 after(() => {
   if (tarballPath) fs.rmSync(tarballPath, { force: true });
+  if (packDir) fs.rmSync(packDir, { recursive: true, force: true });
   if (consumerDir) fs.rmSync(consumerDir, { recursive: true, force: true });
 });
 

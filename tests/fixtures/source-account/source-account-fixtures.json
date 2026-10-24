@@ -1,0 +1,16 @@
+{
+  "id": "source-account-suite",
+  "contracts": [
+    {
+      "id": "source-account-proof",
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_source_account.wasm",
+      "invocations": [
+        {
+          "id": "constant",
+          "function_name": "constant_probe",
+          "args": []
+        }
+      ]
+    }
+  ]
+}

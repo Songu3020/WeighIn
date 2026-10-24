@@ -11,7 +11,7 @@ Existing tests and earlier experiments validated multiple benchmark declarations
 3. Neither contract accidentally cross-pairs with the other, even though they share the identical function and invocation case label.
 4. All 8 comparable resource metrics exhibit zero deltas in an unchanged control.
 5. Verifier rejection tests fail closed when identities are swapped, contracts are missing, or control deltas are non-zero.
-6. This setup evaluates independent deployed contracts and is distinct from inter-contract caller/callee stateful execution.
+6. This setup evaluates independent deployed contracts and is distinct from inter-contract caller/callee stateful execution, which is covered by the [nested invocation attribution proof](nested-invocation.md).
 
 ## Declared Contracts and Identities
 

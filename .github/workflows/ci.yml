@@ -17,6 +17,12 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: '1.95.0'
+      - name: Fetch locked native helper crates
+        run: cargo +1.95.0 fetch --locked --manifest-path native/simulation/Cargo.toml
       - run: npm ci
       - name: npm audit (moderate+ advisory gate)
         run: |
@@ -43,14 +49,21 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0
+        with:
+          toolchain: '1.95.0'
+      - name: Fetch locked native helper crates
+        run: cargo +1.95.0 fetch --locked --manifest-path native/simulation/Cargo.toml
       - run: npm ci
+      - name: Verify committed package provenance
+        run: npm run provenance
       - run: npm run bundle
-      - name: Verify no uncommitted changes
+      - name: Verify regenerated bundles
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Error: Uncommitted changes detected after build. Please run 'npm run bundle' locally and commit the results."
-            git status
-            git diff
+          if ! git diff --exit-code -- bundled/; then
+            echo "Error: Regenerated bundles differ from the committed bundles. Please run 'npm run bundle' locally and commit the results."
+            git diff -- bundled/
             exit 1
           fi
       - name: Smoke-test packed npm artifact from clean installed consumer
@@ -113,6 +126,21 @@ jobs:
           npm test
           npm run test:native
           npm run bundle
+      - name: Restore committed artifacts before measuring
+        run: |
+          # Rebuilding the bundle rewrites the provenance manifest and the
+          # dependency inventory, because both record the checkout they were
+          # produced from. The Action refuses to measure a checkout with
+          # modified tracked files, so restore the committed artifacts. The
+          # verify-build job already proved that the committed bundle is up to
+          # date.
+          git checkout -- bundled/ provenance-manifest.json docs/dependency-inventory.json
+          status="$(git status --porcelain --untracked-files=no)"
+          if [ -n "$status" ]; then
+            echo "Error: tracked files are still modified before measuring:"
+            echo "$status"
+            exit 1
+          fi
 
       - name: Start local Stellar network
         run: bash scripts/start-local-network.sh

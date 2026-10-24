@@ -40,9 +40,21 @@ test("a clean packed consumer receives the inventory, bundles, native locks, and
 
     const consumer = path.join(temporary, "consumer");
     const tarball = path.join(temporary, packed.filename);
+    // The consumer install prefers the npm cache but may fall back to the
+    // registry: a cold CI cache holds the locked tarballs but not the
+    // registry metadata npm resolves version ranges from.
     execFileSync(
       "npm",
-      ["install", "--offline", "--ignore-scripts", "--no-audit", "--no-fund", "--prefix", consumer, tarball],
+      [
+        "install",
+        "--prefer-offline",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--prefix",
+        consumer,
+        tarball,
+      ],
       { cwd: temporary, stdio: "pipe" },
     );
     execFileSync(process.execPath, ["-e", "require('weighin')"], {

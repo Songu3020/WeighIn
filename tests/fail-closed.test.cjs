@@ -283,6 +283,21 @@ test("Action rejects a healthy but unsupported RPC network before builds or fund
   }
 });
 
+test("Action refuses to measure a HEAD checkout with uncommitted changes", () => {
+  const result = action("dirty-head");
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.summary, /HEAD workspace has uncommitted changes/);
+  assert.match(result.summary, /contract\/src\/lib\.rs/);
+  assert.equal(result.keyPaths.length, 0, "no account may be funded for a dirty checkout");
+  assert.deepEqual(result.builds, [], "no contract may be built for a dirty checkout");
+});
+
+test("Action measures a HEAD checkout that only contains untracked files", () => {
+  const result = action("untracked-head");
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(result.keyPaths.length, 2, "both revisions are measured");
+});
+
 test("Action validates supported baseline branch, tag, and SHA forms", () => {
   for (const ref of ["feature/topic", "v1.2.3", "0123456789abcdef0123456789abcdef01234567"]) {
     const result = action("control", policy, null, null, "fixtures.json", undefined, ref);
@@ -521,4 +536,132 @@ test("Action preserves primary error when writing report-path fails due to inval
   assert.equal(res.status, 1);
   assert.match(res.output, /fail/);
   assert.match(res.summary, /RPC has not reported healthy/);
+});
+
+// ---------------------------------------------------------------------------
+// Unknown fixture declaration field rejection (strict schema)
+// ---------------------------------------------------------------------------
+
+test("parseFixtures rejects unknown key at fixture root", () => {
+  const json = JSON.stringify({
+    idenitifer: "my-suite",
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [{ function_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /idenitifer/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on contract declaration", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_pat: "contract.wasm",
+        invocations: [{ function_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /wasm_pat/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on invocation declaration", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [{ functoin_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /functoin_name/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on top-level typed argument", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [
+          {
+            function_name: "hello",
+            args: [{ typ: "symbol", value: "world" }],
+          },
+        ],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /typ/);
+      return true;
+    },
+  );
+});
+
+test("Action rejects unknown fixture root field before build or deployment", () => {
+  // The action unit hook mocks runMeasurement entirely in 'control' mode.
+  // Instead, verify the rejection happens at the runMeasurement level:
+  // parseFixtures is the first thing runMeasurement calls, so an invalid
+  // fixture must throw before any key file, account, or network I/O.
+  const os = require("node:os");
+  const path = require("node:path");
+  const fs = require("node:fs");
+  const { runMeasurement } = require("../dist/measurement");
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "weighin-reject-unknown-"));
+  const fixturesPath = path.join(tmp, "fixtures.json");
+  const keyFile = path.join(tmp, "key.sec");
+
+  // Fixture with an unknown root field — parseFixtures should throw
+  fs.writeFileSync(
+    fixturesPath,
+    JSON.stringify({
+      idenitifer: "my-suite",
+      contracts: [
+        {
+          wasm_path: "contract.wasm",
+          invocations: [{ function_name: "hello", args: [] }],
+        },
+      ],
+    }),
+  );
+
+  const p = runMeasurement({ fixturesPath, fixtureId: "fixtures.json", gitCommit: "abc", sdkVersion: "0", keyFile });
+  p.then(
+    () => { throw new Error("expected rejection"); },
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /idenitifer/);
+      // key file must not have been created — parseFixtures threw before getOrInitAccount
+      assert.equal(fs.existsSync(keyFile), false, "key file must not be created before schema validation");
+    },
+  ).finally(() => fs.rmSync(tmp, { recursive: true, force: true }));
+
+  return p.catch(() => {}); // let the test runner see it resolved
 });

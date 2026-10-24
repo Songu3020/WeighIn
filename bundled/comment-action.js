@@ -26168,7 +26168,7 @@ var METRIC_KEY_SET = new Set(METRIC_KEYS);
 
 // src/comment.ts
 var COMMENT_MARKER = "<!-- weighin-report -->";
-async function findReportComment(octokit, owner, repo, issueNumber, marker = COMMENT_MARKER) {
+async function findReportComment(octokit, owner, repo, issueNumber, marker = COMMENT_MARKER, expectedAuthorId) {
   for await (const response of octokit.paginate.iterator(
     octokit.rest.issues.listComments,
     {
@@ -26178,25 +26178,89 @@ async function findReportComment(octokit, owner, repo, issueNumber, marker = COM
     }
   )) {
     const comments = response.data;
-    const match = comments.find((comment) => comment.body?.includes(marker));
+    const match = comments.find((comment) => {
+      const matchesMarker = comment.body?.includes(marker);
+      if (!matchesMarker) return false;
+      if (expectedAuthorId !== void 0) {
+        return comment.user?.id === expectedAuthorId;
+      }
+      return true;
+    });
     if (match) {
       return match;
     }
   }
   return void 0;
 }
-async function upsertPrComment(token, numberOrBody, explicitBody) {
+var GITHUB_ACTIONS_BOT = {
+  login: "github-actions[bot]",
+  id: 41898282,
+  type: "Bot"
+};
+async function resolveExpectedAuthor(octokit, mode) {
+  if (mode === "github-actions") {
+    return { id: GITHUB_ACTIONS_BOT.id };
+  }
+  if (mode === "authenticated-user") {
+    let data;
+    try {
+      const response = await octokit.rest.users.getAuthenticated();
+      data = response.data;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err ?? "unknown error");
+      throw new Error(
+        `comment-author-mode is "authenticated-user" but the authenticated user could not be resolved: ${message}`
+      );
+    }
+    const user = data;
+    if (!user || typeof user.id !== "number" || !Number.isInteger(user.id) || user.id <= 0) {
+      throw new Error(
+        'comment-author-mode is "authenticated-user" but GET /user returned an unusable identity (missing or non-positive numeric id). Ensure the supplied token belongs to a regular user or bot account with a valid numeric ID.'
+      );
+    }
+    return { id: user.id };
+  }
+  throw new Error(
+    `Unsupported comment-author-mode: "${mode}". Supported values are "github-actions" and "authenticated-user".`
+  );
+}
+async function upsertPrComment(token, numberOrBody, bodyOrOptions, maybeOptions) {
   const github = await Promise.resolve().then(() => (init_github(), github_exports));
-  const core2 = await Promise.resolve().then(() => __toESM(require_core()));
-  const body = typeof numberOrBody === "string" ? numberOrBody : explicitBody;
-  const prNumber = typeof numberOrBody === "number" ? numberOrBody : github.context.payload.pull_request?.number;
+  let body;
+  let prNumberInput;
+  let options;
+  if (typeof numberOrBody === "number") {
+    prNumberInput = numberOrBody;
+    body = bodyOrOptions;
+    options = maybeOptions ?? {};
+  } else {
+    body = numberOrBody;
+    prNumberInput = void 0;
+    options = bodyOrOptions ?? {};
+  }
+  const core2 = options.core ?? await Promise.resolve().then(() => __toESM(require_core()));
+  const mode = options.commentAuthorMode ?? "github-actions";
+  if (mode !== "github-actions" && mode !== "authenticated-user") {
+    throw new Error(
+      `Unsupported comment-author-mode: "${mode}". Supported values are "github-actions" and "authenticated-user".`
+    );
+  }
+  const prNumber = prNumberInput !== void 0 ? prNumberInput : github.context.payload.pull_request?.number;
   if (!prNumber) {
     core2.warning("Not in a pull_request context; skipping PR comment.");
     return;
   }
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
-  const existing = await findReportComment(octokit, owner, repo, prNumber);
+  const expectedAuthor = await resolveExpectedAuthor(octokit, mode);
+  const existing = await findReportComment(
+    octokit,
+    owner,
+    repo,
+    prNumber,
+    COMMENT_MARKER,
+    expectedAuthor.id
+  );
   if (existing) {
     await octokit.rest.issues.updateComment({
       owner,
@@ -26222,6 +26286,13 @@ async function run() {
     const reportPath = core.getInput("report-path", { required: true });
     const metadataPath = core.getInput("metadata-path", { required: true });
     const token = core.getInput("github-token", { required: true });
+    const commentAuthorModeRaw = core.getInput("comment-author-mode") || "github-actions";
+    if (commentAuthorModeRaw !== "github-actions" && commentAuthorModeRaw !== "authenticated-user") {
+      throw new Error(
+        `Unsupported comment-author-mode: "${commentAuthorModeRaw}". Supported values are "github-actions" and "authenticated-user".`
+      );
+    }
+    const commentAuthorMode = commentAuthorModeRaw;
     if (!fs.existsSync(reportPath)) {
       throw new Error(`Report file not found: ${reportPath}`);
     }
@@ -26232,7 +26303,10 @@ async function run() {
     const metadataRaw = fs.readFileSync(metadataPath, "utf8");
     const { owner, repo } = context2.repo;
     const metadata = parsePrMetadata(metadataRaw, `${owner}/${repo}`);
-    await upsertPrComment(token, metadata.prNumber, reportBody);
+    await upsertPrComment(token, metadata.prNumber, reportBody, {
+      commentAuthorMode,
+      core
+    });
   } catch (error) {
     core.setFailed(error.message);
   }

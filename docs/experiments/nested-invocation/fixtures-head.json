@@ -1,0 +1,49 @@
+{
+  "callee": {
+    "id": "nested-invocation-suite",
+    "contracts": [
+      {
+        "id": "callee",
+        "wasm_path": "build-head/wasm/nested_callee.wasm",
+        "invocations": [
+          {
+            "id": "work-once",
+            "function_name": "work",
+            "args": [
+              {
+                "type": "u32",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "caller": {
+    "id": "nested-invocation-suite",
+    "contracts": [
+      {
+        "id": "caller",
+        "wasm_path": "build-head/wasm/nested_caller.wasm",
+        "invocations": [
+          {
+            "id": "nested-work",
+            "function_name": "run",
+            "args": [
+              {
+                "type": "address",
+                "value": "CCLVGBBKV335I43BSSKHABHBJNC3BEUTNME343HTJFYFJ37QKLQULIHZ",
+                "resolved_from": "deployed callee runtime address"
+              },
+              {
+                "type": "u32",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

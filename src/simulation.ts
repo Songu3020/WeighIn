@@ -74,6 +74,11 @@ export interface ComputeProvenance {
   seed: number[];
   auth_mode: string;
   host_features: string[];
+  /** Public key of the account that invoked the measured transaction.
+   *  Absent only in records produced before source-account identity was
+   *  recorded; comparisons require both sides to agree on it.
+   */
+  source_account?: string;
   /** Schema 4: audited resource caps only, excluding fee settings and metadata. */
   resource_limits_sha256?: string;
 }
@@ -99,6 +104,87 @@ function sameXdr(
         ? value
         : value.toXDR("raw");
   return bytes(left).equals(bytes(right));
+}
+
+/**
+ * Validates uniqueness within read-only and read-write footprint keys and ensures
+ * they are disjoint sets (#121). Rejects malformed footprints before counting resources.
+ */
+export function validateFootprintKeys(
+  readOnlyKeys: string[],
+  readWriteKeys: string[],
+  sourceLabel: string = "footprint",
+): void {
+  const seenReadOnly = new Set<string>();
+  const duplicateReadOnly = new Set<string>();
+  for (const key of readOnlyKeys) {
+    if (seenReadOnly.has(key)) {
+      duplicateReadOnly.add(key);
+    }
+    seenReadOnly.add(key);
+  }
+  if (duplicateReadOnly.size > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: duplicate key(s) in read-only footprint: [${[...duplicateReadOnly].join(", ")}]`,
+    );
+  }
+
+  const seenReadWrite = new Set<string>();
+  const duplicateReadWrite = new Set<string>();
+  for (const key of readWriteKeys) {
+    if (seenReadWrite.has(key)) {
+      duplicateReadWrite.add(key);
+    }
+    seenReadWrite.add(key);
+  }
+  if (duplicateReadWrite.size > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: duplicate key(s) in read-write footprint: [${[...duplicateReadWrite].join(", ")}]`,
+    );
+  }
+
+  const overlaps: string[] = [];
+  for (const key of seenReadWrite) {
+    if (seenReadOnly.has(key)) {
+      overlaps.push(key);
+    }
+  }
+  if (overlaps.length > 0) {
+    throw new Error(
+      `Invalid ${sourceLabel}: key(s) present in both read-only and read-write footprints: [${overlaps.join(", ")}]`,
+    );
+  }
+}
+
+/**
+ * Validates the cryptographic hash of a ledger-history header against canonical decoded header bytes (#122).
+ * Verifies that the history-entry hash matches SHA-256 of header.toXDR(), and matches
+ * the optional RPC response row hash if present.
+ */
+export function validateLedgerHeaderHash(
+  historyEntry: xdr.LedgerHeaderHistoryEntry,
+  rowHash?: string,
+): { recomputedHash: string; historyHash: string } {
+  const headerBytes = historyEntry.header().toXDR();
+  const recomputedHash = crypto
+    .createHash("sha256")
+    .update(headerBytes)
+    .digest("hex");
+  const historyHash = historyEntry.hash().toString("hex");
+
+  if (historyHash !== recomputedHash) {
+    throw new Error(
+      `Ledger header hash mismatch: history-entry hash (${historyHash}) does not match SHA-256 of decoded header bytes (${recomputedHash})`,
+    );
+  }
+
+  if (rowHash && rowHash.toLowerCase() !== recomputedHash.toLowerCase()) {
+    throw new Error(
+      `Ledger header hash mismatch: RPC response hash (${rowHash}) does not match SHA-256 of decoded header bytes (${recomputedHash})`,
+    );
+  }
+
+  return { recomputedHash, historyHash };
 }
 
 /**
@@ -453,13 +539,24 @@ export async function simulateSnapshot(
   helperPath: string,
   signal?: AbortSignal,
 ): Promise<SimulationOutput> {
-  const stdout = await execute(
-    helperPath,
-    [],
-    JSON.stringify(input),
-    undefined,
-    signal,
-  );
+  let stdout: string;
+  try {
+    stdout = await execute(
+      helperPath,
+      [],
+      JSON.stringify(input),
+      undefined,
+      signal,
+    );
+  } catch (failure) {
+    // The helper reports a structured failure envelope on stdout. Surface its
+    // status and message instead of the generic helper error text.
+    const envelope = parseHelperFailure(failure);
+    if (envelope) {
+      throw new Error(`Native helper ${envelope.status}: ${envelope.message}`);
+    }
+    throw failure;
+  }
   let output: SimulationOutput;
   try {
     output = outputSchema.parse(JSON.parse(stdout));
@@ -498,6 +595,11 @@ export async function simulateSnapshot(
       "Invalid simulation helper output: resource fields disagree with transaction-data XDR",
     );
   }
+  validateFootprintKeys(
+    output.read_only_keys,
+    output.read_write_keys,
+    "simulation helper footprint",
+  );
   xdr.ScVal.fromXDR(output.retval_xdr, "base64");
   for (const event of output.contract_events_xdr) {
     if (
@@ -770,11 +872,16 @@ export async function measureInvocation(
       simulation.transactionData,
       "base64",
     ).resources();
-    for (const key of [
-      ...resources.footprint().readOnly(),
-      ...resources.footprint().readWrite(),
-    ])
-      keys.add(key.toXDR("base64"));
+    const roKeys = resources
+      .footprint()
+      .readOnly()
+      .map((k) => k.toXDR("base64"));
+    const rwKeys = resources
+      .footprint()
+      .readWrite()
+      .map((k) => k.toXDR("base64"));
+    validateFootprintKeys(roKeys, rwKeys, "RPC simulation footprint");
+    for (const key of [...roKeys, ...rwKeys]) keys.add(key);
     const requested = [...keys].sort();
     const rows = new Map<
       string,
@@ -850,7 +957,13 @@ export async function measureInvocation(
     if (drift) continue;
     const headers = z
       .object({
-        ledgers: z.array(z.object({ sequence: integer, headerXdr: encoded })),
+        ledgers: z.array(
+          z.object({
+            sequence: integer,
+            headerXdr: encoded,
+            hash: z.string().optional(),
+          }),
+        ),
       })
       .parse(
         await callRpc(
@@ -891,6 +1004,7 @@ export async function measureInvocation(
     ) {
       throw new Error("Snapshot header ledger/protocol mismatch");
     }
+    validateLedgerHeaderHash(historyEntry, row.hash);
     const missingConfigs = configNames.filter((name) => {
       const key = configNameToKey.get(name)!;
       const row = rows.get(key);
@@ -1096,6 +1210,7 @@ export async function measureInvocation(
         seed: input.seed,
         auth_mode: output.auth_mode,
         host_features: output.host_features,
+        source_account: transaction.source,
       },
     };
   }

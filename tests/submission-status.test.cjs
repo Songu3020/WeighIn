@@ -11,6 +11,7 @@ const { runMeasurement } = require("../dist/measurement");
 
 const H1 = "1".repeat(64);
 const H2 = "2".repeat(64);
+const TEST_WASM = Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
 const FULL_ORDER = [
   "getLedgerEntries",
   "getAccount",
@@ -37,7 +38,7 @@ function scenario(t, options = {}) {
   fs.writeFileSync(path.join(dir, "key"), Keypair.random().secret(), {
     mode: 0o600,
   });
-  fs.writeFileSync(path.join(dir, "contract.wasm"), Buffer.from("test-only-wasm"));
+  fs.writeFileSync(path.join(dir, "contract.wasm"), TEST_WASM);
   fs.writeFileSync(
     path.join(dir, "fixtures.json"),
     JSON.stringify({

@@ -33,7 +33,7 @@
     {
       "id": "COMPARISON_ENVIRONMENT_COMPATIBILITY",
       "scope": "comparison",
-      "description": "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, and schema-4 per-metric availability/source/limit/limit_source/limit_reason."
+      "description": "When comparing BASE and HEAD measurement sets, versioned schemas must match, and paired benchmarks with provenance must have identical source, source_version, protocol, helper_sha256, network_id, compute_config_sha256, seed, auth_mode, host_features, resource_limits_sha256, source_account, and schema-4 per-metric availability/source/limit/limit_source/limit_reason."
     },
     {
       "id": "SAFE_INTEGER_BOUNDS",
@@ -70,6 +70,10 @@
     "Sha256Hex": {
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
+    },
+    "AccountPublicKey": {
+      "type": "string",
+      "pattern": "^G[A-Z2-7]{55}$"
     },
     "SeedByte": {
       "type": "integer",
@@ -557,6 +561,9 @@
         },
         "resource_limits_sha256": {
           "$ref": "#/$defs/Sha256Hex"
+        },
+        "source_account": {
+          "$ref": "#/$defs/AccountPublicKey"
         }
       }
     },
@@ -628,6 +635,9 @@
         },
         "resource_limits_sha256": {
           "$ref": "#/$defs/Sha256Hex"
+        },
+        "source_account": {
+          "$ref": "#/$defs/AccountPublicKey"
         }
       }
     },
