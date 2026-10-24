@@ -1,0 +1,38 @@
+{
+  "status": "LIVE_SETUP_PLAN_PROOF_PASS",
+  "issues": [
+    213,
+    215
+  ],
+  "measurement_schema": 4,
+  "identities": {
+    "fixture_id": "id:setup-plan-suite",
+    "callee_logical_id": "id:callee",
+    "caller_logical_id": "id:caller",
+    "caller_case_id": "id:nested-work"
+  },
+  "wasm_sha256": {
+    "callee": "7a88993498d15bb50f16e36e8b8ead51b5a38eea1e933a65430edd6986ebc070",
+    "caller": "de34030d12b0162b67b86b9b2d637af9c3996c3583e7a2455677b4c075043f75"
+  },
+  "runtime_contract_ids": {
+    "callee": "CAU2IHM7LFIXJRJPRQY6HRTNETSNFMJF72RGRMFZNQPSEJVU4FU6XG36",
+    "caller": "CCPMC3A4KU2CSXIKXPQMIU5NYHGHT6EAG37ZC627D6TXOCI3KHQZHIPD"
+  },
+  "checks": {
+    "two_distinct_wasms": true,
+    "callee_deployed_before_caller": true,
+    "each_deployment_submitted_once": true,
+    "all_setup_committed": true,
+    "setup_committed_before_measurement": true,
+    "committed_callee_return_is_callee_address": true,
+    "bound_argument_is_typed_address": true,
+    "bound_argument_equals_committed_return": true,
+    "caller_invoked_at_caller_address": true,
+    "nested_call_touches_callee_instance": true,
+    "nested_call_writes_callee_counter": true,
+    "nested_call_returns_callee_result": true,
+    "malformed_path_fails_before_dependent_invocation": true,
+    "failed_prerequisite_aborts_dependent": true
+  }
+}

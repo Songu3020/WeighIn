@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
 const fs=require('node:fs'),os=require('node:os');
-const {spawnSync}=require('node:child_process');
+const {spawn,spawnSync}=require('node:child_process');
 function startup(mode){const result=spawnSync(process.execPath,['--require',path.join(__dirname,'support/network-startup-hook.cjs'),
   path.resolve(__dirname,'../scripts/wait-for-local-network.cjs')],{encoding:'utf8',timeout:10000,
   env:{...process.env,WEIGHIN_STARTUP_UNIT_MODE:mode}});assert.ifError(result.error);return result;}
@@ -17,7 +17,8 @@ test('startup reports readiness only after healthy RPC and account inclusion',()
   assert.match(r.stdout,/confirmed in RPC/);assert.match(r.stdout,/network is ready/);
 });
 
-function runStartup(existing='none',extraEnv={}){
+const MOCK_CONTAINER_ID='4f0c2a9e8b1d0123456789abcdef0123456789abcdef0123456789abcdef0123';
+function mockStartupTools(){
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'weighin-network-startup-'));
   const dockerPath=path.join(directory,'docker');
   const nodePath=path.join(directory,'node');
@@ -31,21 +32,35 @@ if(args[0]==='ps'){
 }else if(args[0]==='inspect'){
   if(process.env.MOCK_INSPECT_FAILURE==='1')process.exit(1);
   process.stdout.write(process.env.MOCK_EXISTING==='owned'?'weighin-start-local-network\\n':'\\n');
+}else if(args[0]==='run'){
+  if(process.env.MOCK_RUN_ID!=='')process.stdout.write((process.env.MOCK_RUN_ID||'${MOCK_CONTAINER_ID}')+'\\n');
+}else if(args[0]==='logs'){
+  if(process.env.MOCK_LOGS_FAILURE==='1')process.exit(1);
+  process.stdout.write('quickstart: friendbot rejected funding\\n');
+}else if(args[0]==='stop'){
+  if(process.env.MOCK_STOP_FAILURE==='1')process.exit(1);
 }
 `);
   fs.writeFileSync(nodePath,`#!${process.execPath}
-if(process.argv[2]!=='-e')process.stdout.write('network is ready\\n');
+if(process.argv[2]==='-e')process.exit(0);
+if(process.env.MOCK_READINESS==='hang')setTimeout(()=>process.exit(1),1500);
+else if(process.env.MOCK_READINESS==='fail'){process.stderr.write('Account readiness failed within 120s\\n');process.exit(1);}
+else process.stdout.write('network is ready\\n');
 `);
   fs.chmodSync(dockerPath,0o755);
   fs.chmodSync(nodePath,0o755);
+  const readCalls=()=>fs.existsSync(logPath)?fs.readFileSync(logPath,'utf8').trim().split('\n').filter(Boolean).map(line=>JSON.parse(line)):[];
+  const env=extra=>({...process.env,...extra,PATH:`${directory}${path.delimiter}${process.env.PATH}`,MOCK_DOCKER_LOG:logPath});
+  return {env,readCalls};
+}
+
+function runStartup(existing='none',extraEnv={}){
+  const tools=mockStartupTools();
   const result=spawnSync('bash',[path.resolve(__dirname,'../scripts/start-local-network.sh')],{
-    encoding:'utf8',timeout:10000,
-    env:{...process.env,...extraEnv,PATH:`${directory}${path.delimiter}${process.env.PATH}`,
-      MOCK_EXISTING:existing,MOCK_DOCKER_LOG:logPath}
+    encoding:'utf8',timeout:10000,env:tools.env({...extraEnv,MOCK_EXISTING:existing})
   });
   assert.ifError(result.error);
-  const calls=fs.existsSync(logPath)?fs.readFileSync(logPath,'utf8').trim().split('\n').filter(Boolean).map(line=>JSON.parse(line)):[];
-  return {result,calls};
+  return {result,calls:tools.readCalls()};
 }
 
 test('startup replaces its owned disposable sidecar and labels the new container',()=>{
@@ -84,6 +99,67 @@ test('startup leaves a collision untouched when Docker ownership inspection fail
   assert.equal(result.status,1);
   assert.match(result.stderr,/Could not verify ownership.*leaving it untouched/);
   assert.equal(calls.some(args=>['stop','rm','run'].includes(args[0])),false);
+});
+
+test('readiness failure captures logs, then stops only the container this attempt started',()=>{
+  const {result,calls}=runStartup('none',{MOCK_READINESS:'fail'});
+  assert.equal(result.status,1);
+  assert.match(result.stderr,/readiness failed/);
+  assert.match(result.stdout,/friendbot rejected funding/);
+  const after=calls.slice(calls.findIndex(args=>args[0]==='run')+1);
+  assert.deepEqual(after,[['logs',MOCK_CONTAINER_ID],['stop',MOCK_CONTAINER_ID]]);
+});
+
+test('a readiness failure leaves an existing owned container replaced, not resurrected',()=>{
+  const {result,calls}=runStartup('owned',{MOCK_READINESS:'fail'});
+  assert.equal(result.status,1);
+  assert.deepEqual(calls.map(args=>args[0]),['ps','inspect','rm','run','logs','stop']);
+  assert.equal(calls.filter(args=>args[0]==='stop').every(args=>args[1]===MOCK_CONTAINER_ID),true);
+});
+
+test('a failed cleanup is reported and never turns failed readiness into success',()=>{
+  const {result,calls}=runStartup('none',{MOCK_READINESS:'fail',MOCK_STOP_FAILURE:'1'});
+  assert.equal(result.status,1);
+  assert.match(result.stderr,new RegExp(`could not stop container ${MOCK_CONTAINER_ID}; remove it with: docker rm -f ${MOCK_CONTAINER_ID}`));
+  assert.ok(calls.some(args=>args[0]==='stop'));
+});
+
+test('missing logs do not prevent stopping the container',()=>{
+  const {result,calls}=runStartup('none',{MOCK_READINESS:'fail',MOCK_LOGS_FAILURE:'1'});
+  assert.equal(result.status,1);
+  assert.match(result.stderr,/could not capture logs/);
+  assert.deepEqual(calls.at(-1),['stop',MOCK_CONTAINER_ID]);
+});
+
+test('successful readiness leaves the started container running',()=>{
+  const {result,calls}=runStartup('none');
+  assert.equal(result.status,0,result.stdout+result.stderr);
+  assert.equal(calls.some(args=>['logs','stop','rm'].includes(args[0])),false);
+});
+
+test('startup fails closed without touching any container when docker run reports no ID',()=>{
+  const {result,calls}=runStartup('none',{MOCK_RUN_ID:''});
+  assert.equal(result.status,1);
+  assert.match(result.stderr,/did not report the new container ID/);
+  assert.equal(calls.some(args=>['logs','stop','rm'].includes(args[0])),false);
+});
+
+test('termination while waiting for readiness still stops the started container',async()=>{
+  const tools=mockStartupTools();
+  const child=spawn('bash',[path.resolve(__dirname,'../scripts/start-local-network.sh')],{
+    env:tools.env({MOCK_EXISTING:'none',MOCK_READINESS:'hang'})
+  });
+  let stderr='';
+  child.stderr.on('data',chunk=>{stderr+=chunk;});
+  await new Promise(resolve=>{
+    const poll=setInterval(()=>{
+      if(tools.readCalls().some(args=>args[0]==='run')){clearInterval(poll);resolve();}
+    },20);
+  });
+  child.kill('SIGTERM');
+  const status=await new Promise(resolve=>child.on('close',code=>resolve(code)));
+  assert.equal(status,143,stderr);
+  assert.deepEqual(tools.readCalls().slice(-2),[['logs',MOCK_CONTAINER_ID],['stop',MOCK_CONTAINER_ID]]);
 });
 
 test('flagship workflow cleanup stops only the owned startup container',()=>{

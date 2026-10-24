@@ -34,18 +34,56 @@ if [ -n "${existing_container}" ]; then
     docker rm -f "${CONTAINER_NAME}"
 fi
 
+# Until readiness is confirmed, any exit stops the container this attempt
+# started, addressed by its ID so no other container is ever touched. Logs are
+# captured first because the --rm container is deleted once it stops. A failed
+# cleanup is reported but never turns the failed start into success. The traps
+# are installed before docker run so a signal received while it starts the
+# container is handled once its ID is known.
+ready=0
+container_id=""
+cleanup_unready_sidecar() {
+    local status=$?
+    trap - EXIT INT TERM
+    if [ "${ready}" = "1" ]; then
+        exit "${status}"
+    fi
+    if [ -z "${container_id}" ]; then
+        if [ "${status}" -eq 0 ]; then
+            status=1
+        fi
+        exit "${status}"
+    fi
+    echo "Capturing logs from container ${container_id} before stopping it..." >&2
+    docker logs "${container_id}" || echo "Warning: could not capture logs from container ${container_id}." >&2
+    if ! docker stop "${container_id}" >/dev/null; then
+        echo "Warning: could not stop container ${container_id}; remove it with: docker rm -f ${container_id}" >&2
+    fi
+    if [ "${status}" -eq 0 ]; then
+        status=1
+    fi
+    exit "${status}"
+}
+trap cleanup_unready_sidecar EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 echo "Starting ${IMAGE} in local standalone mode..."
-docker run --rm -d \
+container_id="$(docker run --rm -d \
   --name "${CONTAINER_NAME}" \
     --label "${OWNER_LABEL}=${OWNER_VALUE}" \
   -p "${PORT}:8000" \
-  ${IMAGE} --local
+  ${IMAGE} --local)"
+if [ -z "${container_id}" ]; then
+    echo "Error: docker run did not report the new container ID, so it cannot be cleaned up safely." >&2
+    exit 1
+fi
 
 echo "Waiting for RPC health, Friendbot funding and RPC account inclusion at ${RPC_URL}..."
 if node "$(dirname "$0")/wait-for-local-network.cjs" "${RPC_URL}"; then
+    ready=1
     exit 0
 fi
 
 echo "Error: Stellar Quickstart account/network readiness failed." >&2
-docker logs "${CONTAINER_NAME}" || true
 exit 1

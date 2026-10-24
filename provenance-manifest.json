@@ -2,6 +2,11 @@
   "schema_version": 1,
   "purpose": "verifiable WeighIn package build provenance",
   "source_revision": "fcba3bc443e8b82a20f68b4a08b2ad88e6760f86",
+  "source_revision": "d882ca087705b15ad7e8c381a039dcf7789ac6a4",
+  "tools": {
+    "node": "v22.23.1",
+    "npm": "12.0.2"
+  "source_revision": "e0b7b3e48021af6b1d0f1c78ec65074a5ef8a148",
   "tools": {
     "node": "v22.22.2",
     "npm": "10.9.7"
@@ -18,6 +23,8 @@
     {
       "path": "bundled/index.js",
       "sha256": "0ad140c091bf09715644f09dbe73fa51610023c06fdd6ea5bcaa6f2dd74625fc"
+      "sha256": "8a9f95736a10f453afe2dfd02d354a7400bd78bfc82fa9e65498f77c6d883292"
+      "sha256": "e0432feb946821a6c8d4997c03d3fd9f0903b8c7ea47ebd80ee40c88978475c3"
     },
     {
       "path": "native/simulation/Cargo.lock",
@@ -29,7 +36,7 @@
     },
     {
       "path": "native/simulation/src/main.rs",
-      "sha256": "c46eaa54dc07ea5aed5ab42481328e630d7b8f595e5198f7c58b468f9949507e"
+      "sha256": "ca7af818f409ab160148f500e07f4fa67dd6c1c6107cd061c3fa8a8bf4a64def"
     },
     {
       "path": "package-lock.json",
@@ -73,7 +80,7 @@
     },
     {
       "path": "src/config.ts",
-      "sha256": "d823fc7cdc5c9e15ea3565fe38e21e8ceeeea807d74d3c12464aeed05174767b"
+      "sha256": "0c742c2ed0573e447b70e22a2fde13af9e9a1e4d69b78d9cbe79a4fddc66168c"
     },
     {
       "path": "src/dependency-inventory.ts",
@@ -93,10 +100,11 @@
     },
     {
       "path": "src/identity.ts",
-      "sha256": "e0127204807e1bca07896eaee3396c54295ef8a09188debba09edc0ed7e1c086"
+      "sha256": "987c2136e2a777328bf8383b2d321572230f88c61ed27d2c2ae88a60925e5f7d"
     },
     {
       "path": "src/measurement.ts",
+      "sha256": "f959cad9896bcb1544ab0cfed64504836e1269b327a245339219621db8bf2d18"
       "sha256": "4f7d35342977c5d38018e8e02ad06de7339c12a480a8794d3320c51958415890"
     },
     {
@@ -116,6 +124,8 @@
       "sha256": "531612923e05a8d96b61037d98f3efc179735bfe8a526bcd88dcda1f6b9547c2"
     },
     {
+      "path": "src/setup-plan.ts",
+      "sha256": "6f1926d555b4dda124f833fced2f9adac965aeb6edc0e91dabcd71ed92c24f47"
       "path": "src/sdk-version.ts",
       "sha256": "8c0aeced896b1b3085cf1a087b67d0e6e484f4f8986b6ce4d34314d9ff543d35"
     },
