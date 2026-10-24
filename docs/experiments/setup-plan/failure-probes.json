@@ -1,0 +1,17 @@
+{
+  "malformed_binding_path": {
+    "error": "Cannot resolve binding to \"callee\": $ is scvAddress, not a vec, so index 0 cannot be selected",
+    "submissions": [
+      "hostFunctionTypeUploadContractWasm",
+      "hostFunctionTypeCreateContractV2",
+      "hostFunctionTypeUploadContractWasm",
+      "hostFunctionTypeCreateContractV2"
+    ],
+    "simulated": []
+  },
+  "failed_prerequisite": {
+    "error": "HostError: Error(WasmVm, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(WasmVm, InvalidAction)], data:\"Error(WasmVm, InvalidAction)\"\n\nSetup of id:callee failed; aborted dependents: id:caller",
+    "submissions": [],
+    "simulated": []
+  }
+}

@@ -76,10 +76,13 @@ export function parseFixtures(
 
     const caseIds = new Set<string>();
     const invocations = contract.invocations.map((invocation) => {
-      const args = invocation.args.map((arg) => ({
-        type: arg.type.toLowerCase(),
-        value: canonical(arg.value),
-      }));
+      // A bound argument is identified by its declared reference, never by the
+      // runtime value it resolves to, so case identity survives redeployment.
+      const args = invocation.args.map((arg) =>
+        "binding" in arg
+          ? { type: arg.type.toLowerCase(), binding: canonical(arg.binding) }
+          : { type: arg.type.toLowerCase(), value: canonical(arg.value) },
+      );
       const case_id =
         invocation.id === undefined
           ? `args:${JSON.stringify(args)}`
