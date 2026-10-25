@@ -1,15 +1,10 @@
 {
   "schema_version": 1,
   "purpose": "verifiable WeighIn package build provenance",
-  "source_revision": "d1645ff51fb979d6468fee88f2248795edde2a0e",
-  "source_revision": "d882ca087705b15ad7e8c381a039dcf7789ac6a4",
+  "source_revision": "2d96113f6f6f8fc3a7958ad9000598ee190bf9ee",
   "tools": {
-    "node": "v22.23.1",
-    "npm": "12.0.2"
-  "source_revision": "e0b7b3e48021af6b1d0f1c78ec65074a5ef8a148",
-  "tools": {
-    "node": "v22.17.1",
-    "npm": "10.9.2"
+    "node": "v22.22.2",
+    "npm": "10.9.7"
   },
   "inputs": [
     {
@@ -22,9 +17,7 @@
     },
     {
       "path": "bundled/index.js",
-      "sha256": "b8501f343b7315eb8f053c251f47de3b7ac7f043c2f60dd19f96186ee14093aa"
-      "sha256": "8a9f95736a10f453afe2dfd02d354a7400bd78bfc82fa9e65498f77c6d883292"
-      "sha256": "e0432feb946821a6c8d4997c03d3fd9f0903b8c7ea47ebd80ee40c88978475c3"
+      "sha256": "45a49193cf3b61f79cc13eee70fb09c715be56023836481cd412b7f9bc301fb7"
     },
     {
       "path": "native/simulation/Cargo.lock",
@@ -44,7 +37,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "4ab0915dc8e341dbf1d0f577de1c8f380dbe70870124f7b7fa3a195d57401bc1"
+      "sha256": "74c20c7f7574ef9701efc0953fa198e4eb4539c70582dc352f4576bcf7a993e8"
     },
     {
       "path": "src/account.ts",
@@ -104,8 +97,7 @@
     },
     {
       "path": "src/measurement.ts",
-      "sha256": "f959cad9896bcb1544ab0cfed64504836e1269b327a245339219621db8bf2d18"
-      "sha256": "4f7d35342977c5d38018e8e02ad06de7339c12a480a8794d3320c51958415890"
+      "sha256": "c8090d2ba1cf783537a1ea4f7131486f45530bebc5c4afd8618b4acb97c5d4d8"
     },
     {
       "path": "src/network.ts",
@@ -128,14 +120,16 @@
       "sha256": "531612923e05a8d96b61037d98f3efc179735bfe8a526bcd88dcda1f6b9547c2"
     },
     {
-      "path": "src/setup-plan.ts",
-      "sha256": "6f1926d555b4dda124f833fced2f9adac965aeb6edc0e91dabcd71ed92c24f47"
       "path": "src/sdk-version.ts",
       "sha256": "8c0aeced896b1b3085cf1a087b67d0e6e484f4f8986b6ce4d34314d9ff543d35"
     },
     {
+      "path": "src/setup-plan.ts",
+      "sha256": "6f1926d555b4dda124f833fced2f9adac965aeb6edc0e91dabcd71ed92c24f47"
+    },
+    {
       "path": "src/simulation.ts",
-      "sha256": "f25168e2b70e7920e220adf98c9e2cacb2f4e27771ab98ea481644b329139f85"
+      "sha256": "77f03201459718927d56355a525dcc5721ede1c0b780de1c2ea548286a98deca"
     },
     {
       "path": "src/source-account.ts",

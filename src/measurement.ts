@@ -1086,6 +1086,7 @@ export async function runMeasurement(
   // Measurement phase, in fixture declaration order.
   const results: ContractBenchmark[] = [];
   for (const contractSpec of fixturesSpec.contracts) {
+    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path)!;
     const { contractId, wasmSha256 } = deployments.get(
       contractSpec.logical_id,
     )!;
@@ -1110,24 +1111,16 @@ export async function runMeasurement(
         setupResults,
       });
 
-      const simRes = await server.simulateTransaction(invokeTx);
-      if (rpc.Api.isSimulationError(simRes)) {
-        throw new Error(
-          `Simulation failed for ${invokeSpec.function_name}: ${simRes.error}`,
-        );
-      }
-
-      if (!rpc.Api.isSimulationSuccess(simRes)) {
-        throw new Error(
-          `Simulation did not return transaction data for ${invokeSpec.function_name}`,
-        );
-      }
       const helperPath = await resolveSimulationHelper(opts.helperPath);
       const { output, provenance, limits } = await measureInvocation(
         effectiveRpcUrl,
         invokeTx,
         helperPath,
-        { signal: opts.signal },
+        {
+          signal: opts.signal,
+          functionName: invokeSpec.function_name,
+          caseId: invokeSpec.case_id,
+        },
       );
       const metrics = metricsFromSimulation(output, limits);
 
