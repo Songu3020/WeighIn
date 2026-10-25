@@ -37,25 +37,56 @@ async function execute(order, metadata = true, run = successfulPr, condition = c
   const server = http.createServer((request, response) => {
     let raw = ''; request.on('data', data => raw += data);
     request.on('end', () => {
-      const api = '/repos/WeighInNG/WeighIn';
-      const send = (status, value) => { response.writeHead(status, { 'content-type': 'application/json' }); response.end(JSON.stringify(value)); };
+      const url = new URL(request.url, `http://${request.headers.host || '127.0.0.1'}`);
       const body = raw ? JSON.parse(raw) : undefined;
-      if (request.method === 'GET' && request.url === `${api}/pulls/27`) {
+      const send = (status, value, headers = {}) => {
+        response.writeHead(status, { 'content-type': 'application/json', ...headers });
+        response.end(JSON.stringify(value));
+      };
+
+      if (request.method === 'GET' && url.pathname === '/repos/WeighInNG/WeighIn/pulls/27') {
         lookups.push(request.url);
-        return scenario.pullStatus ? send(scenario.pullStatus, { message: 'scenario failure' }) : send(200, { head: { sha: currentHead } });
+        return scenario.pullStatus
+          ? send(scenario.pullStatus, { message: 'scenario failure' })
+          : send(200, { head: { sha: currentHead } });
       }
-      if (request.method === 'GET' && request.url.startsWith(`${api}/git/commits/`)) {
+
+      if (request.method === 'GET' && url.pathname.startsWith('/repos/WeighInNG/WeighIn/git/commits/')) {
         lookups.push(request.url);
-        const sha = request.url.split('/').pop(), parents = scenario.parents && scenario.parents[sha];
-        return parents ? send(200, { sha, parents: parents.map(parent => ({ sha: parent })) }) : send(404, { message: 'Not Found' });
+        const sha = url.pathname.split('/').pop();
+        const parents = scenario.parents && scenario.parents[sha];
+        return parents
+          ? send(200, { sha, parents: parents.map(parent => ({ sha: parent })) })
+          : send(404, { message: 'Not Found' });
       }
-      if (request.url === `${api}/issues/27/comments` && ['GET', 'POST'].includes(request.method)) {
-        calls.push({ method: request.method, body });
-        return request.method === 'GET' ? send(200, scenario.existingComments || []) : send(201, { id: 42, body: body.body });
+
+      if (url.pathname === '/repos/WeighInNG/WeighIn/issues/27/comments' && request.method === 'GET') {
+        const page = parseInt(url.searchParams.get('page') || '1', 10);
+        calls.push({ method: 'GET', url: request.url, page, body });
+        if (scenario.pages) {
+          const pageIndex = page - 1;
+          const pageEntry = scenario.pages[pageIndex];
+          if (pageEntry && pageEntry.status && pageEntry.status >= 400) {
+            return send(pageEntry.status, { message: pageEntry.message || 'API error' });
+          }
+          const headers = pageIndex + 1 < scenario.pages.length
+            ? { link: `<http://${request.headers.host}${url.pathname}?page=${page + 1}>; rel="next"` }
+            : {};
+          return send(200, pageEntry ?? [], headers);
+        }
+        return send(200, scenario.existingComments || []);
       }
-      if (request.method === 'PATCH' && /^\/repos\/WeighInNG\/WeighIn\/issues\/comments\/\d+$/.test(request.url)) {
-        calls.push({ method: request.method, body });
-        return send(200, { id: 7, body: body.body });
+
+      if (url.pathname === '/repos/WeighInNG/WeighIn/issues/27/comments' && request.method === 'POST') {
+        calls.push({ method: 'POST', url: request.url, body });
+        return send(201, { id: 42, body: body.body });
+      }
+
+      const patchMatch = url.pathname.match(/^\/repos\/WeighInNG\/WeighIn\/issues\/comments\/(\d+)$/);
+      if (patchMatch && request.method === 'PATCH') {
+        const commentId = parseInt(patchMatch[1], 10);
+        calls.push({ method: 'PATCH', url: request.url, commentId, body });
+        return send(200, { id: commentId, body: body.body });
       }
       response.writeHead(400); response.end('Unexpected test API request');
     });
@@ -202,6 +233,72 @@ test('a successful fork PR uses the same comment delivery path', async () => {
   assert.equal(result.calls[1].body.body, report);
 });
 
+test('a report on page two is updated and no new comment is created', async () => {
+  const pages = [
+    [{ id: 101, body: 'Discussion comment 1' }],
+    [{ id: 102, body: '<!-- weighin-report -->\nOld benchmark report', user: { id: 41898282 } }],
+    [{ id: 103, body: 'Discussion comment 2' }],
+  ];
+  const result = await execute(steps, true, successfulPr, commentJob.if, { pages });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.deepEqual(result.calls.map(c => c.method), ['GET', 'GET', 'PATCH']);
+  assert.deepEqual(result.calls.filter(c => c.method === 'GET').map(c => c.page), [1, 2]);
+  assert.equal(result.calls[2].commentId, 102);
+  assert.equal(result.calls[2].body.body, report);
+});
+
+test('lookup reaches exhaustion before creating a report when none exists', async () => {
+  const pages = [
+    [{ id: 201, body: 'Discussion comment 1' }],
+    [{ id: 202, body: 'Discussion comment 2' }],
+    [{ id: 203, body: 'Discussion comment 3' }],
+  ];
+  const result = await execute(steps, true, successfulPr, commentJob.if, { pages });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.deepEqual(result.calls.map(c => c.method), ['GET', 'GET', 'GET', 'POST']);
+  assert.deepEqual(result.calls.filter(c => c.method === 'GET').map(c => c.page), [1, 2, 3]);
+  assert.equal(result.calls[3].body.body, report);
+});
+
+test('empty first page followed by non-matching page then matching report updates exactly one comment', async () => {
+  const pages = [
+    [],
+    [{ id: 301, body: 'Discussion comment 1' }],
+    [{ id: 302, body: '<!-- weighin-report -->\nFound on page 3', user: { id: 41898282 } }],
+  ];
+  const result = await execute(steps, true, successfulPr, commentJob.if, { pages });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.deepEqual(result.calls.map(c => c.method), ['GET', 'GET', 'GET', 'PATCH']);
+  assert.deepEqual(result.calls.filter(c => c.method === 'GET').map(c => c.page), [1, 2, 3]);
+  assert.equal(result.calls[3].commentId, 302);
+  assert.equal(result.calls[3].body.body, report);
+});
+
+test('preserves existing selection behavior when multiple markers exist on the same page', async () => {
+  const pages = [
+    [
+      { id: 401, body: '<!-- weighin-report -->\nFirst marker', user: { id: 41898282 } },
+      { id: 402, body: '<!-- weighin-report -->\nSecond marker', user: { id: 41898282 } },
+    ],
+    [{ id: 403, body: '<!-- weighin-report -->\nThird marker', user: { id: 41898282 } }],
+  ];
+  const result = await execute(steps, true, successfulPr, commentJob.if, { pages });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.deepEqual(result.calls.map(c => c.method), ['GET', 'PATCH']);
+  assert.equal(result.calls[1].commentId, 401);
+  assert.equal(result.calls[1].body.body, report);
+});
+
+test('an API failure during pagination stops execution and creates no comment', async () => {
+  const pages = [
+    [{ id: 501, body: 'Discussion comment' }],
+    { status: 500, message: 'Server error from GitHub API' },
+  ];
+  const result = await execute(steps, true, successfulPr, commentJob.if, { pages });
+  assert.equal(result.status, 1, 'API failure must cause non-zero exit');
+  assert.match(result.stdout + result.stderr, /Server error from GitHub API/);
+  assert.deepEqual(result.calls.map(c => c.method), ['GET', 'GET']);
+});
 // ---------------------------------------------------------------------------
 // Author-mode regression tests (issue #16)
 // ---------------------------------------------------------------------------
