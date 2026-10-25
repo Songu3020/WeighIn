@@ -805,6 +805,8 @@ async function callRpc(
 
 export interface MeasureInvocationOptions {
   signal?: AbortSignal;
+  functionName?: string;
+  caseId?: string;
 }
 
 /** Capture all discovered keys/config at one ledger; retry the entire capture on drift.
@@ -865,13 +867,67 @@ export async function measureInvocation(
       },
       signal,
     );
-    const error = (raw as { error?: string }).error;
-    if (error) throw new Error(`RPC simulation failed: ${error}`);
-    const simulation = simulationSchema.parse(raw);
-    const resources = xdr.SorobanTransactionData.fromXDR(
-      simulation.transactionData,
-      "base64",
-    ).resources();
+    const context = options?.functionName
+      ? options?.caseId
+        ? `${options.functionName} (${options.caseId})`
+        : options.functionName
+      : undefined;
+    const error = (raw as { error?: string })?.error;
+    if (error) {
+      throw new Error(
+        context
+          ? `Simulation failed for ${context}: ${error}`
+          : `RPC simulation failed: ${error}`,
+      );
+    }
+    if (
+      typeof raw !== "object" ||
+      raw === null ||
+      !("transactionData" in raw) ||
+      !(raw as { transactionData?: unknown }).transactionData
+    ) {
+      throw new Error(
+        context
+          ? `Simulation did not return transaction data for ${context}`
+          : "Simulation did not return transaction data",
+      );
+    }
+    const parseResult = simulationSchema.safeParse(raw);
+    if (!parseResult.success) {
+      const details = parseResult.error.issues
+        .map((issue) => `${issue.path.join(".") || "root"}: ${issue.message}`)
+        .join("; ");
+      throw new Error(
+        context
+          ? `Simulation returned unsupported result shape for ${context}: ${details}`
+          : `Simulation returned unsupported result shape: ${details}`,
+      );
+    }
+    const simulation = parseResult.data;
+    try {
+      xdr.ScVal.fromXDR(simulation.results[0].xdr, "base64");
+    } catch (err: any) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context
+          ? `Simulation returned unsupported result shape for ${context}: invalid return value XDR (${detail})`
+          : `Simulation returned unsupported result shape: invalid return value XDR (${detail})`,
+      );
+    }
+    let resources: xdr.SorobanResources;
+    try {
+      resources = xdr.SorobanTransactionData.fromXDR(
+        simulation.transactionData,
+        "base64",
+      ).resources();
+    } catch (err: any) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context
+          ? `Simulation returned invalid transaction data for ${context}: ${detail}`
+          : `Simulation returned invalid transaction data: ${detail}`,
+      );
+    }
     const roKeys = resources
       .footprint()
       .readOnly()

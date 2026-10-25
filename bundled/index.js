@@ -70124,13 +70124,46 @@ async function measureInvocation(rpcUrl, transaction, helperPath, options) {
       },
       signal
     );
-    const error63 = raw.error;
-    if (error63) throw new Error(`RPC simulation failed: ${error63}`);
-    const simulation = simulationSchema.parse(raw);
-    const resources = types.SorobanTransactionData.fromXDR(
-      simulation.transactionData,
-      "base64"
-    ).resources();
+    const context3 = options?.functionName ? options?.caseId ? `${options.functionName} (${options.caseId})` : options.functionName : void 0;
+    const error63 = raw?.error;
+    if (error63) {
+      throw new Error(
+        context3 ? `Simulation failed for ${context3}: ${error63}` : `RPC simulation failed: ${error63}`
+      );
+    }
+    if (typeof raw !== "object" || raw === null || !("transactionData" in raw) || !raw.transactionData) {
+      throw new Error(
+        context3 ? `Simulation did not return transaction data for ${context3}` : "Simulation did not return transaction data"
+      );
+    }
+    const parseResult = simulationSchema.safeParse(raw);
+    if (!parseResult.success) {
+      const details = parseResult.error.issues.map((issue2) => `${issue2.path.join(".") || "root"}: ${issue2.message}`).join("; ");
+      throw new Error(
+        context3 ? `Simulation returned unsupported result shape for ${context3}: ${details}` : `Simulation returned unsupported result shape: ${details}`
+      );
+    }
+    const simulation = parseResult.data;
+    try {
+      types.ScVal.fromXDR(simulation.results[0].xdr, "base64");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context3 ? `Simulation returned unsupported result shape for ${context3}: invalid return value XDR (${detail})` : `Simulation returned unsupported result shape: invalid return value XDR (${detail})`
+      );
+    }
+    let resources;
+    try {
+      resources = types.SorobanTransactionData.fromXDR(
+        simulation.transactionData,
+        "base64"
+      ).resources();
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        context3 ? `Simulation returned invalid transaction data for ${context3}: ${detail}` : `Simulation returned invalid transaction data: ${detail}`
+      );
+    }
     const roKeys = resources.footprint().readOnly().map((k) => k.toXDR("base64"));
     const rwKeys = resources.footprint().readWrite().map((k) => k.toXDR("base64"));
     validateFootprintKeys(roKeys, rwKeys, "RPC simulation footprint");
@@ -71266,10 +71299,10 @@ Setup of ${contractSpec.logical_id} failed; aborted dependents: ${aborted2.map((
   }
   const results = [];
   for (const contractSpec of fixturesSpec.contracts) {
+    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path);
     const { contractId, wasmSha256 } = deployments.get(
       contractSpec.logical_id
     );
-    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path);
     const benchmarks = [];
     for (const invokeSpec of contractSpec.invocations) {
       if (opts.signal?.aborted) {
@@ -71285,23 +71318,16 @@ Setup of ${contractSpec.logical_id} failed; aborted dependents: ${aborted2.map((
         signal: opts.signal,
         setupResults
       });
-      const simRes = await server.simulateTransaction(invokeTx);
-      if (rpc_exports.Api.isSimulationError(simRes)) {
-        throw new Error(
-          `Simulation failed for ${invokeSpec.function_name}: ${simRes.error}`
-        );
-      }
-      if (!rpc_exports.Api.isSimulationSuccess(simRes)) {
-        throw new Error(
-          `Simulation did not return transaction data for ${invokeSpec.function_name}`
-        );
-      }
       const helperPath = await resolveSimulationHelper(opts.helperPath);
       const { output: output2, provenance, limits } = await measureInvocation(
         effectiveRpcUrl,
         invokeTx,
         helperPath,
-        { signal: opts.signal }
+        {
+          signal: opts.signal,
+          functionName: invokeSpec.function_name,
+          caseId: invokeSpec.case_id
+        }
       );
       const metrics = metricsFromSimulation(output2, limits);
       benchmarks.push({
@@ -71758,6 +71784,30 @@ function resolveEffectivePolicy(diff, config3, origin) {
 
 // src/comment.ts
 var COMMENT_MARKER = "<!-- weighin-report -->";
+async function findReportComment(octokit, owner, repo, issueNumber, marker = COMMENT_MARKER, expectedAuthorId) {
+  for await (const response of octokit.paginate.iterator(
+    octokit.rest.issues.listComments,
+    {
+      owner,
+      repo,
+      issue_number: issueNumber
+    }
+  )) {
+    const comments = response.data;
+    const match = comments.find((comment) => {
+      const matchesMarker = comment.body?.includes(marker);
+      if (!matchesMarker) return false;
+      if (expectedAuthorId !== void 0) {
+        return comment.user?.id === expectedAuthorId;
+      }
+      return true;
+    });
+    if (match) {
+      return match;
+    }
+  }
+  return void 0;
+}
 var GITHUB_ACTIONS_BOT = {
   login: "github-actions[bot]",
   id: 41898282,
@@ -71819,13 +71869,13 @@ async function upsertPrComment(token, numberOrBody, bodyOrOptions, maybeOptions)
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const expectedAuthor = await resolveExpectedAuthor(octokit, mode);
-  const { data: comments } = await octokit.rest.issues.listComments({
+  const existing = await findReportComment(
+    octokit,
     owner,
     repo,
-    issue_number: prNumber
-  });
-  const existing = comments.find(
-    (comment) => comment.body?.includes(COMMENT_MARKER) && comment.user?.id === expectedAuthor.id
+    prNumber,
+    COMMENT_MARKER,
+    expectedAuthor.id
   );
   if (existing) {
     await octokit.rest.issues.updateComment({
