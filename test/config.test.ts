@@ -62,9 +62,7 @@ describe("loadConfig (TOML parsing & Zod Validation)", () => {
     vi.mocked(fs.readFileSync).mockReturnValue(`
       unknown_key = true
     `);
-    expect(() => loadConfig("weighin.toml")).toThrow(
-      "Unrecognized key(s) in object: 'unknown_key'",
-    );
+    expect(() => loadConfig("weighin.toml")).toThrow(/unknown_key/);
   });
 
   it("throws on unknown rule string", () => {
@@ -84,9 +82,7 @@ describe("loadConfig (TOML parsing & Zod Validation)", () => {
       [thresholds.functions.test]
       memory_byte = "ignore"
     `);
-    expect(() => loadConfig("weighin.toml")).toThrow(
-      "Unrecognized key(s) in object: 'memory_byte'",
-    );
+    expect(() => loadConfig("weighin.toml")).toThrow(/memory_byte/);
   });
 
   it("parses valid absolute limits", () => {
@@ -110,9 +106,7 @@ describe("loadConfig (TOML parsing & Zod Validation)", () => {
       [limits.global]
       tx_size_bytes = -1
     `);
-    expect(() => loadConfig("weighin.toml")).toThrow(
-      /greater than or equal to 0/,
-    );
+    expect(() => loadConfig("weighin.toml")).toThrow(/>=\s?0/);
   });
 });
 
@@ -141,7 +135,7 @@ describe("FixturesSpecSchema", () => {
     if (!res.success) {
       const msg = formatZodError(res.error, "fixtures.json");
       expect(msg).toContain("contracts.0.invocations");
-      expect(msg).toContain("Required");
+      expect(msg).toMatch(/expected array|Required/);
     }
   });
 
@@ -163,14 +157,14 @@ describe("FixturesSpecSchema", () => {
     expect(res.success).toBe(false);
     if (!res.success) {
       const msg = formatZodError(res.error, "fix.json");
-      expect(msg).toContain("Invalid enum value");
+      expect(msg).toContain("Invalid option");
 
       // Error formatting test (newline fix)
       const lines = msg.split("\n");
       expect(lines.length).toBe(2);
       expect(lines[0]).toBe("Invalid WeighIn configuration in fix.json:");
       expect(lines[1]).toContain(
-        "- contracts.0.invocations.0.args.0.type: Invalid enum value",
+        "- contracts.0.invocations.0.args.0.type: Invalid option",
       );
     }
   });
