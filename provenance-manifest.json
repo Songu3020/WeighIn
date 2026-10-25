@@ -13,7 +13,7 @@
     },
     {
       "path": "bundled/comment-action.js",
-      "sha256": "fa76a82b443f072be6401fe6ed12d3387de0e25f180a78a1b8557a850c976e04"
+      "sha256": "e109be0faa3147ec7a82d56fa61c41c0d778112fc542744ffa9a55048fdb282f"
     },
     {
       "path": "bundled/index.js",
@@ -69,7 +69,7 @@
     },
     {
       "path": "src/comment.ts",
-      "sha256": "84404c770f2314842c6a67f399e5ea54845cfe70a7c4c15ef1c182df27612e9c"
+      "sha256": "d9b0f4ac6df4e0debb9b8049c61f9eab20f1a16350df1f55799af218c30c84ef"
     },
     {
       "path": "src/config.ts",

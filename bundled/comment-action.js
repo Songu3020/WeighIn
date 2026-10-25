@@ -26168,6 +26168,30 @@ var METRIC_KEY_SET = new Set(METRIC_KEYS);
 
 // src/comment.ts
 var COMMENT_MARKER = "<!-- weighin-report -->";
+async function findReportComment(octokit, owner, repo, issueNumber, marker = COMMENT_MARKER, expectedAuthorId) {
+  for await (const response of octokit.paginate.iterator(
+    octokit.rest.issues.listComments,
+    {
+      owner,
+      repo,
+      issue_number: issueNumber
+    }
+  )) {
+    const comments = response.data;
+    const match = comments.find((comment) => {
+      const matchesMarker = comment.body?.includes(marker);
+      if (!matchesMarker) return false;
+      if (expectedAuthorId !== void 0) {
+        return comment.user?.id === expectedAuthorId;
+      }
+      return true;
+    });
+    if (match) {
+      return match;
+    }
+  }
+  return void 0;
+}
 var GITHUB_ACTIONS_BOT = {
   login: "github-actions[bot]",
   id: 41898282,
@@ -26229,13 +26253,13 @@ async function upsertPrComment(token, numberOrBody, bodyOrOptions, maybeOptions)
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
   const expectedAuthor = await resolveExpectedAuthor(octokit, mode);
-  const { data: comments } = await octokit.rest.issues.listComments({
+  const existing = await findReportComment(
+    octokit,
     owner,
     repo,
-    issue_number: prNumber
-  });
-  const existing = comments.find(
-    (comment) => comment.body?.includes(COMMENT_MARKER) && comment.user?.id === expectedAuthor.id
+    prNumber,
+    COMMENT_MARKER,
+    expectedAuthor.id
   );
   if (existing) {
     await octokit.rest.issues.updateComment({
