@@ -1089,6 +1089,7 @@ export async function runMeasurement(
     const { contractId, wasmSha256 } = deployments.get(
       contractSpec.logical_id,
     )!;
+    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path)!;
 
     const benchmarks: BenchmarkResult[] = [];
 
