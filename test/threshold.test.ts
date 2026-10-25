@@ -53,6 +53,55 @@ describe("enforceThresholds", () => {
     expect(enforceThresholds(diff, { thresholds: {} })).toEqual([]);
   });
 
+  it("requires a matched benchmark for configured global absolute limits", () => {
+    const emptyDiff: DiffResult = {
+      contracts: [],
+      hasRegression: false,
+      newContracts: [],
+      removedContracts: [],
+    };
+    const config: WeighinConfig = {
+      limits: { global: { cpu_instructions: 100 } },
+    };
+
+    expect(() => enforceThresholds(emptyDiff, config)).toThrow(
+      /global policy or limits: no matched BASE\/HEAD benchmarks/,
+    );
+    expect(enforceThresholds(emptyDiff, { limits: { global: {} } })).toEqual(
+      [],
+    );
+    expect(enforceThresholds(emptyDiff, null)).toEqual([]);
+  });
+
+  it("rejects global absolute limits when all cases are unmatched", () => {
+    const diff: DiffResult = {
+      contracts: [
+        {
+          contract_id: "contract-a",
+          base_contract_id: "base-contract",
+          head_contract_id: "head-contract",
+          base_commit: "abc",
+          head_commit: "def",
+          functions: [],
+          hasRegression: false,
+          newFunctions: ["new-fn"],
+          removedFunctions: [],
+          newBenchmarks: [{ function_name: "new-fn", case_id: "args:[]" }],
+          removedBenchmarks: [],
+        },
+      ],
+      hasRegression: false,
+      newContracts: [],
+      removedContracts: [],
+    };
+
+    expect(() =>
+      enforceThresholds(diff, {
+        limits: { global: { cpu_instructions: 100 } },
+      }),
+    ).toThrow(/no matched BASE\/HEAD benchmarks/);
+  });
+
   it("handles fail_on_any_regression", () => {
     const diff = createMockDiff("cpu_instructions", 10, 10, true);
     const config: WeighinConfig = {

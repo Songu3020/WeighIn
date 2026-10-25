@@ -86,9 +86,15 @@ function createLegacySample() {
 
 test("public package root, diff module, and record-schema module export the standalone validator and version constants", () => {
   for (const mod of [rootApi, schemaApi, diffApi]) {
-    assert.deepEqual(mod.SUPPORTED_RECORD_SCHEMA_VERSIONS, [2, 3, 4]);
-    assert.deepEqual(mod.SUPPORTED_MEASUREMENT_ENVELOPES, ["legacy", 2, 3, 4]);
-    assert.equal(mod.CURRENT_RECORD_SCHEMA_VERSION, 4);
+    assert.deepEqual(mod.SUPPORTED_RECORD_SCHEMA_VERSIONS, [2, 3, 4, 5]);
+    assert.deepEqual(mod.SUPPORTED_MEASUREMENT_ENVELOPES, [
+      "legacy",
+      2,
+      3,
+      4,
+      5,
+    ]);
+    assert.equal(mod.CURRENT_RECORD_SCHEMA_VERSION, 5);
     assert.equal(typeof mod.validateMeasurementRecord, "function");
     assert.equal(typeof mod.validateMeasurementRecords, "function");
     assert.equal(typeof mod.inspectMeasurementRecord, "function");
@@ -176,14 +182,15 @@ test("machine-readable JSON Schema matches checked-in artifact and defines expli
     diskSchema.$schema,
     "https://json-schema.org/draft/2020-12/schema",
   );
-  assert.equal(diskSchema["x-weighin-current-version"], 4);
+  assert.equal(diskSchema["x-weighin-current-version"], 5);
   assert.deepEqual(diskSchema["x-weighin-supported-versions"], [
     "legacy",
     2,
     3,
     4,
+    5,
   ]);
-  assert.equal(diskSchema.$defs.ContractBenchmark.oneOf.length, 4);
+  assert.equal(diskSchema.$defs.ContractBenchmark.oneOf.length, 5);
   assert.equal(
     diskSchema.$defs.LegacyContractBenchmark["x-weighin-envelope-version"],
     "legacy",
@@ -199,6 +206,15 @@ test("machine-readable JSON Schema matches checked-in artifact and defines expli
   assert.equal(
     diskSchema.$defs.Schema4ContractBenchmark.properties.schema_version.const,
     4,
+  );
+  assert.equal(
+    diskSchema.$defs.Schema5ContractBenchmark.properties.schema_version.const,
+    5,
+  );
+  assert.equal(
+    diskSchema.$defs.Schema5Metrics.properties.cpu_instructions.properties
+      .source.const,
+    "soroban-simulation.simulated_instructions",
   );
   assert.equal(
     diskSchema.$defs.Sha256Hex.pattern,
@@ -230,7 +246,7 @@ test("validator rejects unknown versions, missing metrics, unavailable-as-zero, 
   );
 
   // 1. Unknown schema versions
-  for (const invalidVersion of [0, 1, 5, 999, "4", null]) {
+  for (const invalidVersion of [0, 1, 6, 999, "4", null]) {
     const mutated = structuredClone(archivedS4);
     mutated[0].schema_version = invalidVersion;
     const res = rootApi.inspectMeasurementRecords(mutated);
@@ -242,7 +258,7 @@ test("validator rejects unknown versions, missing metrics, unavailable-as-zero, 
       (err) => {
         assert.ok(err instanceof rootApi.MeasurementRecordValidationError);
         assert.equal(err.path, "$[0].schema_version");
-        assert.match(err.message, /Version 2\/3\/4 results require/);
+        assert.match(err.message, /Version 2\/3\/4\/5 results require/);
         return true;
       },
     );
