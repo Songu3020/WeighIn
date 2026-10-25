@@ -464,11 +464,12 @@ export function enforceThresholds(
   }
   if (
     (global.fail_on_any_regression ||
-      GLOBAL_RULE_MAP.some(({ field }) => global[field] !== undefined)) &&
+      GLOBAL_RULE_MAP.some(({ field }) => global[field] !== undefined) ||
+      Object.keys(globalLimits).length > 0) &&
     comparedNames.size === 0
   ) {
     throw new Error(
-      "Cannot evaluate global policy: no matched BASE/HEAD benchmarks",
+      "Cannot evaluate configured global policy or limits: no matched BASE/HEAD benchmarks",
     );
   }
 

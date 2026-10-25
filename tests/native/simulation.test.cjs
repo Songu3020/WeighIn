@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { TransactionBuilder, xdr } = require('@stellar/stellar-sdk');
+const { Keypair, TransactionBuilder, xdr } = require('@stellar/stellar-sdk');
 const { simulateSnapshot, measureInvocation } = require('../../dist/simulation');
 const evidence = path.resolve(__dirname, '../../docs/experiments/compute-source-spike');
 const helper = path.resolve(__dirname, '../../native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation');
@@ -36,6 +36,34 @@ test('real helper rejects missing config, uncaptured state, failed calls, protoc
     [{ ...base, seed: [0] }, /32 bytes/],
   ];
   for (const [input, message] of cases) await assert.rejects(simulateSnapshot(input, helper), message);
+});
+
+// A ledger key that is not part of the captured snapshot.
+function unrelatedAccountKey() {
+  return xdr.LedgerKey.account(new xdr.LedgerKeyAccount({ accountId: Keypair.random().xdrAccountId() })).toXDR('base64');
+}
+test('real helper keeps valid absent-key rows and rejects present-only metadata on them', async () => {
+  const baseline = await simulateSnapshot(base, helper);
+  const present = base.entries.find(row => row.xdr && row.extension_xdr !== undefined && row.last_modified !== undefined);
+  assert.ok(present, 'captured snapshot has a present entry with metadata');
+  const header = xdr.LedgerHeader.fromXDR(base.header_xdr, 'base64');
+  const absent = extra => ({ ...base, entries: [...base.entries, { key: unrelatedAccountKey(), xdr: null, ...extra }] });
+
+  for (const extra of [{}, { live_until: null }]) {
+    assert.deepEqual(await simulateSnapshot(absent(extra), helper), baseline);
+  }
+  const contradictions = [
+    [{ extension_xdr: present.extension_xdr }, /absent snapshot entry must not carry extension_xdr$/m],
+    [{ last_modified: present.last_modified }, /absent snapshot entry must not carry last_modified$/m],
+    [{ live_until: header.ledgerSeq() + 100 }, /absent snapshot entry must not carry live_until$/m],
+    // Reported as a contradiction, not as archived state.
+    [{ live_until: 0 }, /absent snapshot entry must not carry live_until$/m],
+    [
+      { extension_xdr: present.extension_xdr, last_modified: present.last_modified, live_until: header.ledgerSeq() + 100 },
+      /absent snapshot entry must not carry extension_xdr, last_modified, live_until$/m,
+    ],
+  ];
+  for (const [extra, message] of contradictions) await assert.rejects(simulateSnapshot(absent(extra), helper), message);
 });
 
 function capturedRpc(t, mutate) {

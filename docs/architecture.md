@@ -116,8 +116,9 @@ consumed CPU/memory. The helper's consumed cost-model values supply compute;
 RPC/native resource data supplies audited IO/events. No adjusted instruction
 budget is substituted for consumption.
 
-`src/measurement.ts::metricsFromSimulation` emits schema 4: eight measured resource fields and three
-unavailable fields with null values/reasons. Caps are decoded from the same
+`src/measurement.ts::metricsFromSimulation` emits schema 5: eight measured resource fields and three
+unavailable fields with null values/reasons. Per-metric source/cap labels are
+validated against approved mappings. Caps are decoded from the same
 captured configuration; event count has no independent cap. Exact definitions
 and source locations are in [metric provenance](metric-provenance.md).
 
@@ -139,7 +140,7 @@ See [source-account effects](source-account-effects.md).
 `src/record-schema.ts` provides the authoritative versioned schema and standalone
 runtime validator (`validateMeasurementRecord`, `validateMeasurementRecords`,
 `inspectMeasurementRecords`, and `getMeasurementRecordJsonSchema`) for saved
-measurement envelopes (`legacy`, `2`, `3`, and `4`; see
+measurement envelopes (`legacy`, `2`, `3`, `4`, and `5`; see
 [record schema](record-schema.md)). `src/diff.ts::diffBenchmarks` delegates record
 validation to `src/record-schema.ts`, validating all records including unmatched
 ones. Contracts pair by fixture/logical identity, invocations by function/case

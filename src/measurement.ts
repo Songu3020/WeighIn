@@ -7,6 +7,7 @@ import { ensureAccountReady } from "./account";
 import { redactEndpointSecrets, sanitizeEndpoint } from "./endpoint";
 import { validateLargeInt } from "./config";
 import { SUPPORTED_NETWORK_PASSPHRASE } from "./network";
+import { CURRENT_RECORD_SCHEMA_VERSION } from "./record-schema";
 import {
   measureInvocation,
   resolveSimulationHelper,
@@ -15,6 +16,8 @@ import {
   SimulationOutput,
   ResourceLimits,
 } from "./simulation";
+import { planSetupOrder, dependentsOf, resolveBinding } from "./setup-plan";
+import type { SetupResult } from "./setup-plan";
 import {
   xdr,
   nativeToScVal,
@@ -31,7 +34,7 @@ import {
 
 const DEFAULT_RPC_URL = "http://localhost:8000/rpc";
 
-/** Schema 4 adds audited consumption and per-metric limit provenance. */
+/** Schema 5 binds each metric to its approved source and cap mapping. */
 export interface MetricValue {
   availability?: "measured" | "unavailable";
   consumed: number | null;
@@ -67,7 +70,7 @@ export interface BenchmarkResult {
 
 export interface ContractBenchmark {
   /** Versions 2–4 separate logical comparison identity from deployment identity. */
-  schema_version?: 2 | 3 | 4;
+  schema_version?: 2 | 3 | 4 | 5;
   fixture_id?: string;
   logical_id?: string;
   /** Runtime address, never the comparison key for logical results. */
@@ -83,15 +86,30 @@ export interface InvocationArg {
   value: any;
 }
 
+export type BindingSelectorStep = { field: string } | { index: number };
+
+/** Reference to a declared dependency's committed setup return. */
+export interface SetupBinding {
+  contract: string;
+  select?: BindingSelectorStep[];
+}
+
+export interface BoundInvocationArg {
+  type: string;
+  binding: SetupBinding;
+}
+
 export interface InvocationSpec {
   id?: string;
   function_name: string;
-  args: InvocationArg[];
+  args: Array<InvocationArg | BoundInvocationArg>;
 }
 
 export interface ContractSpec {
   id?: string;
   wasm_path: string;
+  /** Explicit ids of contracts that must be committed before this one. */
+  depends_on?: string[];
   invocations: InvocationSpec[];
 }
 
@@ -433,7 +451,7 @@ async function submitAndConfirm(
   phase: string,
   rpcUrl: string,
   signal?: AbortSignal,
-): Promise<void> {
+): Promise<rpc.Api.GetSuccessfulTransactionResponse> {
   if (signal?.aborted) {
     throw signal.reason || new Error(`${phase} cancelled`);
   }
@@ -475,6 +493,7 @@ async function submitAndConfirm(
       `${phase} transaction ${submission.hash} did not succeed (status=${confirmed.status})`,
     );
   }
+  return confirmed;
 }
 
 // Check if contract is already deployed
@@ -624,6 +643,8 @@ export function resolveContractWasmPath(
 
 /** Upload the WASM and create the contract instance when it is not deployed.
  *  Deployment always uses the deployer account, never an invocation source.
+ *  Returns the committed create return XDR, or the verified instance address
+ *  when the instance already existed.
  */
 export async function ensureContractDeployed(options: {
   server: rpc.Server;
@@ -635,13 +656,18 @@ export async function ensureContractDeployed(options: {
   contractId: string;
   rpcUrl: string;
   signal?: AbortSignal;
-}): Promise<void> {
+}): Promise<Pick<SetupResult, "source" | "return_xdr">> {
   const { server, deployer, deployerAddress, wasmBytes, wasmHash, salt } =
     options;
   const deployed = await isContractDeployed(server, options.contractId);
   if (deployed) {
     console.log(`Already deployed at ${options.contractId}`);
-    return;
+    return {
+      source: "existing_instance",
+      return_xdr: Address.fromString(options.contractId)
+        .toScVal()
+        .toXDR("base64"),
+    };
   }
 
   console.log(`Installing WASM...`);
@@ -694,7 +720,7 @@ export async function ensureContractDeployed(options: {
 
   const preparedCreate = await server.prepareTransaction(createTx);
   preparedCreate.sign(deployer);
-  await submitAndConfirm(
+  const created = await submitAndConfirm(
     server,
     preparedCreate,
     "contract creation",
@@ -702,11 +728,16 @@ export async function ensureContractDeployed(options: {
     options.signal,
   );
   console.log(`Deployed at ${options.contractId}`);
+  return {
+    source: "created",
+    return_xdr: created.returnValue?.toXDR("base64"),
+  };
 }
 
 /** Build the simulated invocation transaction for one contract case.
  *  The transaction source account selects the invoking identity; it is never
  *  a signing key, because benchmark invocations are simulated, not submitted.
+ *  Bound arguments are resolved from setupResults, keyed by explicit contract id.
  */
 export async function buildInvocationTransaction(options: {
   server: rpc.Server;
@@ -715,6 +746,7 @@ export async function buildInvocationTransaction(options: {
   invocation: InvocationSpec;
   rpcUrl: string;
   signal?: AbortSignal;
+  setupResults?: ReadonlyMap<string, SetupResult>;
 }): Promise<Transaction> {
   const { server, sourceAccount, contractId, invocation } = options;
   if (options.signal?.aborted) {
@@ -728,7 +760,19 @@ export async function buildInvocationTransaction(options: {
       `Invocation source account is not available on the network: ${sourceAccount} (${redactEndpointSecrets(String(err?.message ?? err), options.rpcUrl)})`,
     );
   }
-  const argsSc = invocation.args.map(toScVal);
+  const argsSc = invocation.args.map((arg) => {
+    if (!("binding" in arg)) return toScVal(arg);
+    if (!options.setupResults) {
+      throw new Error(
+        `Setup bindings are not available in this measurement path: ${invocation.function_name} binds "${arg.binding.contract}"`,
+      );
+    }
+    return resolveBinding(
+      arg.binding,
+      arg.type.toLowerCase(),
+      options.setupResults.get(arg.binding.contract),
+    );
+  });
   return new TransactionBuilder(account, {
     fee: "1000000",
     networkPassphrase: SUPPORTED_NETWORK_PASSPHRASE,
@@ -953,6 +997,12 @@ export async function runMeasurement(
       path.relative(process.cwd(), path.resolve(opts.fixturesPath)),
   );
 
+  // Validate dependency references, bindings and cycles before any side effect.
+  const setupOrder = planSetupOrder(
+    fixturesSpec.fixture_id,
+    fixturesSpec.contracts,
+  );
+
   // Preflight every configured contract WASM BEFORE funding or deploying anything (#119, #120)
   const resolvedWasmPaths = preflightContractArtifacts(
     fixturesDir,
@@ -981,9 +1031,14 @@ export async function runMeasurement(
     }
   }
 
-  const results: ContractBenchmark[] = [];
-
-  for (const contractSpec of fixturesSpec.contracts) {
+  // Setup phase: commit every deployment in dependency order before any
+  // measured invocation. A failed prerequisite aborts all of its dependents.
+  const setupResults = new Map<string, SetupResult>();
+  const deployments = new Map<
+    string,
+    { contractId: string; wasmSha256: string }
+  >();
+  for (const contractSpec of setupOrder) {
     const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path)!;
     const wasmBytes = fs.readFileSync(wasmPath);
     const wasmHash = crypto.createHash("sha256").update(wasmBytes).digest();
@@ -997,17 +1052,44 @@ export async function runMeasurement(
     const contractId = calculateContractId(deployer.publicKey(), salt);
 
     console.log(`Contract ID: ${contractId}`);
-    await ensureContractDeployed({
-      server,
-      deployer,
-      deployerAddress,
-      wasmBytes,
-      wasmHash,
-      salt,
-      contractId,
-      rpcUrl: effectiveRpcUrl,
-      signal: opts.signal,
-    });
+    let receipt: Pick<SetupResult, "source" | "return_xdr">;
+    try {
+      receipt = await ensureContractDeployed({
+        server,
+        deployer,
+        deployerAddress,
+        wasmBytes,
+        wasmHash,
+        salt,
+        contractId,
+        rpcUrl: effectiveRpcUrl,
+        signal: opts.signal,
+      });
+    } catch (err) {
+      const aborted = dependentsOf(contractSpec, setupOrder);
+      if (opts.signal?.aborted || aborted.length === 0) throw err;
+      throw new Error(
+        `${err instanceof Error ? err.message : String(err)}\nSetup of ${contractSpec.logical_id} failed; aborted dependents: ${aborted.map((contract) => contract.logical_id).join(", ")}`,
+        { cause: err },
+      );
+    }
+    deployments.set(contractSpec.logical_id, { contractId, wasmSha256 });
+    if (contractSpec.id !== undefined) {
+      setupResults.set(contractSpec.id, {
+        logical_id: contractSpec.logical_id,
+        contract_id: contractId,
+        ...receipt,
+      });
+    }
+  }
+
+  // Measurement phase, in fixture declaration order.
+  const results: ContractBenchmark[] = [];
+  for (const contractSpec of fixturesSpec.contracts) {
+    const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path)!;
+    const { contractId, wasmSha256 } = deployments.get(
+      contractSpec.logical_id,
+    )!;
 
     const benchmarks: BenchmarkResult[] = [];
 
@@ -1026,6 +1108,7 @@ export async function runMeasurement(
         invocation: invokeSpec,
         rpcUrl: effectiveRpcUrl,
         signal: opts.signal,
+        setupResults,
       });
 
       const helperPath = await resolveSimulationHelper(opts.helperPath);
@@ -1056,7 +1139,7 @@ export async function runMeasurement(
         : discoverSdkVersion(wasmPath);
 
     results.push({
-      schema_version: 4,
+      schema_version: CURRENT_RECORD_SCHEMA_VERSION,
       fixture_id: fixturesSpec.fixture_id,
       logical_id: contractSpec.logical_id,
       contract_id: contractId,

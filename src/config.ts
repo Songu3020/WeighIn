@@ -138,26 +138,28 @@ export function validateLargeInt(type: string, val: any): string | null {
 
 // ---------------------------------------------------------------------------
 
+export const INVOCATION_ARG_TYPES = [
+  "symbol",
+  "string",
+  "u32",
+  "i32",
+  "bool",
+  "u64",
+  "i64",
+  "u128",
+  "i128",
+  "address",
+  "bytes",
+  "vec",
+  "map",
+] as const;
+
 export const InvocationArgSchema: z.ZodType<any> = z.lazy(() =>
   z
     .object({
       type: z.preprocess(
         (val) => (typeof val === "string" ? val.toLowerCase() : val),
-        z.enum([
-          "symbol",
-          "string",
-          "u32",
-          "i32",
-          "bool",
-          "u64",
-          "i64",
-          "u128",
-          "i128",
-          "address",
-          "bytes",
-          "vec",
-          "map",
-        ]),
+        z.enum(INVOCATION_ARG_TYPES),
       ),
       value: z.any(),
     })
@@ -240,11 +242,50 @@ const idSchema = z
   .string()
   .refine((value) => value.trim().length > 0, "ID must not be blank");
 
+// One step into a committed setup return: a named field of a map/struct, or a
+// position in a vec.
+const BindingSelectorStepSchema = z.union([
+  z.object({ field: z.string().min(1) }).strict(),
+  z.object({ index: z.number().int().nonnegative() }).strict(),
+]);
+
+/** A top-level argument taken from a dependency's committed setup return
+ *  instead of a literal value. The selected ScVal must match the declared type.
+ */
+export const BoundInvocationArgSchema = z
+  .object({
+    type: z.preprocess(
+      (val) => (typeof val === "string" ? val.toLowerCase() : val),
+      z.enum(INVOCATION_ARG_TYPES),
+    ),
+    binding: z
+      .object({
+        contract: idSchema,
+        select: z.array(BindingSelectorStepSchema).optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+// Dispatch on the binding key so literal arguments keep their own diagnostics.
+const TopLevelInvocationArgSchema = z.unknown().transform((val, ctx) => {
+  const schema =
+    val !== null && typeof val === "object" && "binding" in val
+      ? BoundInvocationArgSchema
+      : InvocationArgSchema;
+  const result = schema.safeParse(val);
+  if (!result.success) {
+    result.error.issues.forEach((issue) => ctx.addIssue(issue));
+    return z.NEVER;
+  }
+  return result.data;
+});
+
 export const InvocationSpecSchema = z
   .object({
     id: idSchema.optional(),
     function_name: z.string().min(1),
-    args: z.array(InvocationArgSchema),
+    args: z.array(TopLevelInvocationArgSchema),
   })
   .strict();
 
@@ -252,6 +293,7 @@ export const ContractSpecSchema = z
   .object({
     id: idSchema.optional(),
     wasm_path: z.string().min(1),
+    depends_on: z.array(idSchema).optional(),
     invocations: z.array(InvocationSpecSchema).min(1),
   })
   .strict();
@@ -281,5 +323,6 @@ export function formatZodError(error: z.ZodError, fileName: string): string {
 export type RuleValue = z.infer<typeof RuleValueSchema>;
 export type GlobalThresholds = z.infer<typeof GlobalThresholdsSchema>;
 export type InvocationArg = z.infer<typeof InvocationArgSchema>;
+export type BoundInvocationArg = z.infer<typeof BoundInvocationArgSchema>;
 export type InvocationSpec = z.infer<typeof InvocationSpecSchema>;
 export type ContractSpec = z.infer<typeof ContractSpecSchema>;

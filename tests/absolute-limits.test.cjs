@@ -41,3 +41,25 @@ test('per-function absolute limits require a matched function', () => {
   assert.throws(() => enforceThresholds({ contracts: [], hasRegression: false, newContracts: [], removedContracts: [] },
     { limits: { functions: { missing: { cpu_instructions: 50 } } } }), /no matched BASE\/HEAD benchmark/);
 });
+
+test('global absolute limits fail closed when the comparison has no matched benchmarks', () => {
+  const empty = { contracts: [], hasRegression: false, newContracts: [], removedContracts: [] };
+  assert.throws(() => enforceThresholds(empty, { limits: { global: { cpu_instructions: 50 } } }),
+    /global policy or limits: no matched BASE\/HEAD benchmarks/);
+
+  const unmatchedCases = {
+    contracts: [{ functions: [], newBenchmarks: [{ function_name: 'added', case_id: 'args:[]' }] }],
+    hasRegression: false,
+    newContracts: [],
+    removedContracts: [],
+  };
+  assert.throws(() => enforceThresholds(unmatchedCases, { limits: { global: { cpu_instructions: 50 } } }),
+    /no matched BASE\/HEAD benchmarks/);
+});
+
+test('report-only and explicitly empty global limits pass an empty comparison', () => {
+  const empty = { contracts: [], hasRegression: false, newContracts: [], removedContracts: [] };
+  assert.deepEqual(enforceThresholds(empty, null), []);
+  assert.deepEqual(enforceThresholds(empty, {}), []);
+  assert.deepEqual(enforceThresholds(empty, { limits: { global: {} } }), []);
+});

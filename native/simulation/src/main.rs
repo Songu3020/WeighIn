@@ -157,6 +157,24 @@ fn run() -> Result<()> {
     let mut map = BTreeMap::new();
     for row in input.entries {
         let key = LedgerKey::from_xdr_base64(&row.key, DEFAULT_XDR_RW_LIMITS)?;
+        // An absent row records that the key does not exist; metadata that only
+        // a present entry can have makes the row contradictory, not absent.
+        if row.xdr.is_none() {
+            let present_only: Vec<&str> = [
+                ("extension_xdr", row.extension_xdr.is_some()),
+                ("last_modified", row.last_modified.is_some()),
+                ("live_until", row.live_until.is_some()),
+            ]
+            .into_iter()
+            .filter_map(|(field, set)| set.then_some(field))
+            .collect();
+            if !present_only.is_empty() {
+                bail!(
+                    "absent snapshot entry must not carry {}",
+                    present_only.join(", ")
+                );
+            }
+        }
         if row.live_until.is_some_and(|ttl| ttl < header.ledger_seq) {
             bail!("archived ledger state is unsupported");
         }

@@ -1,0 +1,12 @@
+{
+  "node": "v22.23.1",
+  "platform": "linux-x64",
+  "stellar_sdk": "16.0.1",
+  "quickstart_image": "stellar/quickstart@sha256:4c8bad1ef7341205b898f83d9489321da80c7bd74183100fc8e2a39a5938c7d5",
+  "rpc_url": "http://localhost:8000/rpc",
+  "network_passphrase": "Standalone Network ; February 2017",
+  "protocol_version": 28,
+  "helper_sha256": "9758c1c24c2a10646a6d4518e630ab376f82b11ba7d1685481b37b5aa9a4b0db",
+  "repository_base": "a1ded3fd331a56d32b310cd480a2cd6e5cce7c48",
+  "wasm_source": "docs/experiments/nested-invocation/{nested-callee,nested-caller}.wasm"
+}

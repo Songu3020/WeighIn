@@ -74,7 +74,7 @@ async function main() {
   const cliFile = path.join(temporary, 'cli-results.json');
   const cli = await child(process.execPath, [path.resolve(__dirname, '../../dist/cli.js'), 'fixtures.json', '--output', cliFile, '--rpc-url', rpcUrl], process.env, headDir);
   write('cli-process', cli); assert.equal(cli.status, 0, cli.stderr);
-  const cliResults = JSON.parse(fs.readFileSync(cliFile)); assert.equal(cliResults[0].schema_version, 4); write('cli-results', cliResults);
+  const cliResults = JSON.parse(fs.readFileSync(cliFile)); assert.equal(cliResults[0].schema_version, 5); write('cli-results', cliResults);
   const failedOutput = path.join(temporary, 'missing-helper-results.json');
   const failure = await child(process.execPath, [path.resolve(__dirname, '../../dist/cli.js'), 'fixtures.json', '--output', failedOutput, '--rpc-url', rpcUrl], { ...process.env, WEIGHIN_HELPER_PATH: path.join(temporary, 'missing-helper') }, headDir);
   write('cli-missing-helper-process', failure);
