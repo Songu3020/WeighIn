@@ -1,0 +1,20 @@
+[
+  {
+    "contract": "id:contract-alpha",
+    "method": "simulateTransaction",
+    "latestLedger": 100,
+    "contract_id": "CD2A22ZSCFXNQ3KDJAOISADM55GPV4NKQPMKCOWUVPVSDZ25DJ3G2DQN",
+    "returnParity": true,
+    "retval_xdr": "AAAAEgAAAApIZWxsb1dvcmxk",
+    "transactionDataSha": "b32e96e8292797ac1e5a1a1e545956b75b776b9389dc4c109be0a8fa157bf36f"
+  },
+  {
+    "contract": "id:contract-beta",
+    "method": "simulateTransaction",
+    "latestLedger": 100,
+    "contract_id": "CBTG57UJJ5667XNJW7G2J3Z7S6Q4EZZJ5E763BOCB4J3V3W2PQJ7Z36B",
+    "returnParity": true,
+    "retval_xdr": "AAAAEgAAAApIZWxsb1dvcmxkY291bnRlcg==",
+    "transactionDataSha": "e124c68b2f2adafb25f05e7ed63eab8b7275e2ecbece82bc623eac66431b5525"
+  }
+]

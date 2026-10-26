@@ -1,0 +1,9 @@
+{
+  "status": "ARCHIVED_STATE_REJECTED",
+  "expired_entry_key": "AAAABgAAAAG4J7GFKznhxJhjS0y+gWY/VfGjDaBNUI+UXByjlpGokwAAABQAAAAB",
+  "header_ledger": 21888,
+  "live_until": 21887,
+  "exit_code": 1,
+  "stderr": "archived ledger state is unsupported",
+  "stdout": ""
+}

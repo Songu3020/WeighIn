@@ -1,0 +1,70 @@
+{
+  "setup_order": [
+    {
+      "host_function": "hostFunctionTypeUploadContractWasm",
+      "artifact": "callee",
+      "hash": "6ead0070742fc9468f355ce59f89eace29377d85059d169f8ed515090a947e41",
+      "status": "PENDING"
+    },
+    {
+      "host_function": "hostFunctionTypeCreateContractV2",
+      "artifact": "callee",
+      "hash": "74960b123aab1d7c4c9f56511f8b087090bead34ecd5216760fea1279a84ee8e",
+      "status": "PENDING"
+    },
+    {
+      "host_function": "hostFunctionTypeUploadContractWasm",
+      "artifact": "caller",
+      "hash": "40a5b949d9b34998b12a5febe08a23d77f680aae097108325181b58c2c08fb01",
+      "status": "PENDING"
+    },
+    {
+      "host_function": "hostFunctionTypeCreateContractV2",
+      "artifact": "caller",
+      "hash": "14fd5fc60bfdf75ff2703819a0542bad3852745965c379b6287d9528b28bee5c",
+      "status": "PENDING"
+    }
+  ],
+  "committed_returns": [
+    {
+      "hash": "74960b123aab1d7c4c9f56511f8b087090bead34ecd5216760fea1279a84ee8e",
+      "status": "SUCCESS",
+      "ledger": 106,
+      "return_xdr": "AAAAEgAAAAEppB2fWVF0xS+MMePGbSTk0rEl/qJosLlsHyImtOFp6w==",
+      "decoded_address": "CAU2IHM7LFIXJRJPRQY6HRTNETSNFMJF72RGRMFZNQPSEJVU4FU6XG36"
+    },
+    {
+      "hash": "14fd5fc60bfdf75ff2703819a0542bad3852745965c379b6287d9528b28bee5c",
+      "status": "SUCCESS",
+      "ledger": 109,
+      "return_xdr": "AAAAEgAAAAGewWwcVTQpXQq74MRTrcHMefiANv+Re18fp3cJG1Hhkw==",
+      "decoded_address": "CCPMC3A4KU2CSXIKXPQMIU5NYHGHT6EAG37ZC627D6TXOCI3KHQZHIPD"
+    }
+  ],
+  "confirmations": [
+    {
+      "hash": "6ead0070742fc9468f355ce59f89eace29377d85059d169f8ed515090a947e41",
+      "status": "SUCCESS",
+      "ledger": 104,
+      "return_xdr": "AAAADQAAACB6iJk0mNFbtQ8W426Ljq1RtaOO6h6TOmVDDt1phuvAcA=="
+    },
+    {
+      "hash": "74960b123aab1d7c4c9f56511f8b087090bead34ecd5216760fea1279a84ee8e",
+      "status": "SUCCESS",
+      "ledger": 106,
+      "return_xdr": "AAAAEgAAAAEppB2fWVF0xS+MMePGbSTk0rEl/qJosLlsHyImtOFp6w=="
+    },
+    {
+      "hash": "40a5b949d9b34998b12a5febe08a23d77f680aae097108325181b58c2c08fb01",
+      "status": "SUCCESS",
+      "ledger": 108,
+      "return_xdr": "AAAADQAAACDeNAMNErAWK2e4a5stY3r5w5lsNYPnokVWd7TAdQQ/dQ=="
+    },
+    {
+      "hash": "14fd5fc60bfdf75ff2703819a0542bad3852745965c379b6287d9528b28bee5c",
+      "status": "SUCCESS",
+      "ledger": 109,
+      "return_xdr": "AAAAEgAAAAGewWwcVTQpXQq74MRTrcHMefiANv+Re18fp3cJG1Hhkw=="
+    }
+  ]
+}

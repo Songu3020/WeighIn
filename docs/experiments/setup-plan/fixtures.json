@@ -1,0 +1,46 @@
+{
+  "id": "setup-plan-suite",
+  "contracts": [
+    {
+      "id": "caller",
+      "wasm_path": "caller.wasm",
+      "depends_on": [
+        "callee"
+      ],
+      "invocations": [
+        {
+          "id": "nested-work",
+          "function_name": "run",
+          "args": [
+            {
+              "type": "address",
+              "binding": {
+                "contract": "callee"
+              }
+            },
+            {
+              "type": "u32",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "callee",
+      "wasm_path": "callee.wasm",
+      "invocations": [
+        {
+          "id": "work-once",
+          "function_name": "work",
+          "args": [
+            {
+              "type": "u32",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

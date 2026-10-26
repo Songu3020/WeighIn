@@ -1,0 +1,21 @@
+{
+  "id": "auth-invocation-suite",
+  "contracts": [
+    {
+      "id": "contract-auth",
+      "wasm_path": "tests/fixtures/auth/contract/target/wasm32v1-none/release/contract_auth.wasm",
+      "invocations": [
+        {
+          "id": "auth_call",
+          "function_name": "auth_call",
+          "args": [
+            {
+              "type": "Address",
+              "value": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

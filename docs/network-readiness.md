@@ -1,10 +1,18 @@
 # Standalone network and deployer readiness
 
 `getNetwork` returns metadata; it does not establish that RPC can serve ledger
-reads or that Friendbot can fund accounts. The Action now requires `getHealth`
-status `healthy` and valid network metadata before builds. Account initialization
-then confirms the deployer's account through raw `getLedgerEntries` before any
+reads or that Friendbot can fund accounts. Before builds, funding, or deployment,
+the Action requires `getHealth` status `healthy`, the standalone network
+passphrase, and protocol 28. A healthy endpoint with a different passphrase or
+protocol is reported as incompatible explicitly. Account initialization then
+confirms the deployer's account through raw `getLedgerEntries` before any
 contract deployment or benchmark measurement.
+
+Every owned raw JSON-RPC request validates a `2.0` response envelope, the exact
+request ID, and exactly one `result` or well-formed `error`. Invalid envelopes
+fail before their payload can affect readiness, funding, or measurement. HTTP
+status failures, malformed responses, valid method errors, and unsupported
+method result schemas remain distinct failure classes.
 
 The raw read avoids SDK 16.0.1 `getAccountEntry`, which converts all read errors
 into account-not-found errors. A successful empty ledger response means absence;
@@ -28,7 +36,25 @@ The private deployer key remains in the existing private runner file.
 The repository startup script checks RPC health for up to 120 seconds, then uses
 the same account readiness path to fund a disposable account and confirm its RPC
 inclusion. These sequential phases can take up to 240 seconds, excluding Docker
-startup. Install Node dependencies and build TypeScript before running:
+startup. It labels its disposable `stellar-quickstart` container with
+`io.weighin.managed-by=weighin-start-local-network` and only replaces a matching
+container carrying that ownership label. An unowned name collision is preserved
+and causes an actionable error. To explicitly authorize replacing an unowned
+container, set `WEIGHIN_REPLACE_UNOWNED_CONTAINER=1` for that invocation. Docker
+ownership-inspection failures also stop startup without modifying the container.
+
+The script records the container ID that `docker run` reports for the container
+it starts. If readiness fails, or the script is interrupted (`SIGINT`/`SIGTERM`)
+before readiness is confirmed, it prints that container's logs and then stops it
+by ID; because the container runs with `--rm`, stopping it also removes it. Only
+the container started by this attempt is ever stopped. A failed log capture or
+stop is reported with the manual `docker rm -f <id>` command, and the script
+still exits non-zero, so a cleanup problem can never turn a failed start into
+success. If `docker run` does not report an ID, startup fails without touching
+any container. After successful readiness the container is left running for the
+caller.
+
+Install Node dependencies and build TypeScript before running:
 
 ```bash
 npm ci
@@ -62,7 +88,10 @@ node tests/experiments/verify-network-readiness.cjs /tmp/weighin-network-readine
 ```
 
 Docker access, official Stellar CLI 28.1.0, Rust 1.95.0/wasm32v1-none and native
-helper are required. The harness currently uses the locally verified CLI under
+helper are required. The startup script owns and cleans up only containers with
+its ownership label; the experiment still refuses to start when any container
+already uses the fixed name. The harness currently uses the locally verified CLI
+under
 `/tmp/weighin-stage3-stellar`; provision that path before rerunning. Cargo cache
 reuse is optional via `WEIGHIN_EXPERIMENT_CARGO_TARGET_DIR`. Fresh containers do
 not imply clean Cargo/helper builds. The experiment refuses to replace an existing

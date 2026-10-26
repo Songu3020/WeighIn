@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "revision": "example-revision",
+  "scenario": "caller-callee",
+  "plan": [
+    {
+      "deployment_id": "callee",
+      "artifact": {
+        "owner": "callee.wasm",
+        "wasm_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "depends_on": []
+    },
+    {
+      "deployment_id": "caller",
+      "artifact": {
+        "owner": "caller.wasm",
+        "wasm_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "depends_on": ["callee"]
+    }
+  ],
+  "setup_receipts": {
+    "callee": {
+      "status": "committed",
+      "upload_tx_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "instance_tx_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "contract_id": "CC227UDF6WBLRTOKKVRIJN7BGSBK67ZGV6IDARJ2AMATGSQ7UZNBZHSB",
+      "return": {
+        "type": "address",
+        "xdr_base64": "AAAAEgAAAAG1r9Bl9YK4zcpVYoS34TSCr38mr5AwRToDATNKH6ZaHA=="
+      }
+    }
+  },
+  "caller_invocation": {
+    "function_name": "read_callee",
+    "args": [
+      {
+        "binding": "callee_address",
+        "type": "address",
+        "source": "setup.callee.return"
+      }
+    ]
+  },
+  "bindings": {
+    "callee_address": {
+      "scope": "caller-callee",
+      "source": "setup.callee.return",
+      "selector": "root",
+      "type": "address",
+      "xdr_sha256": "example-only"
+    }
+  }
+}

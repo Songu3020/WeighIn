@@ -49,3 +49,17 @@ test('all 35 saved measurements link to real native inputs and matching raw RPC 
   }
   assert.equal(count,35);
 });
+
+test('controlled ledger-variation evidence demonstrates REPEATABILITY_VARIATION_FOUND with fixed WASM and preserved policy enforcement',()=>{
+  const ledgerDir=path.resolve(__dirname,'../docs/experiments/ledger-variation');
+  const readLedger=name=>JSON.parse(fs.readFileSync(path.join(ledgerDir,name),'utf8'));
+  const runs=readLedger('runs.json'),analysis=readLedger('analysis.json'),policy=readLedger('policy.json');
+  const {enforceThresholds}=require('../dist/threshold');
+  assert.deepEqual(analyzeRepeatability(runs),analysis);
+  assert.equal(analysis.status,'REPEATABILITY_VARIATION_FOUND');
+  assert.equal(analysis.reference.wasm_stable,true);
+  assert.equal(analysis.reference.metrics_stable,false);
+  assert.equal(analysis.arbitrary_live_state_determinism_proven,false);
+  assert.deepEqual(enforceThresholds(analysis.reference.diffs[1],policy),[]);
+  assert.deepEqual(enforceThresholds(analysis.reference.diffs[4],policy),readLedger('violations.json'));
+});

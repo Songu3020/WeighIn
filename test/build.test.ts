@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as exec from "@actions/exec";
 import { buildContracts } from "../src/build";
-import { buildForRevision } from "../src/build-selection";
+import {
+  buildForRevision,
+  parseOptionalBooleanInput,
+} from "../src/build-selection";
 
 vi.mock("@actions/exec");
 vi.mock("../src/build", () => ({
@@ -21,6 +24,7 @@ describe("build selection", () => {
     );
     expect(buildContracts).toHaveBeenCalledWith(
       "/workspace/fixtures.json",
+      "/workspace",
       "1.95.0",
     );
   });
@@ -58,5 +62,62 @@ describe("build selection", () => {
     await expect(
       buildForRevision("fixtures.json", "/head", "", "make fail", false),
     ).rejects.toThrow(/Custom build command failed: exit code 2/);
+  });
+});
+
+describe("parseOptionalBooleanInput", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("returns default when input is omitted or empty", () => {
+    delete process.env["INPUT_SKIP-BUILD"];
+    expect(parseOptionalBooleanInput("skip-build", false)).toBe(false);
+    expect(parseOptionalBooleanInput("skip-build", true)).toBe(true);
+
+    process.env["INPUT_SKIP-BUILD"] = "";
+    expect(parseOptionalBooleanInput("skip-build", false)).toBe(false);
+
+    process.env["INPUT_SKIP-BUILD"] = "   ";
+    expect(parseOptionalBooleanInput("skip-build", false)).toBe(false);
+  });
+
+  it("accepts all documented YAML 1.2 true boolean spellings", () => {
+    for (const val of ["true", "True", "TRUE"]) {
+      process.env["INPUT_SKIP-BUILD"] = val;
+      expect(parseOptionalBooleanInput("skip-build", false)).toBe(true);
+    }
+  });
+
+  it("accepts all documented YAML 1.2 false boolean spellings", () => {
+    for (const val of ["false", "False", "FALSE"]) {
+      process.env["INPUT_SKIP-BUILD"] = val;
+      expect(parseOptionalBooleanInput("skip-build", true)).toBe(false);
+    }
+  });
+
+  it("rejects non-boolean spellings and misspellings with actionable schema error", () => {
+    for (const val of [
+      "yes",
+      "no",
+      "0",
+      "1",
+      "on",
+      "off",
+      "maybe",
+      "flase",
+      "ture",
+    ]) {
+      process.env["INPUT_SKIP-BUILD"] = val;
+      expect(() => parseOptionalBooleanInput("skip-build", false)).toThrow(
+        /YAML 1\.2 "Core Schema" specification: skip-build/,
+      );
+    }
   });
 });

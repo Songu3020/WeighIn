@@ -1,0 +1,50 @@
+{
+  "status": "VERIFIED",
+  "scenario": "control",
+  "action_exit": 0,
+  "action_outcome": "success",
+  "result": "pass",
+  "independent_contracts": [
+    "id:contract-alpha",
+    "id:contract-beta"
+  ],
+  "distinct_wasm_hashes": {
+    "id:contract-alpha": "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+    "id:contract-beta": "a82f349c81927db45100ef9081a951c5e408848db929c323f4948a86561e1b74"
+  },
+  "runtime_contract_ids": {
+    "id:contract-alpha": "CD2A22ZSCFXNQ3KDJAOISADM55GPV4NKQPMKCOWUVPVSDZ25DJ3G2DQN",
+    "id:contract-beta": "CBTG57UJJ5667XNJW7G2J3Z7S6Q4EZZJ5E763BOCB4J3V3W2PQJ7Z36B"
+  },
+  "overlapping_functions": [
+    "hello"
+  ],
+  "overlapping_cases": [
+    "id:world"
+  ],
+  "build_hashes": [
+    "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+    "a82f349c81927db45100ef9081a951c5e408848db929c323f4948a86561e1b74",
+    "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+    "a82f349c81927db45100ef9081a951c5e408848db929c323f4948a86561e1b74"
+  ],
+  "base_sha": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+  "head_sha": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+  "cpu": [
+    {
+      "logical_id": "id:contract-alpha",
+      "base": 266842,
+      "head": 266842,
+      "delta": 0
+    },
+    {
+      "logical_id": "id:contract-beta",
+      "base": 328450,
+      "head": 328450,
+      "delta": 0
+    }
+  ],
+  "violations": [],
+  "inter_contract_stateful_call": false,
+  "real_build_network_native_measurement": true
+}

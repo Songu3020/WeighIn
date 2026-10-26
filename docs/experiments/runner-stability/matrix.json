@@ -1,0 +1,28 @@
+{
+  "protocol": 28,
+  "soroban_simulation_version": "28.0.1",
+  "rust_version": "1.95.0",
+  "target": "x86_64-unknown-linux-gnu",
+  "contract_id": "contract-test",
+  "wasm_sha256": "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+  "auth_mode": "recording(true,true)",
+  "seed": "0000000000000000000000000000000000000000000000000000000000000000",
+  "runners": [
+    {
+      "id": "ubuntu-24.04",
+      "os": "Ubuntu 24.04.1 LTS",
+      "kernel": "Linux 6.8.0-1017-azure",
+      "glibc": "2.39",
+      "arch": "x86_64",
+      "compatibility_rationale": "glibc 2.39 backward-compatible with 2.35 target ABI; soroban-simulation x86_64 ELF binary executes cleanly"
+    },
+    {
+      "id": "ubuntu-22.04",
+      "os": "Ubuntu 22.04.5 LTS",
+      "kernel": "Linux 5.15.0-1071-azure",
+      "glibc": "2.35",
+      "arch": "x86_64",
+      "compatibility_rationale": "Target baseline glibc 2.35 with standard GNU x86_64 toolchain; soroban-simulation executes cleanly"
+    }
+  ]
+}

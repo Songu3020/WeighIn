@@ -47,7 +47,7 @@ async function main(){
   const helper=path.join(pkg,'native/simulation/target/x86_64-unknown-linux-gnu/release/weighin-simulation');assert.ok(fs.existsSync(helper));
   const frozen=JSON.parse(fs.readFileSync(path.join(checkout,'docs/experiments/network-readiness/live/run-1/action/native.json')))[0];
   const replay=await checked('installed-helper-replay',helper,[],consumer,{},JSON.stringify(frozen.input));assert.deepEqual(JSON.parse(replay.stdout),frozen.output);
-  await checked('contract-build',process.execPath,['-e',"require('./dist/build').buildContracts('weighin-fixtures.json','1.95.0').catch(e=>{console.error(e);process.exitCode=1})"]);
+  await checked('contract-build',process.execPath,['-e',"require('./dist/build').buildContracts('weighin-fixtures.json','.','1.95.0').catch(e=>{console.error(e);process.exitCode=1})"]);
   const present=await checked('existing-sidecar','docker',['ps','-a','-q','-f','name=^/stellar-quickstart$']);assert.equal(present.stdout.trim(),'','Refusing to replace existing sidecar');
   try{
     await checked('startup','bash',['scripts/start-local-network.sh']);
@@ -57,7 +57,7 @@ async function main(){
       {NODE_OPTIONS:'--require='+path.join(root,'tests/support/record-clean-delivery-io.cjs'),WEIGHIN_CLEAN_CAPTURE:capture});
     const results=JSON.parse(fs.readFileSync(path.join(capture,'results.json'))),native=JSON.parse(fs.readFileSync(path.join(capture,'native.json')));
     assert.equal(results.length,2);assert.equal(native.length,2);assert.ok(native.every(r=>r.file===helper));
-    for(const c of results){assert.equal(c.schema_version,4);assert.equal(c.benchmarks[0].metrics.cpu_instructions.consumed,266842);}
+    for(const c of results){assert.equal(c.schema_version,5);assert.equal(c.benchmarks[0].metrics.cpu_instructions.consumed,266842);}
     const migration=path.join(destination,'historical-migration');
     await checked('historical-migration',process.execPath,['tests/experiments/verify-fixture-migration.cjs',migration],checkout,
       {WEIGHIN_EXPERIMENT_RPC_URL:'http://localhost:8000/rpc',WEIGHIN_EXPERIMENT_CARGO_TARGET_DIR:path.join(checkout,'contract/target')});

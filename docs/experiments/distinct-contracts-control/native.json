@@ -1,0 +1,16 @@
+[
+  {
+    "contract": "id:contract-alpha",
+    "wasm_sha256": "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+    "cpu_instructions_consumed": 266842,
+    "memory_bytes_consumed": 2048,
+    "return_parity": true
+  },
+  {
+    "contract": "id:contract-beta",
+    "wasm_sha256": "a82f349c81927db45100ef9081a951c5e408848db929c323f4948a86561e1b74",
+    "cpu_instructions_consumed": 328450,
+    "memory_bytes_consumed": 3072,
+    "return_parity": true
+  }
+]

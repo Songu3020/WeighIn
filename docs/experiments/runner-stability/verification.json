@@ -1,0 +1,29 @@
+{
+  "status": "VERIFIED",
+  "scenario": "runner_stability",
+  "action_exit": 0,
+  "action_outcome": "success",
+  "result": "pass",
+  "contract_id": "contract-test",
+  "wasm_sha256": "718ba18378a2d94ec7bf0c75b3813c7d0bb5b65beb2fb4c445b3a4726ecd5668",
+  "supported_images": [
+    "ubuntu-24.04",
+    "ubuntu-22.04"
+  ],
+  "sample_count_per_runner": 5,
+  "metrics_evaluated": [
+    "cpu_instructions_consumed",
+    "memory_bytes_consumed",
+    "disk_read_bytes",
+    "write_bytes",
+    "read_only_keys",
+    "read_write_keys",
+    "historical_data_read_bytes",
+    "contract_data_hard_limit",
+    "tx_size_bytes"
+  ],
+  "cross_runner_stability": "pass",
+  "cross_runner_variance": 0,
+  "reject_cross_environment_averaging": true,
+  "unavailable_metrics_explicit_null": true
+}

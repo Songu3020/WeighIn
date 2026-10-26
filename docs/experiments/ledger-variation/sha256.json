@@ -1,0 +1,21 @@
+{
+  "analysis.json": "377caf1ec73ba7da99b356265f13a25f119a3b75f24f2d1754c5009cbda924b4",
+  "contract.wasm": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+  "control-diff.json": "02395d44d875b7f308853038f7467d4566b9720057c7612b9d512365dd38c0a6",
+  "environment.json": "b2ec0a7ebf5fbf1dfadf8991553277a43e95a5f8e5447a6626e7f71e42283715",
+  "ledger-progression.json": "a2c1c220afcaca1c98e351ed601aaf05bbfbb754f65d2d7db98aebaa5362a537",
+  "metrics.csv": "60caac865ecbd84864b1769f99f46f695c47ec6b759e431a3054b69d0b7fe45d",
+  "native.json": "142b5fad781f66f54e2c450afceb4b6b968630ef35d2eea7d7a2f9e6607499cc",
+  "policy.json": "7293c2ade1d64fc296a4d9863017fd9186e63faa028db6274c2ee9bc3a22e9b0",
+  "rpc.json": "e5bdb27e592ca06a34688f6dcc0429610700dbaaba15ff79b7db5b60bdaf6123",
+  "runs.json": "03838029e845698eb1a6ef127e4f0dbdb490f5c9933f71139115484a2253e58a",
+  "source/contract/Cargo.lock": "af261b30de67d5f534ef58392be43f80d802200c26dc35da25e6f71278329912",
+  "source/contract/Cargo.toml": "bd5c50e30a1cb6b87a287513204f8497b1747b21e58268449f0739a1455c33fa",
+  "source/contract/src/lib.rs": "14010c8383497157b1177abe2a2c78f8c191509b0e328dbfce3fd9c446200a3c",
+  "source/weighin-fixtures.json": "2353888b98569dd4a0708f53ea2ef7cda630dbe9392a62ed58cfa2098d24a403",
+  "source/weighin.toml": "d047e06257c2f7b0014cbb93babe128c2cd82111d73b7c2da77f025123e7f898",
+  "summary.md": "0a1a5c8c8f08a61f8aa7a8ae2cdd9f247c2a36e18731dc0501f1f80b759a550e",
+  "variation-diff.json": "9d675dff97971cc93d226cb701996a501840d1ff8d4268efe6609282898344aa",
+  "verification.json": "02c15be58b81c65dd49d9c8d9379f5a36ad406b21464a9461c94e868d3ae1720",
+  "violations.json": "40ceaacbdae940908eec8ded557095d95e012882500b6ec0ade70944286aae4d"
+}

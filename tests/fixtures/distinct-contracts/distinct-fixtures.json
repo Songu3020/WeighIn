@@ -1,0 +1,37 @@
+{
+  "id": "distinct-contracts-suite",
+  "contracts": [
+    {
+      "id": "contract-alpha",
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "invocations": [
+        {
+          "id": "world",
+          "function_name": "hello",
+          "args": [
+            {
+              "type": "Symbol",
+              "value": "world"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contract-beta",
+      "wasm_path": "contract-beta/target/wasm32v1-none/release/contract_beta.wasm",
+      "invocations": [
+        {
+          "id": "world",
+          "function_name": "hello",
+          "args": [
+            {
+              "type": "Symbol",
+              "value": "world"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

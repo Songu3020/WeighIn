@@ -1,4 +1,9 @@
 import { Keypair, xdr } from "@stellar/stellar-sdk";
+import {
+  parseJsonRpcResponse,
+  redactEndpointSecrets,
+  sanitizeEndpoint,
+} from "./endpoint";
 
 const DEADLINE_MS = 120_000;
 const REQUEST_MS = 15_000;
@@ -13,8 +18,19 @@ class TemporaryReadinessError extends Error {}
 export async function ensureAccountReady(
   rpcUrl: string,
   publicKey: string,
+  signal?: AbortSignal,
 ): Promise<void> {
-  const base = new URL(rpcUrl);
+  if (signal?.aborted) {
+    throw signal.reason || new Error("Account readiness cancelled");
+  }
+  let base: URL;
+  try {
+    base = new URL(rpcUrl);
+  } catch {
+    throw new Error(
+      `Invalid RPC URL for account readiness: ${sanitizeEndpoint(rpcUrl)}`,
+    );
+  }
   base.pathname =
     base.pathname.replace(/\/rpc\/?$/, "").replace(/\/$/, "") + "/friendbot";
   base.search = "";
@@ -28,18 +44,25 @@ export async function ensureAccountReady(
   const deadline = Date.now() + DEADLINE_MS;
   let funded = false,
     lastError = "account has not appeared in RPC";
+  let requestId = 0;
   async function request(
     url: string,
     options: RequestInit = {},
   ): Promise<string> {
     try {
+      if (signal?.aborted)
+        throw signal.reason || new Error("Account readiness cancelled");
       if (Date.now() >= deadline)
         throw new TemporaryReadinessError("readiness deadline elapsed");
+      const timeoutSignal = AbortSignal.timeout(
+        Math.max(1, Math.min(REQUEST_MS, deadline - Date.now())),
+      );
+      const combinedSignal = signal
+        ? AbortSignal.any([signal, timeoutSignal])
+        : timeoutSignal;
       const response = await fetch(url, {
         ...options,
-        signal: AbortSignal.timeout(
-          Math.max(1, Math.min(REQUEST_MS, deadline - Date.now())),
-        ),
+        signal: combinedSignal,
       });
       if (!response.ok) {
         // Classify from headers even if the error body stalls.
@@ -51,39 +74,52 @@ export async function ensureAccountReady(
       }
       return await response.text();
     } catch (error: any) {
+      if (signal?.aborted)
+        throw signal.reason || new Error("Account readiness cancelled");
       if (error instanceof TemporaryReadinessError) throw error;
       if (
         error instanceof TypeError ||
         ["TimeoutError", "AbortError"].includes(error?.name)
       ) {
         throw new TemporaryReadinessError(
-          `transport failure: ${error.message}`,
+          `transport failure at ${sanitizeEndpoint(url)}: ${redactEndpointSecrets(String(error?.message ?? error), rpcUrl)}`,
         );
       }
       throw error;
     }
   }
   while (Date.now() < deadline) {
+    if (signal?.aborted)
+      throw signal.reason || new Error("Account readiness cancelled");
     try {
+      const id = ++requestId;
       const response = await request(rpcUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jsonrpc: "2.0",
-          id: 1,
+          id,
           method: "getLedgerEntries",
           params: { keys: [key] },
         }),
       });
-      const json = JSON.parse(response) as any;
-      if (json.error)
+      let json;
+      try {
+        json = parseJsonRpcResponse(response, id);
+      } catch (error) {
         throw new Error(
-          `Account readiness RPC error: ${JSON.stringify(json.error)}`,
+          `Account readiness invalid RPC response at ${sanitizeEndpoint(rpcUrl)}: ${redactEndpointSecrets(String((error as Error)?.message ?? error), rpcUrl)}`,
         );
-      const entries = json.result?.entries;
+      }
+      if ("error" in json)
+        throw new Error(
+          `Account readiness RPC method error at ${sanitizeEndpoint(rpcUrl)}: ${redactEndpointSecrets(JSON.stringify(json.error), rpcUrl)}`,
+        );
+      const result = json.result as any;
+      const entries = result?.entries;
       if (
-        !Number.isInteger(json.result?.latestLedger) ||
-        json.result.latestLedger <= 0 ||
+        !Number.isInteger(result?.latestLedger) ||
+        result.latestLedger <= 0 ||
         !Array.isArray(entries) ||
         entries.length > 1
       )
@@ -111,6 +147,8 @@ export async function ensureAccountReady(
       }
       lastError = "funded account has not appeared in RPC";
     } catch (error: any) {
+      if (signal?.aborted)
+        throw signal.reason || new Error("Account readiness cancelled");
       // A response body can time out after fetch has resolved.
       if (
         !(error instanceof TemporaryReadinessError) &&
@@ -120,11 +158,26 @@ export async function ensureAccountReady(
       lastError = error.message;
       console.warn(`Account readiness retry: ${lastError}`);
     }
+    if (signal?.aborted)
+      throw signal.reason || new Error("Account readiness cancelled");
     const remaining = deadline - Date.now();
     if (remaining > 0)
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.min(RETRY_MS, remaining)),
-      );
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(resolve, Math.min(RETRY_MS, remaining));
+        if (signal) {
+          const onAbort = () => {
+            clearTimeout(timer);
+            reject(signal.reason || new Error("Account readiness cancelled"));
+          };
+          if (signal.aborted) {
+            clearTimeout(timer);
+            return reject(
+              signal.reason || new Error("Account readiness cancelled"),
+            );
+          }
+          signal.addEventListener("abort", onAbort, { once: true });
+        }
+      });
   }
   throw new Error(
     `Account readiness failed within ${DEADLINE_MS / 1000}s: ${lastError}`,

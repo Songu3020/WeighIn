@@ -1,4 +1,4 @@
-# Native simulation measurement (schema 4)
+# Native simulation measurement (schema 5)
 
 WeighIn now measures consumed CPU and memory with the official
 `soroban-simulation` / `soroban-env-host` 28.0.1 libraries. The initial supported
@@ -33,6 +33,15 @@ validated for executable access and versioned output; the binary's SHA256 is
 recorded. Missing binaries, malformed output, host failures and unsupported
 protocols produce errors, not measurements containing zero.
 
+Helper executable identity is strictly bound to actual execution: the executable
+file's content SHA256 is captured before invocation, re-verified immediately after
+process termination, validated across retry attempts, and checked before emitting
+provenance. If the binary is replaced, mutated, or modified during or across execution,
+measurement fails fast with an explicit error. Remaining filesystem trust assumptions:
+WeighIn relies on standard OS filesystem access controls and assumes the host storage
+hosting the binary is not subject to in-flight inode replacement or unauthorized write
+mutation by concurrent untrusted local processes outside Node's process space.
+
 The local network script and workflow example pin the exact protocol-28 image
 used in the proof. The Action's modern contract build now uses the
 [Stellar build path](contract-build.md), with its own verified reference and
@@ -51,20 +60,42 @@ node dist/cli.js weighin-fixtures.json --rpc-url http://localhost:8000/rpc --out
 The CLI writes measurement JSON and exits 1 on measurement failure. It remains a
 measurement command; threshold comparison is performed by the Action.
 
+## WASM artifact preflight and resolution
+
+Before establishing RPC connections, initializing deployer accounts, or submitting upload/deployment transactions, WeighIn validates every declared contract WASM artifact upfront across all declared fixtures:
+
+- **Existence & regular file**: The declared WASM path relative to the fixtures directory must exist and be a regular file (`stat.isFile()`). Directories, symlinks pointing to non-files, or missing paths fail.
+- **WASM binary magic header**: The file must begin with the 8-byte WebAssembly binary magic number and version (`\0asm\x01\x00\x00\x00`). Truncated or non-WASM files are rejected immediately.
+- **Multi-error aggregation**: When multiple declared WASMs are invalid across one or more contracts, WeighIn aggregates all validation failures into a single contextual error listing `[fixtureId / contractLabel]`, failing closed before funding accounts.
+- **Strict target resolution**: Cross-target substitution (e.g., falling back to `wasm32-unknown-unknown` when `wasm32v1-none` is declared) is disabled by default. If a declared path is missing, measurement fails immediately. To opt in explicitly, pass `--allow-cross-target-substitution` in the CLI, `allow-cross-target-substitution: true` in the Action, or set `WEIGHIN_ALLOW_CROSS_TARGET_SUBSTITUTION=true`.
+
 ## Source and immutable state
 
 CPU comes directly from `simulated_instructions`; memory from `simulated_memory`.
 They are consumed Soroban cost-model units, not submission budgets, hardware
 instruction counts or process RSS. Compute limits come from the same captured
 network configuration. No RPC instruction-budget substitution is used.
+Measured transactions must match the captured RPC endpoint's network passphrase;
+mismatched networks fail immediately before any simulation or helper execution.
 
 The adapter captures all footprint keys plus network config, ledger data,
 extensions, last-modified sequence, TTL metadata and explicitly queried absence.
-Batches must share the simulation's reported ledger. It verifies the matching
-ledger header, retries the entire capture on drift, and expands discovered keys
-when the helper reports an uncaptured read. After 30 attempts, incomplete/drifting
-state is an error. This uses current-state RPC APIs; it is not a historical-state
-reader.
+Read-only and read-write footprint keys from both RPC simulation and the native helper
+are strictly validated for uniqueness and mutual disjointness before counting resources
+or executing simulations; duplicate keys or read/write overlaps fail immediately with an explicit error.
+Every required network configuration setting is identified and verified before
+native helper execution; missing configuration entries fail immediately with a
+bounded list of missing setting names and are not retried as ordinary ledger drift.
+Batches must share the simulation's reported ledger. Header retrieval requires
+exactly one matching sequence row for the captured ledger with a well-formed
+history entry; ambiguous duplicate headers or malformed entry XDR are rejected,
+while unrelated valid page rows are accepted according to the RPC contract.
+The history-entry hash is strictly validated against the canonical SHA-256 digest of
+decoded header bytes and any returned RPC row hash, rejecting corrupted or mismatched entries before native execution.
+It verifies the matching ledger header, retries the entire capture on drift,
+and expands discovered keys when the helper reports an uncaptured read. After 30
+attempts, incomplete/drifting state is an error. This uses current-state RPC APIs;
+it is not a historical-state reader.
 
 For the observed `getLedgerEntries` JSON-RPC error `-32603` with message
 `could not query captive core: http request failed with non-200 status code (404)`,
@@ -92,9 +123,20 @@ config hashes remain diagnostics and are shown for both revisions. They do not
 change the consumed compute calibration. It records both snapshot ledgers/hashes. It does not guarantee
 that arbitrary live contract state remains unchanged between captures.
 
+## Cancellation lifecycle
+
+Measurement and helper operations accept an optional `signal?: AbortSignal` across all phases:
+
+- **Account and network readiness**: `ensureAccountReady` and `getOrInitAccount` check cancellation before and during polling. Readiness retry backoffs listen to `signal` to abort immediately rather than waiting for remaining sleep durations.
+- **RPC calls and polling**: `callRpc`, `waitForTransaction`, and `submitAndConfirm` link the caller's cancellation signal with internal timeouts via `AbortSignal.any`. Polling intervals abort promptly on signal trigger.
+- **Native helper execution**: `simulateSnapshot` and `execute` pass `signal` to Node's `execFile`, which terminates the spawned native helper child process promptly (`SIGTERM` / `SIGKILL`) on abort.
+- **Simulation and transient recovery**: `measureInvocation` aborts transient captive-core retry delays immediately upon cancellation and halts retry loops.
+- **Resource protection**: Caller-provided key files (`keyFile`) are never created, modified or deleted by the API, whether a run succeeds, fails or is cancelled. When no `keyFile` is given, the API creates a private temporary directory for the deployer key and removes it when the run finishes, fails or is cancelled, so each such run uses a fresh deployer account. Scratch files are cleaned up.
+- **Fail-closed guarantees**: Cancelled measurements throw explicit cancellation errors (`AbortError`) and never produce synthetic zero or fallback benchmarks.
+
 ## Schema migration
 
-`ContractBenchmark.schema_version` is now **4**. See the
+`ContractBenchmark.schema_version` is now **5**. See the
 [metric audit and migration](metric-provenance.md) for the complete mapping. The stable comparison tuple from
 schema 2 remains `(fixture_id, logical_id, function_name, case_id)`; runtime
 `contract_id` and WASM hash remain diagnostics.
@@ -117,6 +159,11 @@ network cap: its measured value has `limit: null` and `limit_reason`. Other meas
 metrics provide `limit_source` from captured configuration. These meanings are
 spelled out in the metric audit; footprint counts are not host-call counts.
 
+Schema 5 validates exact approved source and cap labels per metric; a pair of
+matching but fabricated labels is rejected. Historical schema-4 records remain
+valid as schema 4 and are not rewritten. Schema versions cannot be mixed, so
+remeasure both revisions with the current producer when migrating.
+
 Consumers must handle null consumption/limits. Diff records expose
 `availability: comparable | unavailable`; unavailable comparisons have null
 `delta`/`pct` and a reason, with no invented improvement/regression.
@@ -126,9 +173,8 @@ ledger, seed and auth settings, plus a resource-limit hash. Diff/report records 
 
 Existing schema-2 results can compare with other schema-2 results, and legacy
 results retain their old runtime matching. Schema 2 is never silently compared
-with newer schemas: earlier numeric fields do not establish the same source semantics.
-Schema-3 records retain their existing behavior when compared to schema 3; mixing
-schema 3 and 4 fails explicitly.
+with newer schemas: earlier numeric fields do not establish the same source
+semantics. Schema 3, 4, and 5 remain separate envelopes and cannot be mixed.
 Unmatched records are validated too. New/removed benchmark behavior is unchanged.
 
 ## Policies and reports
@@ -176,7 +222,7 @@ See [integration evidence](experiments/native-integration/verification.json),
 [the regression report](experiments/native-integration/report.md), and the explicit
 live harness `tests/experiments/verify-integration.cjs`.
 
-The historical schema-3 evidence below remains unchanged. Current schema-4 proof
+The historical schema-3 evidence below remains unchanged. The previous schema-4 proof
 and raw IO/event verification are linked from the metric audit.
 
 The harness runs genuine prebuilt bundled-contract BASE/temporary persistent-write

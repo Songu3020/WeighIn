@@ -12,11 +12,15 @@ globalThis.fetch=async(url,options)=>{
     funded=true;return new Response('{}');
   }
   const request=JSON.parse(options.body);
-  if(request.method==='getHealth')return new Response(JSON.stringify({result:
+  if(request.method==='getHealth')return new Response(JSON.stringify({jsonrpc:'2.0',id:request.id,result:
     mode==='metadata-only'?{passphrase:'Standalone Network ; February 2017'}:
       {status:mode==='unhealthy'?'starting':'healthy'}}));
   const key=request.params.keys[0],entries=[];
+  if(request.method==='getLedgerEntries'&&xdr.LedgerKey.fromXDR(key,'base64').switch().name==='configSetting'){
+    if(mode!=='missing-config')entries.push({key,xdr:template.xdr});
+    return new Response(JSON.stringify({jsonrpc:'2.0',id:request.id,result:{entries,latestLedger:100}}));
+  }
   if(funded){const value=xdr.LedgerEntryData.fromXDR(template.xdr,'base64');
     value.account().accountId(xdr.LedgerKey.fromXDR(key,'base64').account().accountId());entries.push({key,xdr:value.toXDR('base64')});}
-  return new Response(JSON.stringify({result:{entries,latestLedger:100}}));
+  return new Response(JSON.stringify({jsonrpc:'2.0',id:request.id,result:{entries,latestLedger:100}}));
 };

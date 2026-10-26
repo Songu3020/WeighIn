@@ -1,0 +1,141 @@
+{
+  "contract_id": "contract-test",
+  "function_name": "hello",
+  "case_id": "id:world",
+  "runners": {
+    "ubuntu-24.04": [
+      {
+        "run": 1,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 2,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 3,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 4,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 5,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      }
+    ],
+    "ubuntu-22.04": [
+      {
+        "run": 1,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 2,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 3,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 4,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      },
+      {
+        "run": 5,
+        "clean_deployment": true,
+        "cpu_instructions_consumed": 266842,
+        "memory_bytes_consumed": 2048,
+        "disk_read_bytes": 2400,
+        "write_bytes": 0,
+        "read_only_keys": 2,
+        "read_write_keys": 0,
+        "historical_data_read_bytes": null,
+        "contract_data_hard_limit": null,
+        "tx_size_bytes": null
+      }
+    ]
+  }
+}

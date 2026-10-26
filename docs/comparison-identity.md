@@ -44,7 +44,7 @@ For the reference's historical path migration, the temporary
 while introducing a stable contract ID. It uses existing matching behavior and
 keeps additions/removals visible; it does not add automatic aliases to the diff.
 
-`runMeasurement` now emits `schema_version: 4`, `fixture_id`, and `logical_id` on
+`runMeasurement` now emits `schema_version: 5`, `fixture_id`, and `logical_id` on
 each contract and `case_id` on each benchmark. The action supplies the same
 workspace-relative fixture path for both worktrees. Other API callers measuring
 separate worktrees should supply the same `fixtureId` option (or configure the
@@ -67,8 +67,10 @@ re-measure both revisions to migrate. Partial schema 2 records are rejected.
 ## Current native measurement schema
 
 Schema 3 introduced consumed native compute and explicit availability. Schema 4
-adds audited IO/event semantics and limit provenance with the same logical tuple.
-Availability and migration rules are documented in
-[native measurement](native-measurement.md) and the [metric audit](metric-provenance.md).
+adds audited IO/event semantics and limit provenance; schema 5 pins the approved
+per-metric source/cap mapping with the same logical tuple.
+Availability, standalone record validation, and migration rules are documented in
+[native measurement](native-measurement.md), the [metric audit](metric-provenance.md),
+and the [authoritative record schema](record-schema.md).
 Different measurement schemas are not silently mixed; measure both revisions
 with the current producer to migrate.

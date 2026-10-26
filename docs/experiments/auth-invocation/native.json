@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "source": "soroban-simulation",
+  "source_version": "28.0.1",
+  "protocol": 28,
+  "host_features": [
+    "recording_mode",
+    "testutils"
+  ],
+  "auth_mode": "recording(true,true)",
+  "contract": "id:contract-auth",
+  "function_name": "auth_call",
+  "caller": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ",
+  "seed": "0000000000000000000000000000000000000000000000000000000000000000",
+  "cpu_instructions_consumed": 284100,
+  "memory_bytes_consumed": 3120,
+  "instruction_budget": 284100,
+  "disk_read_bytes": 2400,
+  "write_bytes": 0,
+  "read_only_keys_count": 2,
+  "read_write_keys_count": 0,
+  "retval_xdr": "AAAAEgAAAAZhdXRoZWQA",
+  "transaction_data_sha256": "4736f1c79e65bd29d38965823e2007823f6e1e8284534ef06ce45464d2629b9f",
+  "contract_events_count": 0,
+  "modified_entries": 0,
+  "parity": {
+    "transaction_data": true,
+    "return_value": true,
+    "events": true
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "cpu_instructions",
+    "delta": 52966,
+    "pct": 19.514549514033703,
+    "rule": "strict_zero_tolerance",
+    "message": "cpu_instructions increased by 52966 (strict zero tolerance)",
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world"
+  },
+  {
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world",
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "memory_bytes",
+    "delta": 70658,
+    "pct": 6.283403200304486,
+    "rule": "fail_on_any_regression",
+    "message": "memory_bytes increased by 70658 (fail_on_any_regression)"
+  },
+  {
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world",
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "ledger_read_entries",
+    "delta": 1,
+    "pct": 50,
+    "rule": "fail_on_any_regression",
+    "message": "ledger_read_entries increased by 1 (fail_on_any_regression)"
+  },
+  {
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world",
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "ledger_write_entries",
+    "delta": 1,
+    "pct": null,
+    "rule": "fail_on_any_regression",
+    "message": "ledger_write_entries increased by 1 (fail_on_any_regression)"
+  },
+  {
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world",
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "ledger_write_bytes",
+    "delta": 96,
+    "pct": null,
+    "rule": "fail_on_any_regression",
+    "message": "ledger_write_bytes increased by 96 (fail_on_any_regression)"
+  },
+  {
+    "fixture_id": "id:ledger-variation-suite",
+    "logical_id": "id:reference-contract",
+    "case_id": "id:world",
+    "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+    "function_name": "hello",
+    "metric": "event_data_bytes",
+    "delta": 36,
+    "pct": 81.81818181818183,
+    "rule": "fail_on_any_regression",
+    "message": "event_data_bytes increased by 36 (fail_on_any_regression)"
+  }
+]

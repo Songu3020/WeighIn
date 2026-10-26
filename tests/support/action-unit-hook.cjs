@@ -3,16 +3,18 @@
 const Module = require("node:module");
 const fs = require("node:fs");
 const path = require("node:path");
+const { spawnSync } = require("node:child_process");
 const load = Module._load;
 const mode = process.env.WEIGHIN_UNIT_MODE;
 const logDir = process.env.WEIGHIN_UNIT_LOG_DIR;
 if (logDir) fs.mkdirSync(logDir, { recursive: true });
-function logKeyPath(filePath) {
+function logKeyPath(filePath, fixtureId) {
   if (!filePath || !logDir) return;
   const dir = path.dirname(filePath);
   const stats = fs.existsSync(dir) ? fs.statSync(dir) : null;
   const record = {
     filePath,
+    fixtureId,
     dirPath: dir,
     dirMode: stats ? stats.mode & 0o777 : null,
     exists: fs.existsSync(filePath),
@@ -24,20 +26,35 @@ function logKeyPath(filePath) {
   );
 }
 globalThis.fetch = async (url, options) => {
-  const method = options?.body ? JSON.parse(options.body).method : "";
+  const request = options?.body ? JSON.parse(options.body) : null;
+  const method = request?.method ?? "";
   if (mode === "funding-exhausted") {
     if (!method) return new Response("still warming", { status: 502 });
     if (method === "getLedgerEntries")
       return new Response(
-        JSON.stringify({ result: { entries: [], latestLedger: 100 } }),
+        JSON.stringify({ jsonrpc: "2.0", id: request.id, result: { entries: [], latestLedger: 100 } }),
       );
+  }
+  const result =
+    method === "getNetwork"
+      ? {
+          passphrase:
+            mode === "rpc-wrong-passphrase"
+              ? "Test SDF Network ; September 2015"
+              : "Standalone Network ; February 2017",
+          ...(mode === "rpc-missing-protocol"
+            ? {}
+            : { protocolVersion: mode === "rpc-wrong-protocol" ? 27 : 28 }),
+        }
+      : { status: mode === "rpc-unhealthy" ? "starting" : "healthy" };
+  if (mode === "rpc-invalid-envelope" && method === "getHealth") {
+    return new Response(JSON.stringify({ jsonrpc: "2.0", id: request.id + 1, result }));
   }
   return new Response(
     JSON.stringify({
-      result: {
-        passphrase: "unit-test-network",
-        status: mode === "rpc-unhealthy" ? "starting" : "healthy",
-      },
+      jsonrpc: "2.0",
+      id: request?.id,
+      result,
     }),
   );
 };
@@ -53,12 +70,58 @@ if (mode === "funding-exhausted") {
 Module._load = function (name, parent, ...args) {
   if (
     parent?.filename.endsWith("/dist/action.js") ||
-    parent?.filename.endsWith("/dist/build.js")
+    parent?.filename.endsWith("/dist/build.js") ||
+    parent?.filename.endsWith("/dist/git-utils.js")
   ) {
+    if (name === "@actions/core" && parent?.filename.endsWith("/dist/action.js")) {
+      const core = load.call(this, name, parent, ...args);
+      if (mode === "summary-delivery-failure") {
+        let failedFirstWrite = false;
+        return new Proxy(core, {
+          get(target, property, receiver) {
+            if (property === "summary") {
+              return {
+                addRaw(content) {
+                  target.summary.addRaw(content);
+                  return {
+                    async write() {
+                      if (!failedFirstWrite) {
+                        failedFirstWrite = true;
+                        throw new Error("unit summary delivery failure");
+                      }
+                      return target.summary.write();
+                    },
+                  };
+                },
+              };
+            }
+            return Reflect.get(target, property, receiver);
+          },
+        });
+      }
+      return core;
+    }
     if (name === "@actions/github") return { context: { payload: {} } };
     if (name === "@actions/exec")
       return {
         exec: async (command, argv, options = {}) => {
+          if (command === "git" && argv[0] === "check-ref-format") {
+            const result = spawnSync("git", argv, { encoding: "utf8" });
+            return result.status ?? 1;
+          }
+          // The unit workspace is a clean checkout unless a mode makes it dirty.
+          if (command === "git" && argv[0] === "status") {
+            options.listeners?.stdout?.(
+              Buffer.from(
+                mode === "dirty-head"
+                  ? " M contract/src/lib.rs\n"
+                  : mode === "untracked-head"
+                    ? "?? weighin-report.md\n"
+                    : "",
+              ),
+            );
+            return 0;
+          }
           const isBase = !(
             options.cwd === process.env.GITHUB_WORKSPACE ||
             options.cwd?.startsWith(process.env.GITHUB_WORKSPACE + path.sep)
@@ -74,6 +137,11 @@ Module._load = function (name, parent, ...args) {
           if (command === "git" && argv[1] === "remove")
             fs.rmSync(argv.at(-1), { recursive: true, force: true });
           if (command === "stellar" && argv[0] === "contract") {
+            if (logDir)
+              fs.appendFileSync(
+                path.join(logDir, "builds.jsonl"),
+                `${JSON.stringify({ revision: isBase ? "BASE" : "HEAD", cwd: options.cwd })}\n`,
+              );
             if (isBase && mode === "build")
               throw new Error("unit base build failure");
             fs.writeFileSync(
@@ -106,7 +174,7 @@ Module._load = function (name, parent, ...args) {
     if (name === "./measurement" && mode !== "funding-exhausted")
       return {
         runMeasurement: async (options) => {
-          logKeyPath(options.keyFile);
+          logKeyPath(options.keyFile, options.fixtureId);
           const isBase = !options.fixturesPath.startsWith(
             process.env.GITHUB_WORKSPACE + path.sep,
           );

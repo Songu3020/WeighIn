@@ -6,8 +6,9 @@ inputs:
   fixtures-path:
     description: >
       Path to the weighin-fixtures.json file in the caller repo, relative to the
-      repository root. Declares which WASM files to benchmark and which functions
-      to invoke. The Action builds with Stellar CLI 28.1+ (optimization enabled)
+      repository root. The path must remain within both the HEAD workspace and
+      the independently checked-out BASE worktree. Declares which WASM files
+      to benchmark and which functions to invoke. The Action builds with Stellar CLI 28.1+ (optimization enabled)
       and Rust 1.84+ as a minimum gate; SDK-specific requirements may be higher.
       Tested versions are Stellar CLI 28.1.0 and Rust 1.95.0. Callers must provision
       these tools, wasm32v1-none, and Rust 1.95.0 for the native helper.
@@ -20,7 +21,22 @@ inputs:
       repository root. If the file does not exist the action runs without
       enforcing any regression rules.
     required: false
-    default: 'weighin.toml'
+    default: "weighin.toml"
+
+  trusted-policy-ref:
+    description: >
+      Optional immutable Git ref (branch, tag, or SHA) from origin from which
+      the threshold policy is loaded. Must be paired with trusted-policy-path.
+      The resolved commit SHA is recorded in the report.
+    required: false
+    default: ''
+
+  trusted-policy-path:
+    description: >
+      Optional path inside trusted-policy-ref for the threshold policy. When
+      supplied, HEAD cannot select or modify the policy used by this run.
+    required: false
+    default: ''
 
   rpc-url:
     description: >
@@ -38,17 +54,33 @@ inputs:
     required: false
     default: ''
 
+  comment-author-mode:
+    description: >
+      Which identity should own the report comment. Use "github-actions"
+      (default) when the comment is posted by the GitHub Actions bot via
+      GITHUB_TOKEN. Use "authenticated-user" when posting with a personal
+      access token or user OAuth token; in that mode the currently
+      authenticated user's numeric ID is resolved via GET /user.
+      Unsupported values fail the action before any comment mutation.
+      Custom installation-token writers and arbitrary third-party GitHub App
+      identities are not supported by either mode.
+    required: false
+    default: 'github-actions'
+
   metadata-path:
     description: >
       Optional path where the action should write a JSON file containing the PR
       number and HEAD SHA (e.g. pr-metadata.json). Used for split workflows.
+      Must not resolve to the same file as report-path, fixtures-path or
+      config-path.
     required: false
     default: ''
 
   base-ref:
     description: >
-      Git ref to use as the baseline for comparison. Defaults to the PR base
-      branch (github.base_ref). Override for manual dispatch or scheduled runs.
+      Branch, tag, or commit SHA to use as the baseline for comparison. Defaults
+      to the PR base branch (github.base_ref). Invalid refs are rejected before
+      builds or network deployment. Override for manual dispatch or scheduled runs.
     required: false
     default: ''
 
@@ -63,17 +95,22 @@ inputs:
     default: ''
 
   report-path:
-    description: "Optional path where the generated Markdown benchmark report should be written"
+    description: "Optional path where the generated Markdown benchmark report should be written. The report is written to an owned temporary file in the destination directory and renamed into place, so an interrupted write keeps a previously published report unchanged. Must not resolve to the same file as metadata-path, fixtures-path or config-path."
     required: false
     default: ''
 
   build-command:
     description: "Optional shell command run in each revision; bypasses default build checks and cannot be combined with skip-build"
     required: false
-    default: ""
+    default: ''
 
   skip-build:
-    description: "Skip compilation and use precompiled fixture WASMs in both revisions; bypasses default build checks"
+    description: "Skip compilation and use precompiled fixture WASMs in both revisions; bypasses default build checks. Accepts standard YAML 1.2 boolean spellings (true, True, TRUE, false, False, FALSE); defaults to false when omitted. Non-boolean values are rejected."
+    required: false
+    default: "false"
+
+  allow-cross-target-substitution:
+    description: "Explicitly allow falling back to wasm32-unknown-unknown if a declared wasm32v1-none artifact is missing. Defaults to false. When false (default), missing declared artifacts fail immediately."
     required: false
     default: "false"
 

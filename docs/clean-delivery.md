@@ -1,7 +1,9 @@
 # Clean checkout and npm package verification
 
 The package is a prebuilt CLI and the existing measurement module. Its `main`
-entry is `dist/measurement.js`. `npm pack` runs the existing TypeScript build and
+entry is `dist/measurement.js` and its `types` entry is `dist/measurement.d.ts`.
+The build emits declarations for every `dist` module; test-only helpers marked
+`@internal` (such as `_resetSimulationHelperState`) are stripped from them. `npm pack` runs the existing TypeScript build and
 Action bundle commands through `prepack`; a checkout with no `dist` can therefore
 produce a complete tarball after `npm ci`. Packing source requires the development
 dependencies. Installing the resulting tarball requires only production Node
@@ -38,6 +40,17 @@ npm install --omit=dev /absolute/path/to/weighin-1.0.0.tgz
 node -e "console.log(typeof require('weighin').runMeasurement)"
 ```
 
+TypeScript consumers need no separate typings package:
+
+```ts
+import { runMeasurement, validateMeasurementRecords, type ContractBenchmark } from "weighin";
+import { diffBenchmarks } from "weighin/dist/diff";
+```
+
+`tests/type-declarations.test.cjs` packs the real tarball, installs it in an
+isolated consumer and compiles that consumer under `strict` with TypeScript.
+It also checks that API misuse and imports of stripped internals fail to compile.
+
 Run the installed `node_modules/.bin/weighin` executable from the benchmark
 project's directory with the project's fixture path. The CLI measures existing
 WASMs; build the configured artifacts first. For this repository's temporary
@@ -49,7 +62,8 @@ The historical migration experiment explicitly selects commit
 
 ## Verification experiment
 
-With the prerequisites on PATH and no existing `stellar-quickstart` sidecar:
+With the prerequisites on PATH and no existing `stellar-quickstart` container
+(the startup script preserves unowned name collisions):
 
 ```bash
 node tests/experiments/verify-clean-delivery.cjs /tmp/weighin-clean-delivery-proof

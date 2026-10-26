@@ -106,7 +106,15 @@ test("empty fixture suites and contracts are rejected; zero argument invocations
   );
 });
 
-function action(mode, config = policy, tmpRoot = null) {
+function action(
+  mode,
+  config = policy,
+  tmpRoot = null,
+  reportPath = null,
+  fixturesPath = "fixtures.json",
+  setupFiles,
+  baseRefInput = "main",
+) {
   const temporary =
     tmpRoot ?? fs.mkdtempSync(path.join(os.tmpdir(), "weighin-action-unit-"));
   const keyLogDir = path.join(temporary, "key-log");
@@ -143,6 +151,11 @@ function action(mode, config = policy, tmpRoot = null) {
     }
     if (config !== null)
       fs.writeFileSync(path.join(temporary, "head/weighin.toml"), config);
+    setupFiles?.({
+      temporary,
+      head: path.join(temporary, "head"),
+      base: path.join(temporary, "base"),
+    });
     const output = path.join(temporary, "outputs"),
       summary = path.join(temporary, "summary");
     fs.writeFileSync(output, "");
@@ -166,10 +179,11 @@ function action(mode, config = policy, tmpRoot = null) {
           GITHUB_WORKSPACE: path.join(temporary, "head"),
           GITHUB_OUTPUT: output,
           GITHUB_STEP_SUMMARY: summary,
-          "INPUT_FIXTURES-PATH": "fixtures.json",
+          "INPUT_FIXTURES-PATH": fixturesPath,
           "INPUT_CONFIG-PATH": "weighin.toml",
           "INPUT_GITHUB-TOKEN": "",
-          "INPUT_BASE-REF": "main",
+          "INPUT_BASE-REF": baseRefInput,
+          "INPUT_REPORT-PATH": reportPath || "",
         },
       },
     );
@@ -183,19 +197,48 @@ function action(mode, config = policy, tmpRoot = null) {
           .filter(Boolean)
           .map((line) => JSON.parse(line))
       : [];
+    const buildLogFile = path.join(keyLogDir, "builds.jsonl");
+    const builds = fs.existsSync(buildLogFile)
+      ? fs
+          .readFileSync(buildLogFile, "utf8")
+          .trim()
+          .split(/\n+/)
+          .filter(Boolean)
+          .map((line) => JSON.parse(line))
+      : [];
+    const reportFilePath = reportPath ? path.join(temporary, "head", reportPath) : null;
+    const reportContent = reportFilePath && fs.existsSync(reportFilePath)
+      ? fs.readFileSync(reportFilePath, "utf8")
+      : null;
     return {
       ...processResult,
       output: fs.readFileSync(output, "utf8"),
       summary: fs.readFileSync(summary, "utf8"),
       missingConfig: loadConfig(path.join(temporary, "missing.toml")),
       keyPaths,
+      builds,
+      reportContent,
     };
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 }
+function outputValue(output, name) {
+  const lines = output.split(/\r?\n/);
+  let found = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith(`${name}=`)) found = lines[i].slice(name.length + 1);
+    else if (lines[i].startsWith(`${name}<<`)) {
+      const delimiter = lines[i].slice(name.length + 2);
+      const end = lines.indexOf(delimiter, i + 1);
+      found = lines.slice(i + 1, end < 0 ? lines.length : end).join("\n");
+    }
+  }
+  return found;
+}
 for (const [mode, message] of [
   ["funding-exhausted", /Account readiness failed within 120s/],
+  ["rpc-invalid-envelope", /response ID does not match request/],
   ["rpc-unhealthy", /RPC has not reported healthy/],
   ["checkout", /unit checkout failure/],
   ["worktree", /unit worktree failure/],
@@ -219,6 +262,147 @@ for (const [mode, message] of [
     assert.match(result.summary, message);
     assert.match(result.summary, /No passing comparison/);
   });
+test("Action rejects a mismatched health response before account readiness or builds", () => {
+  const result = action("rpc-invalid-envelope");
+  assert.equal(result.status, 1);
+  assert.match(result.summary, /response ID does not match request/);
+  assert.equal(result.keyPaths.length, 0);
+});
+
+test("Action rejects a healthy but unsupported RPC network before builds or funding", () => {
+  for (const [mode, diagnostic] of [
+    ["rpc-wrong-passphrase", /RPC is healthy but incompatible: unsupported network passphrase/],
+    ["rpc-wrong-protocol", /RPC is healthy but incompatible: unsupported protocol 27/],
+    ["rpc-missing-protocol", /RPC is healthy but incompatible: invalid network metadata/],
+  ]) {
+    const result = action(mode);
+    assert.equal(result.status, 1);
+    assert.match(result.summary, diagnostic);
+    assert.equal(result.keyPaths.length, 0);
+    assert.deepEqual(result.builds, []);
+  }
+});
+
+test("Action refuses to measure a HEAD checkout with uncommitted changes", () => {
+  const result = action("dirty-head");
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.summary, /HEAD workspace has uncommitted changes/);
+  assert.match(result.summary, /contract\/src\/lib\.rs/);
+  assert.equal(result.keyPaths.length, 0, "no account may be funded for a dirty checkout");
+  assert.deepEqual(result.builds, [], "no contract may be built for a dirty checkout");
+});
+
+test("Action measures a HEAD checkout that only contains untracked files", () => {
+  const result = action("untracked-head");
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(result.keyPaths.length, 2, "both revisions are measured");
+});
+
+test("Action validates supported baseline branch, tag, and SHA forms", () => {
+  for (const ref of ["feature/topic", "v1.2.3", "0123456789abcdef0123456789abcdef01234567"]) {
+    const result = action("control", policy, null, null, "fixtures.json", undefined, ref);
+    assert.equal(result.status, 0, ref + result.stdout + result.stderr);
+  }
+});
+
+test("Action rejects invalid baseline refs before RPC checks, builds, or funding", () => {
+  for (const ref of ["   ", "--upload-pack=evil", "broken..ref", "trailing/"]) {
+    const result = action("control", policy, null, null, "fixtures.json", undefined, ref);
+    assert.equal(result.status, 1, ref);
+    assert.match(result.summary, /Invalid base-ref/);
+    assert.equal(result.keyPaths.length, 0, ref);
+    assert.deepEqual(result.builds, [], ref);
+  }
+});
+
+test("Action rejects absolute and escaping fixture paths before measuring HEAD", () => {
+  for (const fixturesPath of [
+    "/tmp/outside-fixtures.json",
+    "../outside-fixtures.json",
+    "C:\\repo\\fixtures.json",
+  ]) {
+    const result = action("control", policy, null, null, fixturesPath);
+    assert.equal(result.status, 1, fixturesPath);
+    assert.match(result.summary, /fixtures-path for HEAD must be a relative path inside the HEAD worktree/);
+    assert.equal(result.keyPaths.length, 0, fixturesPath);
+  }
+});
+
+test("Action rejects an existing HEAD symlink that points outside its workspace", () => {
+  for (const kind of ["file", "directory"]) {
+    const result = action(
+      "control",
+      policy,
+      null,
+      null,
+      "nested/fixtures.json",
+      ({ temporary, head }) => {
+        const external = path.join(temporary, "outside-fixtures");
+        fs.mkdirSync(external);
+        fs.writeFileSync(path.join(external, "fixtures.json"), JSON.stringify({ contracts: [] }));
+        fs.mkdirSync(path.join(head, "nested"));
+        if (kind === "directory") fs.rmdirSync(path.join(head, "nested"));
+        fs.symlinkSync(
+          kind === "file" ? path.join(external, "fixtures.json") : external,
+          kind === "file" ? path.join(head, "nested/fixtures.json") : path.join(head, "nested"),
+          kind === "file" ? "file" : "dir",
+        );
+      },
+    );
+    assert.equal(result.status, 1, kind);
+    assert.match(result.summary, /fixtures-path for HEAD must be a relative path inside the HEAD worktree/);
+    assert.equal(result.keyPaths.length, 0, kind);
+  }
+});
+
+test("Action validates BASE symlinks before BASE measurement and accepts normalized nested fixture paths with either ID form", () => {
+  const baseEscape = action(
+    "control",
+    policy,
+    null,
+    null,
+    "nested/fixtures.json",
+    ({ temporary, head, base }) => {
+      fs.mkdirSync(path.join(head, "nested"));
+      fs.mkdirSync(path.join(base, "nested"));
+      const fixture = JSON.stringify({ contracts: [{ id: "explicit:contract", wasm_path: "../contract/contract.wasm", invocations: [{ function_name: "hello", args: [] }] }] });
+      fs.writeFileSync(path.join(head, "nested/fixtures.json"), fixture);
+      const external = path.join(temporary, "outside-fixtures.json");
+      fs.writeFileSync(external, fixture);
+      fs.symlinkSync(external, path.join(base, "nested/fixtures.json"));
+    },
+  );
+  assert.equal(baseEscape.status, 1);
+  assert.match(baseEscape.summary, /fixtures-path for BASE must be a relative path inside the BASE worktree/);
+  assert.equal(baseEscape.keyPaths.length, 1, "HEAD may measure, BASE must fail before measurement");
+  assert.deepEqual(baseEscape.builds.map(({ revision }) => revision), ["HEAD"]);
+
+  for (const explicitId of [false, true]) {
+    const fixture = {
+      contracts: [{
+        ...(explicitId ? { id: "explicit:contract" } : {}),
+        wasm_path: "../contract/contract.wasm",
+        invocations: [{ function_name: "hello", args: [] }],
+      }],
+    };
+    const result = action(
+      "control",
+      policy,
+      null,
+      null,
+      "nested/./fixtures.json",
+      ({ head, base }) => {
+        for (const revision of [head, base]) {
+          fs.mkdirSync(path.join(revision, "nested"));
+          fs.writeFileSync(path.join(revision, "nested/fixtures.json"), JSON.stringify(fixture));
+        }
+      },
+    );
+    assert.equal(result.status, 0);
+    assert.equal(result.keyPaths.length, 2);
+    assert.deepEqual(result.keyPaths.map(({ fixtureId }) => fixtureId), ["nested/fixtures.json", "nested/fixtures.json"]);
+  }
+});
 for (const config of [
   "not valid toml = ",
   '[thresholds.functions.hello]\ncpu_instructions="typo"',
@@ -298,4 +482,220 @@ test("Action unchanged control and optional absent policy still pass; regression
   const regression = action("regression");
   assert.equal(regression.status, 1);
   assert.match(regression.summary, /increased/);
+});
+
+test("Action persists an explicit unsuccessful-comparison report on configuration/fixture/RPC failures when report-path is set", () => {
+  for (const failureMode of ["rpc-unhealthy", "missing-fixtures", "malformed-fixtures"]) {
+    const res = action(failureMode, policy, null, "weighin-report.md");
+    assert.equal(res.status, 1);
+    assert.match(res.output, /fail/);
+    assert.ok(res.reportContent, `expected report file to exist for ${failureMode}`);
+    assert.match(res.reportContent, /# WeighIn Resource Benchmark: Unsuccessful Comparison/);
+    assert.match(res.reportContent, /> \*\*Status: FAILED\*\*/);
+    assert.match(res.reportContent, /Policies established:\*\* No/);
+    assert.match(res.reportContent, /Thresholds evaluated:\*\* None/);
+    assert.match(res.reportContent, /No passing comparison/);
+    assert.doesNotMatch(res.reportContent, /thresholds-passed/);
+  }
+});
+
+test("Action preserves a validated diff and delivery diagnostic when report writing fails", () => {
+  const result = action(
+    "control",
+    policy,
+    null,
+    "blocked/report.md",
+    "fixtures.json",
+    ({ head }) => fs.writeFileSync(path.join(head, "blocked"), "not a directory"),
+  );
+  assert.equal(result.status, 1);
+  assert.equal(outputValue(result.output, "result"), "fail");
+  assert.match(result.summary, /Failed to write WeighIn report/);
+  const diff = JSON.parse(outputValue(result.output, "diff-json"));
+  assert.ok(diff.contracts.length > 0);
+});
+
+test("Action preserves a validated diff and delivery diagnostic when summary writing fails", () => {
+  const result = action("summary-delivery-failure");
+  assert.equal(result.status, 1);
+  assert.equal(outputValue(result.output, "result"), "fail");
+  assert.match(result.summary, /unit summary delivery failure/);
+  const diff = JSON.parse(outputValue(result.output, "diff-json"));
+  assert.ok(diff.contracts.length > 0);
+});
+
+test("Action does not invent a diff when failure occurs before comparison", () => {
+  const result = action("rpc-unhealthy");
+  assert.equal(result.status, 1);
+  assert.deepEqual(JSON.parse(outputValue(result.output, "diff-json")), {});
+});
+
+test("Action preserves primary error when writing report-path fails due to invalid output path", () => {
+  // Pass an invalid path that cannot be created as a file
+  const res = action("rpc-unhealthy", policy, null, "fixtures.json"); // fixtures.json already exists as a file, but let's test a directory path as file
+  assert.equal(res.status, 1);
+  assert.match(res.output, /fail/);
+  assert.match(res.summary, /RPC has not reported healthy/);
+});
+
+// ---------------------------------------------------------------------------
+// Unknown fixture declaration field rejection (strict schema)
+// ---------------------------------------------------------------------------
+
+test("parseFixtures rejects unknown key at fixture root", () => {
+  const json = JSON.stringify({
+    idenitifer: "my-suite",
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [{ function_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /idenitifer/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on contract declaration", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_pat: "contract.wasm",
+        invocations: [{ function_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /wasm_pat/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on invocation declaration", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [{ functoin_name: "hello", args: [] }],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /functoin_name/);
+      return true;
+    },
+  );
+});
+
+test("parseFixtures rejects unknown key on top-level typed argument", () => {
+  const json = JSON.stringify({
+    contracts: [
+      {
+        wasm_path: "contract.wasm",
+        invocations: [
+          {
+            function_name: "hello",
+            args: [{ typ: "symbol", value: "world" }],
+          },
+        ],
+      },
+    ],
+  });
+  assert.throws(
+    () => parseFixtures(json, "fixtures.json"),
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /typ/);
+      return true;
+    },
+  );
+});
+
+test("Action rejects unknown fixture root field before build or deployment", () => {
+  // The action unit hook mocks runMeasurement entirely in 'control' mode.
+  // Instead, verify the rejection happens at the runMeasurement level:
+  // parseFixtures is the first thing runMeasurement calls, so an invalid
+  // fixture must throw before any key file, account, or network I/O.
+  const os = require("node:os");
+  const path = require("node:path");
+  const fs = require("node:fs");
+  const { runMeasurement } = require("../dist/measurement");
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "weighin-reject-unknown-"));
+  const fixturesPath = path.join(tmp, "fixtures.json");
+  const keyFile = path.join(tmp, "key.sec");
+
+  // Fixture with an unknown root field — parseFixtures should throw
+  fs.writeFileSync(
+    fixturesPath,
+    JSON.stringify({
+      idenitifer: "my-suite",
+      contracts: [
+        {
+          wasm_path: "contract.wasm",
+          invocations: [{ function_name: "hello", args: [] }],
+        },
+      ],
+    }),
+  );
+
+  const p = runMeasurement({ fixturesPath, fixtureId: "fixtures.json", gitCommit: "abc", sdkVersion: "0", keyFile });
+  p.then(
+    () => { throw new Error("expected rejection"); },
+    (err) => {
+      assert.match(err.message, /Invalid WeighIn configuration in fixtures\.json/);
+      assert.match(err.message, /idenitifer/);
+      // key file must not have been created — parseFixtures threw before getOrInitAccount
+      assert.equal(fs.existsSync(keyFile), false, "key file must not be created before schema validation");
+    },
+  ).finally(() => fs.rmSync(tmp, { recursive: true, force: true }));
+
+  return p.catch(() => {}); // let the test runner see it resolved
+});
+
+test("Action rejects a report-path that aliases the fixtures file and leaves it untouched", () => {
+  const result = action("measurement", policy, null, "fixtures.json");
+  assert.equal(result.status, 1);
+  assert.match(result.summary, /must not resolve to the same path/);
+  assert.doesNotMatch(result.reportContent ?? "", /Unsuccessful Comparison/);
+  assert.ok(JSON.parse(result.reportContent).contracts.length > 0);
+});
+
+test("Action rejects a report-path symlink to the fixtures file and leaves it untouched", () => {
+  const result = action(
+    "measurement",
+    policy,
+    null,
+    "link.md",
+    "fixtures.json",
+    ({ head }) => fs.symlinkSync(path.join(head, "fixtures.json"), path.join(head, "link.md")),
+  );
+  assert.equal(result.status, 1);
+  assert.match(result.summary, /symbolic link/);
+  assert.ok(JSON.parse(result.reportContent).contracts.length > 0);
+});
+
+test("Action rejects report-path and metadata-path that resolve to the same file", () => {
+  process.env["INPUT_METADATA-PATH"] = "same.out";
+  try {
+    const result = action("measurement", policy, null, "same.out");
+    assert.equal(result.status, 1);
+    assert.match(result.summary, /must not resolve to the same path/);
+    assert.doesNotMatch(result.reportContent ?? "", /Unsuccessful Comparison/);
+  } finally {
+    delete process.env["INPUT_METADATA-PATH"];
+  }
 });

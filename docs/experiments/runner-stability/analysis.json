@@ -1,0 +1,125 @@
+{
+  "contract_id": "contract-test",
+  "function_name": "hello",
+  "case_id": "id:world",
+  "reject_cross_environment_averaging": true,
+  "metrics": {
+    "cpu_instructions_consumed": {
+      "status": "deterministic",
+      "ubuntu_24_04": {
+        "min": 266842,
+        "max": 266842,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 266842,
+        "max": 266842,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "memory_bytes_consumed": {
+      "status": "deterministic",
+      "ubuntu_24_04": {
+        "min": 2048,
+        "max": 2048,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 2048,
+        "max": 2048,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "disk_read_bytes": {
+      "status": "deterministic",
+      "ubuntu_24_04": {
+        "min": 2400,
+        "max": 2400,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 2400,
+        "max": 2400,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "write_bytes": {
+      "status": "deterministic_zero",
+      "ubuntu_24_04": {
+        "min": 0,
+        "max": 0,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 0,
+        "max": 0,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "read_only_keys": {
+      "status": "deterministic",
+      "ubuntu_24_04": {
+        "min": 2,
+        "max": 2,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 2,
+        "max": 2,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "read_write_keys": {
+      "status": "deterministic_zero",
+      "ubuntu_24_04": {
+        "min": 0,
+        "max": 0,
+        "range": 0,
+        "variance": 0
+      },
+      "ubuntu_22_04": {
+        "min": 0,
+        "max": 0,
+        "range": 0,
+        "variance": 0
+      },
+      "cross_runner_delta": 0,
+      "cross_runner_drift_pct": 0.0
+    },
+    "historical_data_read_bytes": {
+      "status": "unavailable",
+      "consumed": null,
+      "reason": "No verified consumption source"
+    },
+    "contract_data_hard_limit": {
+      "status": "unavailable",
+      "consumed": null,
+      "reason": "No verified consumption source"
+    },
+    "tx_size_bytes": {
+      "status": "unavailable",
+      "consumed": null,
+      "reason": "No verified consumption source"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "scenario": "signed_auth_setup",
+  "status": "committed",
+  "protocol": 28,
+  "contract_id": "CAUTHKL44G5Y7U534K7AEYZ3A7P3O3QJ7D6C4QZ4LMBVVM2NZZ5ZAUTH",
+  "setup_operation": {
+    "function_name": "initialize",
+    "args": [
+      {
+        "type": "Address",
+        "value": "GAEVHLRQ27T5KVGN5DHTBX24MAREEITOWJHJP5A3VE4FJCFBT3F2EKNN"
+      }
+    ]
+  },
+  "authorization": {
+    "mode": "AddressAccountAuth",
+    "credentials_type": "sorobanCredentialsAddress",
+    "authorizer_address": "GAEVHLRQ27T5KVGN5DHTBX24MAREEITOWJHJP5A3VE4FJCFBT3F2EKNN",
+    "nonce": "1001",
+    "signature_expiration_ledger": 200,
+    "sanitized_signature": {
+      "key_type": "ed25519_public_key",
+      "signature_length": 64,
+      "signature_sha256": "8d3e913a82df4b423985b88cf2400a406fc1e041444be09dcfbaee251393666b"
+    },
+    "preimage": {
+      "envelope_type": "envelopeTypeSorobanAuthorization",
+      "network_id": "Test SDF Future Network ; October 2022",
+      "preimage_sha256": "bb25bfefa84f89b5436b6be4ab601371e756b610dd3f3ec4aa499731a5381f56"
+    }
+  },
+  "receipt": {
+    "transaction_hash": "3333333333333333333333333333333333333333333333333333333333333333",
+    "inclusion_ledger": 105,
+    "status": "SUCCESS",
+    "verified_storage_keys": [
+      {
+        "key_type": "instance_storage",
+        "description": "admin role initialized to GAEVHLRQ27T5KVGN5DHTBX24MAREEITOWJHJP5A3VE4FJCFBT3F2EKNN"
+      }
+    ]
+  },
+  "setup_resource_overhead": {
+    "fee_stroops": 1000000,
+    "cpu_instructions": 310500,
+    "memory_bytes": 4200,
+    "disk_read_bytes": 2400,
+    "write_bytes": 128,
+    "excluded_from_benchmark_consumption": true
+  }
+}

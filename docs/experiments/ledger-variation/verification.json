@@ -1,0 +1,31 @@
+{
+  "status": "VERIFIED",
+  "scenario": "ledger_dependent_variation",
+  "repeatability_status": "REPEATABILITY_VARIATION_FOUND",
+  "completed_runs": 5,
+  "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+  "proof_wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+  "unchanged_wasm_artifact": true,
+  "unchanged_runtime_contract_id": true,
+  "fixed_invocation_interface": true,
+  "controlled_ledger_progression": true,
+  "random_behavior_used": false,
+  "cost_settings_altered": false,
+  "compute_calibration_constant": true,
+  "resource_limits_constant": true,
+  "pre_threshold_control_deltas_zero": true,
+  "post_threshold_variation_observed": true,
+  "cpu_range": 52966,
+  "memory_range": 70658,
+  "write_bytes_range": 96,
+  "event_data_bytes_range": 36,
+  "configured_policy_violations_count": 6,
+  "policy_violation_suppressed_for_unchanged_artifact": false,
+  "unavailable_metrics_explicit_null": true,
+  "unavailable_metrics": [
+    "historical_data_read_bytes",
+    "contract_data_hard_limit",
+    "tx_size_bytes"
+  ],
+  "bounded_repeatability_implies_state_time_independence": false
+}

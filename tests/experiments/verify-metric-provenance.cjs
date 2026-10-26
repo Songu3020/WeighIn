@@ -117,7 +117,7 @@ use soroban_sdk::{contract, contractimpl, symbol_short, vec, token, Address, Env
   // Persist a portable evidence fixture, without a temporary absolute WASM path.
   write('fixtures.json', { ...fixture, contracts: fixture.contracts.map(c => ({ ...c, wasm_path:'contract.wasm' })) });
   const base = await runMeasurement({ fixturesPath, keyFile, rpcUrl:endpoint, helperPath:helper, gitCommit:'isolated-audit-source',sdkVersion:'28.0.0' });
-  write('measurements.json',base); assert.equal(base[0].schema_version,4);
+  write('measurements.json',base); assert.equal(base[0].schema_version,5);
   const benchmarks = Object.fromEntries(base[0].benchmarks.map(b => [b.case_id.replace(/^id:/,''), b]));
   // Raw-RPC check using the exact parity-accepted transaction and ledger.
   for (const benchmark of base[0].benchmarks) {

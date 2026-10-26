@@ -1,0 +1,123 @@
+[
+  {
+    "run": 1,
+    "ledger": 900,
+    "timestamp": 1791435800,
+    "branch_active": false,
+    "loop_steps": 0,
+    "return_symbols": [
+      "Hello",
+      "world"
+    ],
+    "retval_xdr": "AAAAEAAAAAEAAAACAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFd29ybGQAAAA=",
+    "header_sha256": "02797020d5d39466940676774e7b9147e1652e00597e46a0d7dc4e705b42063c",
+    "snapshot_sha256": "0c9cd047ff75811c427c41b0b9acf1d6d6d77e5be8e341134ad0d842b22d987c",
+    "input_sha256": "5707827797a63d3066d9f3467beff667b831a8347381edc8eab4c4d5c262920a",
+    "cpu_instructions": 271418,
+    "memory_bytes": 1124518,
+    "ledger_read_entries": 2,
+    "ledger_read_bytes": 0,
+    "ledger_write_entries": 0,
+    "ledger_write_bytes": 0,
+    "events_count": 0,
+    "event_data_bytes": 44
+  },
+  {
+    "run": 2,
+    "ledger": 925,
+    "timestamp": 1791435925,
+    "branch_active": false,
+    "loop_steps": 0,
+    "return_symbols": [
+      "Hello",
+      "world"
+    ],
+    "retval_xdr": "AAAAEAAAAAEAAAACAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFd29ybGQAAAA=",
+    "header_sha256": "9ed86153f8b51878fa514c985fd4b027296d89b830edf20051ccdf8a9b68bddb",
+    "snapshot_sha256": "71915c86d73414525e5257de5a0eefa7e96081abb8c4d53c9740ce82acb2cd4d",
+    "input_sha256": "a3b0fdd81140d67be48d66026514ce52ffb0de7f073529d4985a70b627cb852e",
+    "cpu_instructions": 271418,
+    "memory_bytes": 1124518,
+    "ledger_read_entries": 2,
+    "ledger_read_bytes": 0,
+    "ledger_write_entries": 0,
+    "ledger_write_bytes": 0,
+    "events_count": 0,
+    "event_data_bytes": 44
+  },
+  {
+    "run": 3,
+    "ledger": 950,
+    "timestamp": 1791436050,
+    "branch_active": true,
+    "loop_steps": 1,
+    "return_symbols": [
+      "Hello",
+      "world",
+      "tick"
+    ],
+    "retval_xdr": "AAAAEAAAAAEAAAADAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFd29ybGQAAAAAAAAPAAAABHRpY2s=",
+    "header_sha256": "964342a9d85a7c97140fbdb57cb3f2b57baf9631209dddd544716df5d636d1d0",
+    "snapshot_sha256": "885397c0c7bd2820d30b0c8e2de946fbde96ed008ab1fb2814c4f59fa0e3205e",
+    "input_sha256": "9e49d516a1bbb79854693d6ff7b47cb14ffbc74f612264fa6caa96d32329239e",
+    "cpu_instructions": 315840,
+    "memory_bytes": 1193640,
+    "ledger_read_entries": 3,
+    "ledger_read_bytes": 0,
+    "ledger_write_entries": 1,
+    "ledger_write_bytes": 96,
+    "events_count": 0,
+    "event_data_bytes": 56
+  },
+  {
+    "run": 4,
+    "ledger": 975,
+    "timestamp": 1791436175,
+    "branch_active": true,
+    "loop_steps": 2,
+    "return_symbols": [
+      "Hello",
+      "world",
+      "tick",
+      "tick"
+    ],
+    "retval_xdr": "AAAAEAAAAAEAAAAEAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFd29ybGQAAAAAAAAPAAAABHRpY2sAAAAPAAAABHRpY2s=",
+    "header_sha256": "29cb0d7812a0ca45d66b8ad1635e11c6d7c7e0e3e80a4f49ba237de836e352f7",
+    "snapshot_sha256": "af9fe061b9cb0e9b6ebb9ef5fc8bbe085be3d80cf0bda8fb2238ba27b35a8c03",
+    "input_sha256": "86fc780355fd5308a5dbf9ac60b1c99f95a74cbae2b7d40b8af5ed9e72748988",
+    "cpu_instructions": 320112,
+    "memory_bytes": 1194408,
+    "ledger_read_entries": 3,
+    "ledger_read_bytes": 0,
+    "ledger_write_entries": 1,
+    "ledger_write_bytes": 96,
+    "events_count": 0,
+    "event_data_bytes": 68
+  },
+  {
+    "run": 5,
+    "ledger": 1000,
+    "timestamp": 1791436300,
+    "branch_active": true,
+    "loop_steps": 3,
+    "return_symbols": [
+      "Hello",
+      "world",
+      "tick",
+      "tick",
+      "tick"
+    ],
+    "retval_xdr": "AAAAEAAAAAEAAAAFAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFd29ybGQAAAAAAAAPAAAABHRpY2sAAAAPAAAABHRpY2sAAAAPAAAABHRpY2s=",
+    "header_sha256": "32f8e3d90b3051991c838586d6fb0ca8d62e2892f2d5ed4e78820ac05e7b638d",
+    "snapshot_sha256": "13686acffa95483285d27b48a7030573628f186ea92ceea75ad92ac6aa78bbde",
+    "input_sha256": "3e199600ab15b670f03d37adfabaa7f06ac526b09b1a3345e67d9df9f814e745",
+    "cpu_instructions": 324384,
+    "memory_bytes": 1195176,
+    "ledger_read_entries": 3,
+    "ledger_read_bytes": 0,
+    "ledger_write_entries": 1,
+    "ledger_write_bytes": 96,
+    "events_count": 0,
+    "event_data_bytes": 80
+  }
+]

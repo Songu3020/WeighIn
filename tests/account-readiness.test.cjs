@@ -10,10 +10,17 @@ const publicKey = StrKey.encodeEd25519PublicKey(xdr.LedgerEntryData.fromXDR(entr
 const absent = () => new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: { entries: [], latestLedger: 100 } }));
 const present = () => new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: { entries: [entry], latestLedger: 101 } }));
 // Controlled HTTP responses and virtual elapsed time only, not live funding evidence.
-async function scenario(handler) {
+async function scenario(handler, preserveEnvelope = false) {
   const oldFetch = global.fetch, oldTimer = global.setTimeout, oldNow = Date.now;
   let elapsed = 0; const calls = [];
-  global.fetch = async (url, options) => { calls.push({ url, options }); return handler(url, options, calls); };
+  global.fetch = async (url, options) => {
+    calls.push({ url, options });
+    const response = await handler(url, options, calls);
+    if (preserveEnvelope || options?.method !== 'POST') return response;
+    const body = await response.json();
+    const request = JSON.parse(options.body);
+    return new Response(JSON.stringify({ ...body, jsonrpc: '2.0', id: request.id }), { status: response.status });
+  };
   Date.now = () => elapsed;
   global.setTimeout = (callback, delay, ...args) => { elapsed += delay; return setImmediate(callback, ...args); };
   try { await ensureAccountReady('http://localhost:8000/rpc', publicKey); return { calls, elapsed }; }
@@ -60,12 +67,34 @@ test('transport timeout can recover; persistent transport failure exhausts the d
 });
 test('RPC error is not interpreted as account absence and does not trigger funding', async () => {
   let calls = 0;
-  await assert.rejects(scenario(() => { calls++; return new Response(JSON.stringify({ error: { code: -32603, message: 'internal failure' } })); }), /Account readiness RPC error/);
+  await assert.rejects(scenario(() => { calls++; return new Response(JSON.stringify({ error: { code: -32603, message: 'internal failure' } })); }), /Account readiness RPC method error.*-32603/);
   assert.equal(calls, 1);
 });
 test('malformed or unrelated account rows are rejected before measurement', async () => {
   for (const entries of [[{ ...entry, key: 'unrelated' }], [{ ...entry, xdr: 'broken' }], [entry, entry]]) {
     await assert.rejects(scenario(() => new Response(JSON.stringify({ result: { entries, latestLedger: 100 } }))));
+  }
+});
+
+test('malformed JSON-RPC envelopes fail before account funding', async () => {
+  const validResult = { entries: [], latestLedger: 100 };
+  const malformed = [
+    { jsonrpc: '1.0', id: 1, result: validResult },
+    { jsonrpc: '2.0', id: 9, result: validResult },
+    { jsonrpc: '2.0', id: 1, result: validResult, error: { code: -1, message: 'conflict' } },
+    { jsonrpc: '2.0', id: 1 },
+    { jsonrpc: '2.0', result: validResult },
+    { jsonrpc: '2.0', id: 1, error: { code: '-32603', message: 'wrong code type' } },
+    { jsonrpc: '2.0', id: 1, result: validResult, extra: true },
+    'not json',
+  ];
+  for (const envelope of malformed) {
+    let calls = 0;
+    await assert.rejects(
+      scenario(() => { calls++; return new Response(typeof envelope === 'string' ? envelope : JSON.stringify(envelope)); }, true),
+      /Account readiness invalid RPC response/,
+    );
+    assert.equal(calls, 1);
   }
 });
 

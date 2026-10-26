@@ -99,3 +99,35 @@ test("CLI output writer preserves a prior result when delivery fails", () => {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 });
+
+test('CLI rejects ambiguous combination of stdout mode and explicit output file',()=>{
+  const pkg=require('../package.json');
+  const bin=path.resolve(__dirname,'..',pkg.bin.weighin);
+
+  // Case 1: --json-stdout and --output file.json
+  const r1=spawnSync(process.execPath,[bin,'fixtures.json','--json-stdout','--output','out.json'],
+    {encoding:'utf8',timeout:5000});
+  assert.equal(r1.status,1);
+  assert.match(r1.stderr,/Ambiguous output configuration/);
+  assert.equal(r1.stdout,'');
+
+  // Case 2: --stdout and positional output
+  const r2=spawnSync(process.execPath,[bin,'fixtures.json','positional.json','--stdout'],
+    {encoding:'utf8',timeout:5000});
+  assert.equal(r2.status,1);
+  assert.match(r2.stderr,/Ambiguous output configuration/);
+  assert.equal(r2.stdout,'');
+});
+
+test('CLI stdout failure emits error on stderr and nothing on stdout',()=>{
+  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'weighin-stdout-fail-'));
+  try{
+    const pkg=require('../package.json');
+    const bin=path.resolve(__dirname,'..',pkg.bin.weighin);
+    const r=spawnSync(process.execPath,[bin,path.join(temporary,'nonexistent.json'),'--json-stdout'],
+      {cwd:temporary,encoding:'utf8',timeout:10000});
+    assert.equal(r.status,1);
+    assert.match(r.stderr,/Benchmarking failed/);
+    assert.equal(r.stdout,'');
+  }finally{fs.rmSync(temporary,{recursive:true,force:true});}
+});

@@ -22,6 +22,11 @@ function limits(input) {
     disk_read_bytes:io.txMaxDiskReadBytes(),write_entries:io.txMaxWriteLedgerEntries(),write_bytes:io.txMaxWriteBytes(),
     events_and_return_bytes:settings.configSettingContractEventsV0.contractEvents().txMaxContractEventsSizeBytes() };
 }
+function currentSchemaRecords() {
+  const current = clone(records);
+  for (const contract of current) contract.schema_version = 5;
+  return current;
+}
 test('all six real cases map the native output and immutable captured caps to production metrics', () => {
   for (const measured of records[0].benchmarks) {
     const replay = replays.find(r => r.output && createHash('sha256').update(JSON.stringify(r.input)).digest('hex') === measured.provenance.input_sha256);
@@ -78,6 +83,37 @@ test('schema 4 control compares all eight measured fields and explicitly retains
   }
   const violations = enforceThresholds(diff,{ thresholds:{ global:{fail_on_any_regression:true} } });
   assert.equal(violations.length,18); assert.ok(violations.every(v=>v.delta === null));
+});
+test('schema 5 accepts the approved per-metric mapping and rejects matching fabricated mappings on both sides', () => {
+  const current = currentSchemaRecords();
+  assert.equal(require('../dist/record-schema').inspectMeasurementRecords(current).valid, true);
+  const diff = diffBenchmarks(current, clone(current));
+  assert.equal(diff.hasRegression, false);
+
+  const base = clone(current), head = clone(current);
+  for (const side of [base, head]) {
+    side[0].benchmarks[0].metrics.cpu_instructions.source = 'fabricated.cpu';
+    side[0].benchmarks[0].metrics.cpu_instructions.limit_source = 'fabricated.cap';
+  }
+  assert.throws(
+    () => diffBenchmarks(base, head),
+    /Schema 5 metric cpu_instructions has unapproved source provenance/,
+  );
+
+  const unmatched = clone(current);
+  unmatched[0].logical_id = 'id:unmatched';
+  unmatched[0].benchmarks[0].metrics.cpu_instructions.source = 'fabricated.cpu';
+  assert.throws(
+    () => diffBenchmarks(current, unmatched),
+    /Schema 5 metric cpu_instructions has unapproved source provenance/,
+  );
+});
+test('schema 4 records remain valid without rewriting and require explicit remeasurement to compare with schema 5', () => {
+  assert.equal(require('../dist/record-schema').inspectMeasurementRecords(records).valid, true);
+  assert.throws(
+    () => diffBenchmarks(records, currentSchemaRecords()),
+    /different schema versions/,
+  );
 });
 test('measured event count without independent network cap can fail a configured regression policy', () => {
   // Behavior-level policy test uses real measurements, selecting two fixture

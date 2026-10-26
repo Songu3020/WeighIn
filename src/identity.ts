@@ -1,42 +1,7 @@
 import * as path from "path";
-import { z } from "zod";
+import { ZodError } from "zod";
 import type { FixturesSpec, ContractSpec, InvocationSpec } from "./measurement";
-
-const id = z
-  .string()
-  .refine((value) => value.trim().length > 0, "ID must not be blank");
-const fixturesSchema = z.object({
-  id: id.optional(),
-  contracts: z
-    .array(
-      z.object({
-        id: id.optional(),
-        wasm_path: z.string().min(1),
-        invocations: z
-          .array(
-            z.object({
-              id: id.optional(),
-              function_name: z.string().min(1),
-              args: z.array(
-                z.object({
-                  type: z.string().min(1),
-                  value: z.union([
-                    z.string(),
-                    z.number(),
-                    z.boolean(),
-                    z.null(),
-                    z.array(z.any()),
-                    z.record(z.any()),
-                  ]),
-                }),
-              ),
-            }),
-          )
-          .min(1),
-      }),
-    )
-    .min(1),
-});
+import { FixturesSpecSchema, formatZodError } from "./config";
 
 export interface IdentifiedInvocation extends InvocationSpec {
   case_id: string;
@@ -83,7 +48,15 @@ export function parseFixtures(
   raw: string,
   fixturePath: string,
 ): IdentifiedFixtures {
-  const fixtures = fixturesSchema.parse(JSON.parse(raw));
+  let fixtures: ReturnType<typeof FixturesSpecSchema.parse>;
+  try {
+    fixtures = FixturesSpecSchema.parse(JSON.parse(raw));
+  } catch (err) {
+    if (err instanceof ZodError) {
+      throw new Error(formatZodError(err, fixturePath));
+    }
+    throw err;
+  }
   const fixture_id =
     fixtures.id === undefined
       ? `path:${relativePath(fixturePath)}`
@@ -103,10 +76,13 @@ export function parseFixtures(
 
     const caseIds = new Set<string>();
     const invocations = contract.invocations.map((invocation) => {
-      const args = invocation.args.map((arg) => ({
-        type: arg.type.toLowerCase(),
-        value: canonical(arg.value),
-      }));
+      // A bound argument is identified by its declared reference, never by the
+      // runtime value it resolves to, so case identity survives redeployment.
+      const args = invocation.args.map((arg) =>
+        "binding" in arg
+          ? { type: arg.type.toLowerCase(), binding: canonical(arg.binding) }
+          : { type: arg.type.toLowerCase(), value: canonical(arg.value) },
+      );
       const case_id =
         invocation.id === undefined
           ? `args:${JSON.stringify(args)}`

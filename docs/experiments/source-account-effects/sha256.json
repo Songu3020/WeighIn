@@ -1,0 +1,12 @@
+{
+  "accounts.json": "38569c44f8aa396371225a165576340e94455b95fa953d1753a90ae6cc76d54b",
+  "contract.wasm": "d9fa9bf6c3457ce028198871fabaf3dd71c267a06b53b89918d17f37477e8028",
+  "control.json": "baa1480b45defd966535641101b5b3b2571a08ebcec9c57dd4517bda0a61a76a",
+  "environment.json": "714397ae647a044eb76cf764a88ce2ebfabf1e5ba390185b168493554bfdb170",
+  "invalid.json": "9c0abbebac5dc69be0bba5b9d6f0f6dc9e020e93f99a6c7d96a11ca5b82c9086",
+  "native.json": "e0f6809efd7394762c684f370dbe543f2bb7976c75c56e9e6e231578ac9408da",
+  "report.json": "d573dfb80256c6cffb4c23161ffa3e7d70a9e33cc015c7d0dd1d32579e0eebdb",
+  "rpc.json": "93463c40f5ef669ab2cfe7f8c1d4a7708edaa798bfab142ffefa791d7ab9c3a3",
+  "summary.md": "6a6d688d0334cac7f94ebdcad62b8ad70c9a8a38215a04c2bb5e057f1b897815",
+  "verification.json": "2e6bf98977073fd669e3a8eada8f3f2c93eac23b934a77104ac358b0b6e3fe71"
+}

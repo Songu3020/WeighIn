@@ -38,6 +38,21 @@ npm audit
 runs Vitest tests under `test`. `npm run test:watch` starts Vitest watch mode.
 Use `npm run format` for intentional formatting changes.
 
+The Node test files run one at a time (`--test-concurrency=1`). Packing the
+consumer artifact runs the `prepack` lifecycle, which rebuilds `dist/` and
+`bundled/` in the checkout; running test files concurrently let one file read a
+bundle another file was still writing. Keep the suite serial so every test
+observes a complete build artifact.
+
+The JavaScript test suite also covers the dependency inventory and the packed
+consumer, so it needs the pinned Rust 1.95.0 toolchain and the locked native
+helper crates (`cargo +1.95.0 fetch --locked --manifest-path
+native/simulation/Cargo.toml`). CI provisions both before it runs the suite.
+`npm audit` is a blocking gate: a moderate, high or critical advisory fails the
+run. Clear an advisory with a deliberate dependency update and a regenerated
+`docs/dependency-inventory.json` (`npm run inventory:generate`); the gate
+itself never changes versions or suppresses advisories.
+
 The Action executes committed bundles directly. After runtime/dependency changes,
 commit both regenerated `bundled/index.js` and `bundled/comment-action.js` with the
 source/lockfile. CI independently regenerates them and rejects stale output.
@@ -77,8 +92,12 @@ and provenance mismatches must remain errors, not invented zero measurements.
 npm pack --dry-run --json
 ```
 
-The package includes JavaScript outputs, both Action bundles and native helper
-sources/lockfile. It does not include a precompiled helper. A dry run proves
+The package includes JavaScript outputs with TypeScript declarations, both
+Action bundles and native helper sources/lockfile. `package.json` `types` points
+to `dist/measurement.d.ts`. Mark test-only exports `/** @internal */`; the build's
+`stripInternal` omits them from declarations while keeping them in JavaScript.
+`tests/type-declarations.test.cjs` packs the tarball and compiles an external
+TypeScript consumer against it. It does not include a precompiled helper. A dry run proves
 inclusion, not installation or live behavior. Experimental archives are available
 in the Git repository. See [dependency review](docs/DEPENDENCY_SECURITY.md) before
 upgrading libraries; do not apply forced blanket upgrades.

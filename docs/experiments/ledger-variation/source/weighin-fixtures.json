@@ -1,0 +1,21 @@
+{
+  "id": "ledger-variation-suite",
+  "contracts": [
+    {
+      "id": "reference-contract",
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "invocations": [
+        {
+          "id": "world",
+          "function_name": "hello",
+          "args": [
+            {
+              "type": "Symbol",
+              "value": "world"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

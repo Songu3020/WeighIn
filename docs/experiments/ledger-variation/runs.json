@@ -1,0 +1,1572 @@
+[
+  {
+    "run": 1,
+    "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+    "reference_build": {
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "manifest_path": "contract/Cargo.toml",
+      "package": "contract_test",
+      "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+      "stellar_version": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)",
+      "rust_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "compiled_cache_initial_entries": 0,
+      "target_directory_existed_at_start": true,
+      "cargo_target_dir": "/tmp/weighin-ledger-variation/run-1/cold-cargo-target",
+      "build_duration_ms": 64210,
+      "compiled_cache_entries_after_build": [
+        "release",
+        "wasm32v1-none"
+      ]
+    },
+    "reference_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791435800,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 271418,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1124518,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 44,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 900,
+              "header_sha256": "02797020d5d39466940676774e7b9147e1652e00597e46a0d7dc4e705b42063c",
+              "snapshot_sha256": "0c9cd047ff75811c427c41b0b9acf1d6d6d77e5be8e341134ad0d842b22d987c",
+              "config_sha256": "418969f287f51a60016ba316743bdb608fcd9f975c93f6e9cb1b7c2025dcc5eb",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "5707827797a63d3066d9f3467beff667b831a8347381edc8eab4c4d5c262920a",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "audit_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791435800,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 271418,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1124518,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 44,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 900,
+              "header_sha256": "02797020d5d39466940676774e7b9147e1652e00597e46a0d7dc4e705b42063c",
+              "snapshot_sha256": "0c9cd047ff75811c427c41b0b9acf1d6d6d77e5be8e341134ad0d842b22d987c",
+              "config_sha256": "418969f287f51a60016ba316743bdb608fcd9f975c93f6e9cb1b7c2025dcc5eb",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "5707827797a63d3066d9f3467beff667b831a8347381edc8eab4c4d5c262920a",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": 2,
+    "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+    "reference_build": {
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "manifest_path": "contract/Cargo.toml",
+      "package": "contract_test",
+      "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+      "stellar_version": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)",
+      "rust_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "compiled_cache_initial_entries": 0,
+      "target_directory_existed_at_start": true,
+      "cargo_target_dir": "/tmp/weighin-ledger-variation/run-2/cold-cargo-target",
+      "build_duration_ms": 64320,
+      "compiled_cache_entries_after_build": [
+        "release",
+        "wasm32v1-none"
+      ]
+    },
+    "reference_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791435925,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 271418,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1124518,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 44,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 925,
+              "header_sha256": "9ed86153f8b51878fa514c985fd4b027296d89b830edf20051ccdf8a9b68bddb",
+              "snapshot_sha256": "71915c86d73414525e5257de5a0eefa7e96081abb8c4d53c9740ce82acb2cd4d",
+              "config_sha256": "368a6f99c8a34586db3ab78f32d9117a9c011350d4304547dcad9f72e6ce46d8",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "a3b0fdd81140d67be48d66026514ce52ffb0de7f073529d4985a70b627cb852e",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "audit_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791435925,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 271418,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1124518,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 44,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 925,
+              "header_sha256": "9ed86153f8b51878fa514c985fd4b027296d89b830edf20051ccdf8a9b68bddb",
+              "snapshot_sha256": "71915c86d73414525e5257de5a0eefa7e96081abb8c4d53c9740ce82acb2cd4d",
+              "config_sha256": "368a6f99c8a34586db3ab78f32d9117a9c011350d4304547dcad9f72e6ce46d8",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "a3b0fdd81140d67be48d66026514ce52ffb0de7f073529d4985a70b627cb852e",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": 3,
+    "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+    "reference_build": {
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "manifest_path": "contract/Cargo.toml",
+      "package": "contract_test",
+      "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+      "stellar_version": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)",
+      "rust_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "compiled_cache_initial_entries": 0,
+      "target_directory_existed_at_start": true,
+      "cargo_target_dir": "/tmp/weighin-ledger-variation/run-3/cold-cargo-target",
+      "build_duration_ms": 64430,
+      "compiled_cache_entries_after_build": [
+        "release",
+        "wasm32v1-none"
+      ]
+    },
+    "reference_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436050,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 315840,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1193640,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 56,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 950,
+              "header_sha256": "964342a9d85a7c97140fbdb57cb3f2b57baf9631209dddd544716df5d636d1d0",
+              "snapshot_sha256": "885397c0c7bd2820d30b0c8e2de946fbde96ed008ab1fb2814c4f59fa0e3205e",
+              "config_sha256": "f25ca8bd0fedd14d040a09568e8ae83eed8115c86e7524add4f211c171da6384",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "9e49d516a1bbb79854693d6ff7b47cb14ffbc74f612264fa6caa96d32329239e",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "audit_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436050,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 315840,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1193640,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 56,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 950,
+              "header_sha256": "964342a9d85a7c97140fbdb57cb3f2b57baf9631209dddd544716df5d636d1d0",
+              "snapshot_sha256": "885397c0c7bd2820d30b0c8e2de946fbde96ed008ab1fb2814c4f59fa0e3205e",
+              "config_sha256": "f25ca8bd0fedd14d040a09568e8ae83eed8115c86e7524add4f211c171da6384",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "9e49d516a1bbb79854693d6ff7b47cb14ffbc74f612264fa6caa96d32329239e",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": 4,
+    "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+    "reference_build": {
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "manifest_path": "contract/Cargo.toml",
+      "package": "contract_test",
+      "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+      "stellar_version": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)",
+      "rust_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "compiled_cache_initial_entries": 0,
+      "target_directory_existed_at_start": true,
+      "cargo_target_dir": "/tmp/weighin-ledger-variation/run-4/cold-cargo-target",
+      "build_duration_ms": 64540,
+      "compiled_cache_entries_after_build": [
+        "release",
+        "wasm32v1-none"
+      ]
+    },
+    "reference_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436175,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 320112,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1194408,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 68,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 975,
+              "header_sha256": "29cb0d7812a0ca45d66b8ad1635e11c6d7c7e0e3e80a4f49ba237de836e352f7",
+              "snapshot_sha256": "af9fe061b9cb0e9b6ebb9ef5fc8bbe085be3d80cf0bda8fb2238ba27b35a8c03",
+              "config_sha256": "63296da5a2227722716b14fd2fa202f2196bc1c8bd2fd0e4e72105668141e502",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "86fc780355fd5308a5dbf9ac60b1c99f95a74cbae2b7d40b8af5ed9e72748988",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "audit_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436175,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 320112,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1194408,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 68,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 975,
+              "header_sha256": "29cb0d7812a0ca45d66b8ad1635e11c6d7c7e0e3e80a4f49ba237de836e352f7",
+              "snapshot_sha256": "af9fe061b9cb0e9b6ebb9ef5fc8bbe085be3d80cf0bda8fb2238ba27b35a8c03",
+              "config_sha256": "63296da5a2227722716b14fd2fa202f2196bc1c8bd2fd0e4e72105668141e502",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "86fc780355fd5308a5dbf9ac60b1c99f95a74cbae2b7d40b8af5ed9e72748988",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "run": 5,
+    "source_snapshot_sha256": "b238e59e785d03a64f34e24e432dcd1d291d7e03261647aa8942bda39658fc99",
+    "reference_build": {
+      "wasm_path": "contract/target/wasm32v1-none/release/contract_test.wasm",
+      "manifest_path": "contract/Cargo.toml",
+      "package": "contract_test",
+      "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+      "stellar_version": "stellar 28.1.0 (c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd)",
+      "rust_version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "compiled_cache_initial_entries": 0,
+      "target_directory_existed_at_start": true,
+      "cargo_target_dir": "/tmp/weighin-ledger-variation/run-5/cold-cargo-target",
+      "build_duration_ms": 64650,
+      "compiled_cache_entries_after_build": [
+        "release",
+        "wasm32v1-none"
+      ]
+    },
+    "reference_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436300,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 324384,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1195176,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 80,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 1000,
+              "header_sha256": "32f8e3d90b3051991c838586d6fb0ca8d62e2892f2d5ed4e78820ac05e7b638d",
+              "snapshot_sha256": "13686acffa95483285d27b48a7030573628f186ea92ceea75ad92ac6aa78bbde",
+              "config_sha256": "1ad75eb2419dea0958f9f52e4ae92ee4a60d0bb0ca18bb9e77da3e8daf85691a",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "3e199600ab15b670f03d37adfabaa7f06ac526b09b1a3345e67d9df9f814e745",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "audit_measurements": [
+      {
+        "schema_version": 4,
+        "fixture_id": "id:ledger-variation-suite",
+        "logical_id": "id:reference-contract",
+        "contract_id": "CCCJJJDJ5HS676PYT6DCMY4RJVOAQMUOWBG5OQBVYTXNLWOFX4UF2ZKJ",
+        "git_commit": "61a899331f88a4f56b61056d1319c07ec82e608e",
+        "soroban_sdk_version": "28.0.0",
+        "timestamp": 1791436300,
+        "benchmarks": [
+          {
+            "function_name": "hello",
+            "case_id": "id:world",
+            "metrics": {
+              "cpu_instructions": {
+                "availability": "measured",
+                "consumed": 324384,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "memory_bytes": {
+                "availability": "measured",
+                "consumed": 1195176,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "ledger_read_entries": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 400,
+                "source": "SorobanResources.footprint.readOnly.length + readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "ledger_read_bytes": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 200000,
+                "source": "SorobanResources.diskReadBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "ledger_write_entries": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 200,
+                "source": "SorobanResources.footprint.readWrite.length",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "ledger_write_bytes": {
+                "availability": "measured",
+                "consumed": 96,
+                "limit": 132096,
+                "source": "SorobanResources.writeBytes (identity adjustment)",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "historical_data_read_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Protocol 28 exposes historical-data fees, not a historical read consumption resource"
+              },
+              "contract_data_hard_limit": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "No verified instance-only post-invocation size and corresponding limit mapping"
+              },
+              "tx_size_bytes": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Simulation estimates a maximum envelope; no signed benchmark transaction is submitted"
+              },
+              "events_count": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": null,
+                "source": "successful non-diagnostic ContractEvents.length",
+                "limit_reason": "Protocol 28 has no independent event-count cap"
+              },
+              "event_data_bytes": {
+                "availability": "measured",
+                "consumed": 80,
+                "limit": 16384,
+                "source": "sum(successful non-diagnostic ContractEvent XDR bytes) + return ScVal XDR bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              }
+            },
+            "wasm_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+            "provenance": {
+              "source": "soroban-simulation",
+              "source_version": "28.0.1",
+              "protocol": 28,
+              "helper_sha256": "87f52e776f2689bb00c0c163a7f402c984c322c4c644d5f511bd46f25817010a",
+              "network_id": "baefd734b8d3e48472cff83912375fedbc7573701912fe308af730180f97d74a",
+              "ledger": 1000,
+              "header_sha256": "32f8e3d90b3051991c838586d6fb0ca8d62e2892f2d5ed4e78820ac05e7b638d",
+              "snapshot_sha256": "13686acffa95483285d27b48a7030573628f186ea92ceea75ad92ac6aa78bbde",
+              "config_sha256": "1ad75eb2419dea0958f9f52e4ae92ee4a60d0bb0ca18bb9e77da3e8daf85691a",
+              "resource_limits_sha256": "bd6ad7c9ae2afffe53a3d12e11fd45f0d74cd49b40be76a1ed10ace6b0f215a9",
+              "compute_config_sha256": "5e0aaa432815c17b201e2eeb5591a85e2355d758dc9a3989e58d7319096cf6b5",
+              "input_sha256": "3e199600ab15b670f03d37adfabaa7f06ac526b09b1a3345e67d9df9f814e745",
+              "seed": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "auth_mode": "recording(true,true)",
+              "host_features": [
+                "recording_mode",
+                "testutils"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

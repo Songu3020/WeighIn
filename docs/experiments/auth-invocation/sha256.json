@@ -1,0 +1,7 @@
+{
+  "contract/Cargo.toml": "30fe865576f2225d46d8f8d49b7d6c3de57da21d3f75af3197f0aea98bd74619",
+  "contract/src/lib.rs": "b9ace463d4d32e166229360e1e8e549eb892a23326596c34dc4d2d18880ae9d0",
+  "rpc.json": "ec31f8eaa117fac0c793959327fb2fe3398bdfa2e33652b0ac80fe03565baa9d",
+  "native.json": "709595e0e52f77a39f91fabfee8671290ed33fabb72b44d487bb3e832cee987a",
+  "verification.json": "42c9154482fa43474bbbcf5813f8653627953135fe6109af845ac4269ec6bbe7"
+}

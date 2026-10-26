@@ -1,0 +1,15 @@
+{
+  "thresholds": {
+    "global": {
+      "fail_on_any_regression": true
+    },
+    "functions": {
+      "hello": {
+        "cpu_instructions": "strict_zero_tolerance",
+        "historical_data_read_bytes": "ignore",
+        "contract_data_hard_limit": "ignore",
+        "tx_size_bytes": "ignore"
+      }
+    }
+  }
+}

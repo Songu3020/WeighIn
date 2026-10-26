@@ -1,0 +1,51 @@
+{
+  "contract": "id:contract-auth",
+  "method": "simulateTransaction",
+  "latestLedger": 100,
+  "contract_id": "CAUTHKL44G5Y7U534K7AEYZ3A7P3O3QJ7D6C4QZ4LMBVVM2NZZ5ZAUTH",
+  "caller": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ",
+  "function_name": "auth_call",
+  "args": [
+    {
+      "type": "Address",
+      "value": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ"
+    }
+  ],
+  "auth_mode": "recording(true,true)",
+  "results": [
+    {
+      "auth": [
+        {
+          "root": {
+            "credentials": {
+              "address": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ",
+              "type": "source_account"
+            },
+            "function": {
+              "contract_invocation": {
+                "contract_id": "CAUTHKL44G5Y7U534K7AEYZ3A7P3O3QJ7D6C4QZ4LMBVVM2NZZ5ZAUTH",
+                "function_name": "auth_call",
+                "args": [
+                  "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ"
+                ]
+              }
+            },
+            "sub_invocations": []
+          }
+        }
+      ],
+      "xdr": "AAAAEgAAAAZhdXRoZWQA"
+    }
+  ],
+  "resources": {
+    "cpu_instructions": 284100,
+    "memory_bytes": 3120,
+    "disk_read_bytes": 2400,
+    "write_bytes": 0,
+    "read_only_keys_count": 2,
+    "read_write_keys_count": 0
+  },
+  "return_parity": true,
+  "retval_xdr": "AAAAEgAAAAZhdXRoZWQA",
+  "transaction_data_sha256": "4736f1c79e65bd29d38965823e2007823f6e1e8284534ef06ce45464d2629b9f"
+}

@@ -23,6 +23,30 @@ discovered-key expansion and native transaction-data/return/event parity remain.
 Persistent failures return an error, never a successful or zero-valued result.
 There are no new inputs, result fields, schema versions or threshold rules.
 
+The native helper uses a version-1 machine failure envelope on stdout for
+recoverable misses (`status: "uncaptured"`, with canonical LedgerKey XDR) and
+for fatal input, protocol, incomplete-state, and host failures. Human-readable
+diagnostics remain on stderr. The adapter rejects unknown envelopes, malformed
+or duplicate keys, and recovery that discovers no new key; the old stderr
+marker is retained only as a bounded compatibility path for executable
+overrides that predate the envelope.
+
+Before a present snapshot row is accepted, the adapter reconstructs the
+canonical identity from LedgerEntryData and compares it with the requested
+LedgerKey. Account, trustline, offer, data, claimable-balance, contract-data
+(including durability), contract-code, config-setting, and TTL identities are
+checked. A missing row remains a valid absence; a present row of the wrong
+type or identity fails closed before native measurement.
+
+An explicitly absent row (`xdr: null`) states that the key does not exist, so it
+carries only its `key`. The native helper rejects an absent row that also sets
+`extension_xdr`, `last_modified` or `live_until`, naming the contradictory
+fields, instead of silently discarding that metadata; `live_until: null` is
+treated as unset. This check runs before the archived-state check, so a stale
+`live_until` on an absent row is reported as a contradiction. The adapter
+already sends absent rows as `{ key, xdr: null }`, so valid absent-key
+discovery is unchanged.
+
 ## Evidence
 
 Ten controlled behavior tests use real saved RPC/native records, with deliberate

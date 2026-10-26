@@ -1,0 +1,37 @@
+{
+  "status": "VERIFIED",
+  "scenario": "auth_invocation",
+  "action_exit": 0,
+  "action_outcome": "success",
+  "result": "pass",
+  "contract_id": "contract-auth",
+  "source_files": {
+    "Cargo.toml": "30fe865576f2225d46d8f8d49b7d6c3de57da21d3f75af3197f0aea98bd74619",
+    "src/lib.rs": "b9ace463d4d32e166229360e1e8e549eb892a23326596c34dc4d2d18880ae9d0"
+  },
+  "wasm_sha256": "c1d37c1cb7498a2a7a37260bbb57a1878b16d4ffe016cd8ee8838343fbac0d16",
+  "protocol": 28,
+  "auth_mode": "recording(true,true)",
+  "supports_recording_auth_mode": true,
+  "supports_signed_production_authorization": false,
+  "network_support_broadened": false,
+  "fail_closed_on_invalid_auth": true,
+  "explicit_require_auth_call": true,
+  "caller": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ",
+  "function_name": "auth_call",
+  "rpc_native_parity": {
+    "cpu_instructions_consumed": 284100,
+    "memory_bytes_consumed": 3120,
+    "disk_read_bytes": 2400,
+    "write_bytes": 0,
+    "return_value_match": true,
+    "transaction_data_match": true,
+    "events_match": true
+  },
+  "invalid_auth_simulation": {
+    "missing_caller_status": "error",
+    "invalid_address_status": "error",
+    "zero_budget_fallback_substituted": false,
+    "error_type": "HostError"
+  }
+}

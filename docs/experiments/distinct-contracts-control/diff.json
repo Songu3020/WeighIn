@@ -1,0 +1,509 @@
+{
+  "contracts": [
+    {
+      "fixture_id": "id:distinct-contracts-suite",
+      "logical_id": "id:contract-alpha",
+      "contract_id": "CD2A22ZSCFXNQ3KDJAOISADM55GPV4NKQPMKCOWUVPVSDZ25DJ3G2DQN",
+      "base_contract_id": "CD2A22ZSCFXNQ3KDJAOISADM55GPV4NKQPMKCOWUVPVSDZ25DJ3G2DQN",
+      "head_contract_id": "CD2A22ZSCFXNQ3KDJAOISADM55GPV4NKQPMKCOWUVPVSDZ25DJ3G2DQN",
+      "base_commit": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+      "head_commit": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+      "functions": [
+        {
+          "function_name": "hello",
+          "case_id": "id:world",
+          "metrics": [
+            {
+              "key": "cpu_instructions",
+              "base": {
+                "availability": "measured",
+                "consumed": 266842,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 266842,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "memory_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 2048,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory_bytes",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 2048,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory_bytes",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_read_entries",
+              "base": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 40,
+                "source": "soroban-simulation.footprint.read_only.len + read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 2,
+                "limit": 40,
+                "source": "soroban-simulation.footprint.read_only.len + read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_read_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 512,
+                "limit": 200000,
+                "source": "soroban-simulation.resources.disk_read_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 512,
+                "limit": 200000,
+                "source": "soroban-simulation.resources.disk_read_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_write_entries",
+              "base": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 25,
+                "source": "soroban-simulation.footprint.read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 25,
+                "source": "soroban-simulation.footprint.read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_write_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "soroban-simulation.resources.write_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 132096,
+                "source": "soroban-simulation.resources.write_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "historical_data_read_bytes",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "contract_data_hard_limit",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "tx_size_bytes",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "events_count",
+              "base": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 100,
+                "source": "soroban-simulation.contract_events.len",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 0,
+                "limit": 100,
+                "source": "soroban-simulation.contract_events.len",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "event_data_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 32,
+                "limit": 16384,
+                "source": "soroban-simulation.event_and_return_bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 32,
+                "limit": 16384,
+                "source": "soroban-simulation.event_and_return_bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            }
+          ],
+          "hasRegression": false
+        }
+      ],
+      "newBenchmarks": [],
+      "removedBenchmarks": [],
+      "newFunctions": [],
+      "removedFunctions": [],
+      "hasRegression": false
+    },
+    {
+      "fixture_id": "id:distinct-contracts-suite",
+      "logical_id": "id:contract-beta",
+      "contract_id": "CBTG57UJJ5667XNJW7G2J3Z7S6Q4EZZJ5E763BOCB4J3V3W2PQJ7Z36B",
+      "base_contract_id": "CBTG57UJJ5667XNJW7G2J3Z7S6Q4EZZJ5E763BOCB4J3V3W2PQJ7Z36B",
+      "head_contract_id": "CBTG57UJJ5667XNJW7G2J3Z7S6Q4EZZJ5E763BOCB4J3V3W2PQJ7Z36B",
+      "base_commit": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+      "head_commit": "082f8918f41296eeaf4f47a5fa2f00bd430e7837",
+      "functions": [
+        {
+          "function_name": "hello",
+          "case_id": "id:world",
+          "metrics": [
+            {
+              "key": "cpu_instructions",
+              "base": {
+                "availability": "measured",
+                "consumed": 328450,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 328450,
+                "limit": 400000000,
+                "source": "soroban-simulation.simulated_instructions",
+                "limit_source": "ConfigSettingContractComputeV0.txMaxInstructions"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "memory_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 3072,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory_bytes",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 3072,
+                "limit": 41943040,
+                "source": "soroban-simulation.simulated_memory_bytes",
+                "limit_source": "ConfigSettingContractComputeV0.txMemoryLimit"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_read_entries",
+              "base": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 40,
+                "source": "soroban-simulation.footprint.read_only.len + read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 3,
+                "limit": 40,
+                "source": "soroban-simulation.footprint.read_only.len + read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostExtV0.txMaxFootprintEntries"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_read_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 640,
+                "limit": 200000,
+                "source": "soroban-simulation.resources.disk_read_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 640,
+                "limit": 200000,
+                "source": "soroban-simulation.resources.disk_read_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxDiskReadBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_write_entries",
+              "base": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 25,
+                "source": "soroban-simulation.footprint.read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 25,
+                "source": "soroban-simulation.footprint.read_write.len",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteLedgerEntries"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "ledger_write_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 88,
+                "limit": 132096,
+                "source": "soroban-simulation.resources.write_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 88,
+                "limit": 132096,
+                "source": "soroban-simulation.resources.write_bytes",
+                "limit_source": "ConfigSettingContractLedgerCostV0.txMaxWriteBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "historical_data_read_bytes",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "contract_data_hard_limit",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "tx_size_bytes",
+              "base": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "head": {
+                "availability": "unavailable",
+                "consumed": null,
+                "limit": null,
+                "reason": "Resource metric not available from Soroban simulation"
+              },
+              "availability": "unavailable",
+              "delta": null,
+              "pct": null,
+              "regression": false,
+              "reason": "Resource metric not available from Soroban simulation"
+            },
+            {
+              "key": "events_count",
+              "base": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 100,
+                "source": "soroban-simulation.contract_events.len",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 1,
+                "limit": 100,
+                "source": "soroban-simulation.contract_events.len",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            },
+            {
+              "key": "event_data_bytes",
+              "base": {
+                "availability": "measured",
+                "consumed": 64,
+                "limit": 16384,
+                "source": "soroban-simulation.event_and_return_bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "head": {
+                "availability": "measured",
+                "consumed": 64,
+                "limit": 16384,
+                "source": "soroban-simulation.event_and_return_bytes",
+                "limit_source": "ConfigSettingContractEventsV0.txMaxContractEventsSizeBytes"
+              },
+              "availability": "comparable",
+              "delta": 0,
+              "pct": 0,
+              "regression": false
+            }
+          ],
+          "hasRegression": false
+        }
+      ],
+      "newBenchmarks": [],
+      "removedBenchmarks": [],
+      "newFunctions": [],
+      "removedFunctions": [],
+      "hasRegression": false
+    }
+  ],
+  "hasRegression": false,
+  "newContracts": [],
+  "removedContracts": []
+}

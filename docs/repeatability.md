@@ -37,7 +37,8 @@ Snapshots spanned ledgers 833–1101. Every case had five distinct snapshot and
 full-configuration hashes, while compute-calibration and resource-limit hashes
 remained constant. Therefore advancing ledger/config metadata did not introduce
 measured resource noise in these fixtures. This does not prove arbitrary state
-changes are harmless.
+or ledger/time changes are harmless; see the [controlled ledger-dependent variation proof](ledger-variation.md)
+for an unchanged-WASM contract whose resources vary with ledger sequence/time.
 
 An earlier real RPC failure remains an operational limitation, detailed below.
 The successful five-sample series establishes repeatable measurements conditional

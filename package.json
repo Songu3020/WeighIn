@@ -3,19 +3,24 @@
   "version": "1.0.0",
   "description": "Resource-Cost Benchmarking & CI Regression Toolkit for Soroban",
   "main": "dist/measurement.js",
+  "types": "dist/measurement.d.ts",
   "bin": {
     "weighin": "dist/cli.js"
   },
   "scripts": {
-    "prepack": "npm run build && npm run bundle",
+    "prepack": "npm run build && npm run bundle && node dist/dependency-inventory.js --quiet",
     "build": "tsc",
-    "bundle": "tsc --noEmit && esbuild src/action.ts --bundle --platform=node --target=node20 --outfile=bundled/index.js --format=cjs && esbuild src/comment-action.ts --bundle --platform=node --target=node20 --outfile=bundled/comment-action.js --format=cjs",
-    "test": "npm run build && node --test tests/*.test.cjs && npm run test:vitest",
+    "bundle": "tsc --noEmit && esbuild src/action.ts --bundle --platform=node --target=node20 --outfile=bundled/index.js --format=cjs && esbuild src/comment-action.ts --bundle --platform=node --target=node20 --outfile=bundled/comment-action.js --format=cjs && node scripts/package-provenance.cjs",
+    "provenance": "node scripts/package-provenance.cjs --verify",
+    "inventory:generate": "npm run build && node dist/dependency-inventory.js",
+    "inventory:check": "npm run build && node dist/dependency-inventory.js --check",
+    "test": "npm run build && node --test --test-concurrency=1 tests/*.test.cjs && npm run test:vitest",
     "test:vitest": "vitest run test/*.test.ts",
     "test:watch": "vitest test/*.test.ts",
     "test:native": "npm run build && npm run build:helper && node --test tests/native/*.test.cjs",
     "build:helper": "cargo +1.95.0 build --release --locked --manifest-path native/simulation/Cargo.toml --target-dir native/simulation/target --target x86_64-unknown-linux-gnu",
     "typecheck": "tsc --noEmit",
+    "docs:check": "node scripts/check-markdown-links.cjs",
     "lint": "prettier --check src test",
     "format": "prettier --write src test"
   },
@@ -24,8 +29,8 @@
     "@actions/exec": "1.1.1",
     "@actions/github": "9.1.1",
     "@stellar/stellar-sdk": "16.0.1",
-    "toml": "4.2.0",
-    "zod": "3.25.76"
+    "toml": "5.0.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "20.19.43",
@@ -33,7 +38,7 @@
     "prettier": "^3.9.6",
     "typescript": "5.9.3",
     "vite": "7.3.7",
-    "vitest": "4.1.11",
+    "vitest": "4.1.12",
     "yaml": "2.9.1"
   },
   "files": [
@@ -51,7 +56,10 @@
     "docs/fixture-migration.md",
     "docs/network-readiness.md",
     "docs/flagship-ci.md",
-    "docs/*.md"
+    "docs/*.md",
+    "docs/dependency-inventory.json",
+    "docs/schemas/*.json",
+    "provenance-manifest.json"
   ],
   "overrides": {
     "@stellar/stellar-sdk": {

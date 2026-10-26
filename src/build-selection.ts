@@ -2,6 +2,23 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { buildContracts } from "./build";
 
+/**
+ * Parse an optional boolean Action input.
+ * When omitted or empty, returns defaultValue (defaults to false).
+ * Validates boolean spelling according to the pinned Actions toolkit YAML 1.2 Core Schema
+ * (true | True | TRUE | false | False | FALSE), rejecting invalid non-boolean strings.
+ */
+export function parseOptionalBooleanInput(
+  name: string,
+  defaultValue = false,
+): boolean {
+  const raw = core.getInput(name);
+  if (!raw) {
+    return defaultValue;
+  }
+  return core.getBooleanInput(name);
+}
+
 /** Select the default modern builder or an explicit custom/prebuilt mode. */
 export async function buildForRevision(
   fixturesPath: string,
@@ -28,5 +45,5 @@ export async function buildForRevision(
     }
     return;
   }
-  await buildContracts(fixturesPath, rustToolchain);
+  await buildContracts(fixturesPath, worktreeRoot, rustToolchain);
 }
