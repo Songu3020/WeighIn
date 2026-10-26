@@ -107,11 +107,11 @@ var require_command = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.issueCommand = issueCommand;
     exports2.issue = issue2;
-    var os3 = __importStar(require("os"));
+    var os4 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os3.EOL);
+      process.stdout.write(cmd.toString() + os4.EOL);
     }
     function issue2(name, message = "") {
       issueCommand(name, {}, message);
@@ -203,18 +203,18 @@ var require_file_command = __commonJS({
     exports2.issueFileCommand = issueFileCommand;
     exports2.prepareKeyValueMessage = prepareKeyValueMessage;
     var crypto6 = __importStar(require("crypto"));
-    var fs8 = __importStar(require("fs"));
-    var os3 = __importStar(require("os"));
+    var fs9 = __importStar(require("fs"));
+    var os4 = __importStar(require("os"));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
       const filePath = process.env[`GITHUB_${command}`];
       if (!filePath) {
         throw new Error(`Unable to find environment variable for file command ${command}`);
       }
-      if (!fs8.existsSync(filePath)) {
+      if (!fs9.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs8.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
+      fs9.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os4.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -227,7 +227,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os3.EOL}${convertedValue}${os3.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os4.EOL}${convertedValue}${os4.EOL}${delimiter}`;
     }
   }
 });
@@ -1352,14 +1352,14 @@ var require_util = __commonJS({
         }
         const port = url2.port != null ? url2.port : url2.protocol === "https:" ? 443 : 80;
         let origin = url2.origin != null ? url2.origin : `${url2.protocol || ""}//${url2.hostname || ""}:${port}`;
-        let path9 = url2.path != null ? url2.path : `${url2.pathname || ""}${url2.search || ""}`;
+        let path10 = url2.path != null ? url2.path : `${url2.pathname || ""}${url2.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path9 && path9[0] !== "/") {
-          path9 = `/${path9}`;
+        if (path10 && path10[0] !== "/") {
+          path10 = `/${path10}`;
         }
-        return new URL(`${origin}${path9}`);
+        return new URL(`${origin}${path10}`);
       }
       if (!isHttpOrHttpsPrefixed(url2.origin || url2.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -1810,39 +1810,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path9, origin }
+          request: { method, path: path10, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path9);
+        debuglog("sending request to %s %s/%s", method, origin, path10);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path9, origin },
+          request: { method, path: path10, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path9,
+          path10,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path9, origin }
+          request: { method, path: path10, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path9);
+        debuglog("trailers received from %s %s/%s", method, origin, path10);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path9, origin },
+          request: { method, path: path10, origin },
           error: error63
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path9,
+          path10,
           error63.message
         );
       });
@@ -1891,9 +1891,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path9, origin }
+            request: { method, path: path10, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path9);
+          debuglog("sending request to %s %s/%s", method, origin, path10);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -1956,7 +1956,7 @@ var require_request = __commonJS({
     var kHandler = Symbol("handler");
     var Request2 = class {
       constructor(origin, {
-        path: path9,
+        path: path10,
         method,
         body,
         headers,
@@ -1971,11 +1971,11 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler2) {
-        if (typeof path9 !== "string") {
+        if (typeof path10 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path9[0] !== "/" && !(path9.startsWith("http://") || path9.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path10[0] !== "/" && !(path10.startsWith("http://") || path10.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path9)) {
+        } else if (invalidPathRegex.test(path10)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -2041,7 +2041,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL2(path9, query) : path9;
+        this.path = query ? buildURL2(path10, query) : path10;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -6734,7 +6734,7 @@ var require_client_h1 = __commonJS({
       return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
     }
     function writeH1(client, request3) {
-      const { method, path: path9, host, upgrade, blocking, reset } = request3;
+      const { method, path: path10, host, upgrade, blocking, reset } = request3;
       let { body, headers, contentLength } = request3;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method === "PROPFIND" || method === "PROPPATCH";
       if (util.isFormDataLike(body)) {
@@ -6815,7 +6815,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path9} HTTP/1.1\r
+      let header = `${method} ${path10} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -7344,7 +7344,7 @@ var require_client_h2 = __commonJS({
     }
     function writeH2(client, request3) {
       const session = client[kHTTP2Session];
-      const { method, path: path9, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
+      const { method, path: path10, host, upgrade, expectContinue, signal, headers: reqHeaders } = request3;
       let { body } = request3;
       if (upgrade) {
         util.errorRequest(client, request3, new Error("Upgrade not supported for H2"));
@@ -7441,7 +7441,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path9;
+      headers[HTTP2_HEADER_PATH] = path10;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -7794,9 +7794,9 @@ var require_redirect_handler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path9 = search ? `${pathname}${search}` : pathname;
+        const path10 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path9;
+        this.opts.path = path10;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -9035,10 +9035,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path9 = "/",
+          path: path10 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path9;
+        opts.path = origin + path10;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -11010,20 +11010,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path9) {
-      if (typeof path9 !== "string") {
-        return path9;
+    function safeUrl(path10) {
+      if (typeof path10 !== "string") {
+        return path10;
       }
-      const pathSegments = path9.split("?");
+      const pathSegments = path10.split("?");
       if (pathSegments.length !== 2) {
-        return path9;
+        return path10;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path9, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path9);
+    function matchKey(mockDispatch2, { path: path10, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path10);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -11045,7 +11045,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL2(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path9 }) => matchValue(safeUrl(path9), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path10 }) => matchValue(safeUrl(path10), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -11083,9 +11083,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path9, method, body, headers, query } = opts;
+      const { path: path10, method, body, headers, query } = opts;
       return {
-        path: path9,
+        path: path10,
         method,
         body,
         headers,
@@ -11548,10 +11548,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path9, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path10, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path9,
+            Path: path10,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -16430,9 +16430,9 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path9) {
-      for (let i = 0; i < path9.length; ++i) {
-        const code = path9.charCodeAt(i);
+    function validateCookiePath(path10) {
+      for (let i = 0; i < path10.length; ++i) {
+        const code = path10.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -19352,11 +19352,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path9 = opts.path;
+          let path10 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path9 = `/${path9}`;
+            path10 = `/${path10}`;
           }
-          url2 = new URL(util.parseOrigin(url2).origin + path9);
+          url2 = new URL(util.parseOrigin(url2).origin + path10);
         } else {
           if (!opts) {
             opts = typeof url2 === "object" ? url2 : {};
@@ -20659,7 +20659,7 @@ var require_path_utils = __commonJS({
     exports2.toPosixPath = toPosixPath;
     exports2.toWin32Path = toWin32Path;
     exports2.toPlatformPath = toPlatformPath;
-    var path9 = __importStar(require("path"));
+    var path10 = __importStar(require("path"));
     function toPosixPath(pth) {
       return pth.replace(/[\\]/g, "/");
     }
@@ -20667,7 +20667,7 @@ var require_path_utils = __commonJS({
       return pth.replace(/[/]/g, "\\");
     }
     function toPlatformPath(pth) {
-      return pth.replace(/[/\\]/g, path9.sep);
+      return pth.replace(/[/\\]/g, path10.sep);
     }
   }
 });
@@ -20729,12 +20729,12 @@ var require_io_util = __commonJS({
     var _a4;
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getCmdPath = exports2.tryGetExecutablePath = exports2.isRooted = exports2.isDirectory = exports2.exists = exports2.READONLY = exports2.UV_FS_O_EXLOCK = exports2.IS_WINDOWS = exports2.unlink = exports2.symlink = exports2.stat = exports2.rmdir = exports2.rm = exports2.rename = exports2.readlink = exports2.readdir = exports2.open = exports2.mkdir = exports2.lstat = exports2.copyFile = exports2.chmod = void 0;
-    var fs8 = __importStar(require("fs"));
-    var path9 = __importStar(require("path"));
-    _a4 = fs8.promises, exports2.chmod = _a4.chmod, exports2.copyFile = _a4.copyFile, exports2.lstat = _a4.lstat, exports2.mkdir = _a4.mkdir, exports2.open = _a4.open, exports2.readdir = _a4.readdir, exports2.readlink = _a4.readlink, exports2.rename = _a4.rename, exports2.rm = _a4.rm, exports2.rmdir = _a4.rmdir, exports2.stat = _a4.stat, exports2.symlink = _a4.symlink, exports2.unlink = _a4.unlink;
+    var fs9 = __importStar(require("fs"));
+    var path10 = __importStar(require("path"));
+    _a4 = fs9.promises, exports2.chmod = _a4.chmod, exports2.copyFile = _a4.copyFile, exports2.lstat = _a4.lstat, exports2.mkdir = _a4.mkdir, exports2.open = _a4.open, exports2.readdir = _a4.readdir, exports2.readlink = _a4.readlink, exports2.rename = _a4.rename, exports2.rm = _a4.rm, exports2.rmdir = _a4.rmdir, exports2.stat = _a4.stat, exports2.symlink = _a4.symlink, exports2.unlink = _a4.unlink;
     exports2.IS_WINDOWS = process.platform === "win32";
     exports2.UV_FS_O_EXLOCK = 268435456;
-    exports2.READONLY = fs8.constants.O_RDONLY;
+    exports2.READONLY = fs9.constants.O_RDONLY;
     function exists(fsPath) {
       return __awaiter2(this, void 0, void 0, function* () {
         try {
@@ -20779,7 +20779,7 @@ var require_io_util = __commonJS({
         }
         if (stats && stats.isFile()) {
           if (exports2.IS_WINDOWS) {
-            const upperExt = path9.extname(filePath).toUpperCase();
+            const upperExt = path10.extname(filePath).toUpperCase();
             if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) {
               return filePath;
             }
@@ -20803,11 +20803,11 @@ var require_io_util = __commonJS({
           if (stats && stats.isFile()) {
             if (exports2.IS_WINDOWS) {
               try {
-                const directory = path9.dirname(filePath);
-                const upperName = path9.basename(filePath).toUpperCase();
+                const directory = path10.dirname(filePath);
+                const upperName = path10.basename(filePath).toUpperCase();
                 for (const actualName of yield exports2.readdir(directory)) {
                   if (upperName === actualName.toUpperCase()) {
-                    filePath = path9.join(directory, actualName);
+                    filePath = path10.join(directory, actualName);
                     break;
                   }
                 }
@@ -20902,7 +20902,7 @@ var require_io = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.findInPath = exports2.which = exports2.mkdirP = exports2.rmRF = exports2.mv = exports2.cp = void 0;
     var assert_1 = require("assert");
-    var path9 = __importStar(require("path"));
+    var path10 = __importStar(require("path"));
     var ioUtil = __importStar(require_io_util());
     function cp(source, dest, options = {}) {
       return __awaiter2(this, void 0, void 0, function* () {
@@ -20911,7 +20911,7 @@ var require_io = __commonJS({
         if (destStat && destStat.isFile() && !force) {
           return;
         }
-        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path9.join(dest, path9.basename(source)) : dest;
+        const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path10.join(dest, path10.basename(source)) : dest;
         if (!(yield ioUtil.exists(source))) {
           throw new Error(`no such file or directory: ${source}`);
         }
@@ -20923,7 +20923,7 @@ var require_io = __commonJS({
             yield cpDirRecursive(source, newDest, 0, force);
           }
         } else {
-          if (path9.relative(source, newDest) === "") {
+          if (path10.relative(source, newDest) === "") {
             throw new Error(`'${newDest}' and '${source}' are the same file`);
           }
           yield copyFile(source, newDest, force);
@@ -20936,7 +20936,7 @@ var require_io = __commonJS({
         if (yield ioUtil.exists(dest)) {
           let destExists = true;
           if (yield ioUtil.isDirectory(dest)) {
-            dest = path9.join(dest, path9.basename(source));
+            dest = path10.join(dest, path10.basename(source));
             destExists = yield ioUtil.exists(dest);
           }
           if (destExists) {
@@ -20947,7 +20947,7 @@ var require_io = __commonJS({
             }
           }
         }
-        yield mkdirP(path9.dirname(dest));
+        yield mkdirP(path10.dirname(dest));
         yield ioUtil.rename(source, dest);
       });
     }
@@ -21010,7 +21010,7 @@ var require_io = __commonJS({
         }
         const extensions = [];
         if (ioUtil.IS_WINDOWS && process.env["PATHEXT"]) {
-          for (const extension of process.env["PATHEXT"].split(path9.delimiter)) {
+          for (const extension of process.env["PATHEXT"].split(path10.delimiter)) {
             if (extension) {
               extensions.push(extension);
             }
@@ -21023,12 +21023,12 @@ var require_io = __commonJS({
           }
           return [];
         }
-        if (tool.includes(path9.sep)) {
+        if (tool.includes(path10.sep)) {
           return [];
         }
         const directories = [];
         if (process.env.PATH) {
-          for (const p of process.env.PATH.split(path9.delimiter)) {
+          for (const p of process.env.PATH.split(path10.delimiter)) {
             if (p) {
               directories.push(p);
             }
@@ -21036,7 +21036,7 @@ var require_io = __commonJS({
         }
         const matches = [];
         for (const directory of directories) {
-          const filePath = yield ioUtil.tryGetExecutablePath(path9.join(directory, tool), extensions);
+          const filePath = yield ioUtil.tryGetExecutablePath(path10.join(directory, tool), extensions);
           if (filePath) {
             matches.push(filePath);
           }
@@ -21149,10 +21149,10 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.argStringToArray = exports2.ToolRunner = void 0;
-    var os3 = __importStar(require("os"));
+    var os4 = __importStar(require("os"));
     var events = __importStar(require("events"));
     var child = __importStar(require("child_process"));
-    var path9 = __importStar(require("path"));
+    var path10 = __importStar(require("path"));
     var io = __importStar(require_io());
     var ioUtil = __importStar(require_io_util());
     var timers_1 = require("timers");
@@ -21204,12 +21204,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os3.EOL);
+          let n = s.indexOf(os4.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os3.EOL.length);
-            n = s.indexOf(os3.EOL);
+            s = s.substring(n + os4.EOL.length);
+            n = s.indexOf(os4.EOL);
           }
           return s;
         } catch (err) {
@@ -21367,7 +21367,7 @@ var require_toolrunner = __commonJS({
       exec() {
         return __awaiter2(this, void 0, void 0, function* () {
           if (!ioUtil.isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS && this.toolPath.includes("\\"))) {
-            this.toolPath = path9.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+            this.toolPath = path10.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
           return new Promise((resolve8, reject) => __awaiter2(this, void 0, void 0, function* () {
@@ -21378,7 +21378,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os4.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -21907,8 +21907,8 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os3 = __importStar(require("os"));
-    var path9 = __importStar(require("path"));
+    var os4 = __importStar(require("os"));
+    var path10 = __importStar(require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
     (function(ExitCode2) {
@@ -21934,7 +21934,7 @@ var require_core = __commonJS({
       } else {
         (0, command_1.issueCommand)("add-path", {}, inputPath);
       }
-      process.env["PATH"] = `${inputPath}${path9.delimiter}${process.env["PATH"]}`;
+      process.env["PATH"] = `${inputPath}${path10.delimiter}${process.env["PATH"]}`;
     }
     function getInput3(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
@@ -21969,7 +21969,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name, value));
       }
-      process.stdout.write(os3.EOL);
+      process.stdout.write(os4.EOL);
       (0, command_1.issueCommand)("set-output", { name }, (0, utils_1.toCommandValue)(value));
     }
     function setCommandEcho(enabled) {
@@ -21995,7 +21995,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     function info4(message) {
-      process.stdout.write(message + os3.EOL);
+      process.stdout.write(message + os4.EOL);
     }
     function startGroup2(name) {
       (0, command_1.issue)("group", name);
@@ -22069,8 +22069,8 @@ var init_context = __esm({
           if ((0, import_fs.existsSync)(process.env.GITHUB_EVENT_PATH)) {
             this.payload = JSON.parse((0, import_fs.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
           } else {
-            const path9 = process.env.GITHUB_EVENT_PATH;
-            process.stdout.write(`GITHUB_EVENT_PATH ${path9} does not exist${import_os.EOL}`);
+            const path10 = process.env.GITHUB_EVENT_PATH;
+            process.stdout.write(`GITHUB_EVENT_PATH ${path10} does not exist${import_os.EOL}`);
           }
         }
         this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -31147,14 +31147,14 @@ var require_compiler = __commonJS({
           } else {
             var kind = containerKinds.get(next);
             if (kind !== DOTTED_TABLE && kind !== IMPLICIT_TABLE) {
-              var path9 = pathKey(prefix.concat(keys.slice(0, i + 1)));
+              var path10 = pathKey(prefix.concat(keys.slice(0, i + 1)));
               if (kind === HEADER_TABLE) {
-                genError("Cannot use dotted keys to extend table '" + path9 + "' defined elsewhere.", off);
+                genError("Cannot use dotted keys to extend table '" + path10 + "' defined elsewhere.", off);
               }
               if (kind === INLINE_TABLE) {
-                genError("Cannot extend inline table '" + path9 + "'.", off);
+                genError("Cannot extend inline table '" + path10 + "'.", off);
               }
-              genError("Cannot redefine existing key '" + path9 + "'.", off);
+              genError("Cannot redefine existing key '" + path10 + "'.", off);
             }
           }
           table = next;
@@ -31221,10 +31221,10 @@ var require_compiler = __commonJS({
         return table;
       }
       function setPath(node2) {
-        var path9 = node2.value;
+        var path10 = node2.value;
         var off = node2.offset;
-        var parent = resolveParentTable(path9, off);
-        var name = path9[path9.length - 1];
+        var parent = resolveParentTable(path10, off);
+        var name = path10[path10.length - 1];
         var table = parent[name];
         if (table === void 0) {
           table = createTable(HEADER_TABLE);
@@ -31232,35 +31232,35 @@ var require_compiler = __commonJS({
         } else if (containerKinds.get(table) === IMPLICIT_TABLE) {
           containerKinds.set(table, HEADER_TABLE);
         } else {
-          genError("Cannot redefine existing key '" + pathKey(path9) + "'.", off);
+          genError("Cannot redefine existing key '" + pathKey(path10) + "'.", off);
         }
         context3 = table;
-        currentPath = path9;
+        currentPath = path10;
       }
       function addTableArray(node2) {
-        var path9 = node2.value;
+        var path10 = node2.value;
         var off = node2.offset;
-        var parent = resolveParentTable(path9, off);
-        var name = path9[path9.length - 1];
+        var parent = resolveParentTable(path10, off);
+        var name = path10[path10.length - 1];
         var tableArray = parent[name];
         if (tableArray === void 0) {
           tableArray = createTableArray();
           parent[name] = tableArray;
         } else if (containerKinds.get(tableArray) !== TABLE_ARRAY) {
           if (Array.isArray(tableArray)) {
-            genError("Cannot append to statically defined array '" + pathKey(path9) + "'.", off);
+            genError("Cannot append to statically defined array '" + pathKey(path10) + "'.", off);
           }
-          genError("Cannot redefine existing key '" + pathKey(path9) + "'.", off);
+          genError("Cannot redefine existing key '" + pathKey(path10) + "'.", off);
         }
         var table = createTable(HEADER_TABLE);
         tableArray.push(table);
         context3 = table;
-        currentPath = path9;
+        currentPath = path10;
       }
-      function resolveParentTable(path9, off) {
+      function resolveParentTable(path10, off) {
         var table = data;
-        for (var i = 0; i < path9.length - 1; i++) {
-          var key = path9[i];
+        for (var i = 0; i < path10.length - 1; i++) {
+          var key = path10[i];
           var next = table[key];
           if (next === void 0) {
             next = createTable(IMPLICIT_TABLE);
@@ -31270,7 +31270,7 @@ var require_compiler = __commonJS({
           if (kind === TABLE_ARRAY) {
             next = next[next.length - 1];
           } else if (kind === void 0 || kind === INLINE_TABLE) {
-            genError("Cannot redefine existing key '" + pathKey(path9.slice(0, i + 1)) + "'.", off);
+            genError("Cannot redefine existing key '" + pathKey(path10.slice(0, i + 1)) + "'.", off);
           }
           table = next;
         }
@@ -31325,13 +31325,13 @@ var require_toml = __commonJS({
 var core3 = __toESM(require_core());
 var exec7 = __toESM(require_exec());
 init_github();
-var fs7 = __toESM(require("fs"));
-var path8 = __toESM(require("path"));
-var os2 = __toESM(require("os"));
+var fs8 = __toESM(require("fs"));
+var path9 = __toESM(require("path"));
+var os3 = __toESM(require("os"));
 
 // src/measurement.ts
-var fs3 = __toESM(require("fs"));
-var path4 = __toESM(require("path"));
+var fs4 = __toESM(require("fs"));
+var path5 = __toESM(require("path"));
 var crypto3 = __toESM(require("crypto"));
 
 // src/identity.ts
@@ -32154,15 +32154,15 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path9) {
-  if (!path9)
+function getElementAtPath(obj, path10) {
+  if (!path10)
     return obj;
-  return path9.reduce((acc, key) => acc?.[key], obj);
+  return path10.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
-  const promises = keys.map((key) => promisesObj[key]);
-  return Promise.all(promises).then((results) => {
+  const promises2 = keys.map((key) => promisesObj[key]);
+  return Promise.all(promises2).then((results) => {
     const resolvedObj = {};
     for (let i = 0; i < keys.length; i++) {
       resolvedObj[keys[i]] = results[i];
@@ -32497,11 +32497,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path9, issues) {
+function prefixIssues(path10, issues) {
   return issues.map((iss) => {
     var _a4;
     (_a4 = iss).path ?? (_a4.path = []);
-    iss.path.unshift(path9);
+    iss.path.unshift(path10);
     return iss;
   });
 }
@@ -32963,16 +32963,16 @@ function flattenError(error63, mapper = (issue2) => issue2.message) {
 }
 function formatError(error63, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error64, path9 = []) => {
+  const processError = (error64, path10 = []) => {
     for (const issue2 of error64.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path9, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path9, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -33011,17 +33011,17 @@ function formatError(error63, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error63, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error64, path9 = []) => {
+  const processError = (error64, path10 = []) => {
     var _a4;
     for (const issue2 of error64.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path9, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path10, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path9, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path10, ...issue2.path]);
       } else {
-        const fullpath = [...path9, ...issue2.path];
+        const fullpath = [...path10, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -33060,8 +33060,8 @@ function treeifyError(error63, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path9 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path9) {
+  const path10 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path10) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -50199,13 +50199,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path9 = ref.slice(1).split("/").filter(Boolean);
-  if (path9.length === 0) {
+  const path10 = ref.slice(1).split("/").filter(Boolean);
+  if (path10.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path9[0] === defsKey) {
-    const key = path9[1] === void 0 ? void 0 : decodeJSONPointerSegment(path9[1]);
+  if (path10[0] === defsKey) {
+    const key = path10[1] === void 0 ? void 0 : decodeJSONPointerSegment(path10[1]);
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -51640,7 +51640,7 @@ function inspectMeasurementRecord(value, index) {
     diagnostics: []
   };
 }
-function validateApprovedMetricProvenance(key, metric, path9, version3, diagnostics) {
+function validateApprovedMetricProvenance(key, metric, path10, version3, diagnostics) {
   const approved = APPROVED_METRIC_PROVENANCE[key];
   const allowedFields = approved.availability === "unavailable" ? ["availability", "consumed", "limit", "reason"] : [
     "availability",
@@ -51664,7 +51664,7 @@ function validateApprovedMetricProvenance(key, metric, path9, version3, diagnost
     const expected = expectedValues[field];
     if (metric[field] !== expected && (expected !== void 0 || metric[field] !== void 0)) {
       diagnostics.push({
-        path: `${path9}.${field}`,
+        path: `${path10}.${field}`,
         version: version3,
         code: "UNAPPROVED_METRIC_PROVENANCE",
         message: `Schema 5 metric ${key} has unapproved ${field} provenance`
@@ -51673,7 +51673,7 @@ function validateApprovedMetricProvenance(key, metric, path9, version3, diagnost
   }
   if (approved.availability === "unavailable" && metric.limit !== null || approved.availability === "measured" && "limitReason" in approved && metric.limit !== null || approved.availability === "measured" && "limitSource" in approved && metric.limit === null) {
     diagnostics.push({
-      path: `${path9}.limit`,
+      path: `${path10}.limit`,
       version: version3,
       code: "UNAPPROVED_METRIC_PROVENANCE",
       message: `Schema 5 metric ${key} has an unapproved limit shape`
@@ -51682,7 +51682,7 @@ function validateApprovedMetricProvenance(key, metric, path9, version3, diagnost
   for (const field of Object.keys(metric)) {
     if (!allowedFields.includes(field)) {
       diagnostics.push({
-        path: `${path9}.${field}`,
+        path: `${path10}.${field}`,
         version: version3,
         code: "UNAPPROVED_METRIC_PROVENANCE",
         message: `Schema 5 metric ${key} contains unsupported provenance field ${field}`
@@ -52436,8 +52436,8 @@ var FixturesSpecSchema = external_exports.object({
 function formatZodError(error63, fileName) {
   const lines = [`Invalid WeighIn configuration in ${fileName}:`];
   for (const issue2 of error63.issues) {
-    const path9 = issue2.path.join(".");
-    lines.push(`- ${path9 || "root"}: ${issue2.message}`);
+    const path10 = issue2.path.join(".");
+    lines.push(`- ${path10 || "root"}: ${issue2.message}`);
   }
   return lines.join("\n");
 }
@@ -63766,14 +63766,14 @@ function pathPaymentStrictReceive(opts) {
   } catch {
     throw new Error("destination is invalid");
   }
-  const path9 = opts.path ? opts.path : [];
+  const path10 = opts.path ? opts.path : [];
   const paymentOp = new types.PathPaymentStrictReceiveOp({
     sendAsset: opts.sendAsset.toXDRObject(),
     sendMax: toXDRAmount(opts.sendMax),
     destination,
     destAsset: opts.destAsset.toXDRObject(),
     destAmount: toXDRAmount(opts.destAmount),
-    path: path9.map((x) => x.toXDRObject())
+    path: path10.map((x) => x.toXDRObject())
   });
   const opAttributes = {
     sourceAccount: null,
@@ -63807,14 +63807,14 @@ function pathPaymentStrictSend(opts) {
   }
   const destAsset = opts.destAsset.toXDRObject();
   const destMin = toXDRAmount(opts.destMin);
-  const path9 = (opts.path ?? []).map((x) => x.toXDRObject());
+  const path10 = (opts.path ?? []).map((x) => x.toXDRObject());
   const payment2 = new types.PathPaymentStrictSendOp({
     sendAsset,
     sendAmount,
     destination,
     destAsset,
     destMin,
-    path: path9
+    path: path10
   });
   const opAttributes = {
     sourceAccount: null,
@@ -64733,9 +64733,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destAmount = fromXDRAmount(attrs.destAmount());
         result.path = [];
-        const path9 = attrs.path();
-        Object.keys(path9).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path9[pathKey]));
+        const path10 = attrs.path();
+        Object.keys(path10).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path10[pathKey]));
         });
         break;
       }
@@ -64747,9 +64747,9 @@ var Operation = class {
         result.destAsset = Asset.fromOperation(attrs.destAsset());
         result.destMin = fromXDRAmount(attrs.destMin());
         result.path = [];
-        const path9 = attrs.path();
-        Object.keys(path9).forEach((pathKey) => {
-          result.path.push(Asset.fromOperation(path9[pathKey]));
+        const path10 = attrs.path();
+        Object.keys(path10).forEach((pathKey) => {
+          result.path.push(Asset.fromOperation(path10[pathKey]));
         });
         break;
       }
@@ -69569,13 +69569,39 @@ async function ensureAccountReady(rpcUrl, publicKey, signal) {
   );
 }
 
+// src/deployer-key.ts
+var fs2 = __toESM(require("fs"));
+var os = __toESM(require("os"));
+var path3 = __toESM(require("path"));
+var OWNED_DIR_PREFIX = "weighin-key-";
+var OWNED_KEY_FILE_NAME = "deployer-key";
+async function acquireDeployerKey(suppliedKeyFile) {
+  if (suppliedKeyFile) {
+    return {
+      keyFile: suppliedKeyFile,
+      owned: false,
+      release: async () => {
+      }
+    };
+  }
+  const dir = await fs2.promises.mkdtemp(
+    path3.join(os.tmpdir(), OWNED_DIR_PREFIX)
+  );
+  await fs2.promises.chmod(dir, 448);
+  return {
+    keyFile: path3.join(dir, OWNED_KEY_FILE_NAME),
+    owned: true,
+    release: () => fs2.promises.rm(dir, { recursive: true, force: true })
+  };
+}
+
 // src/network.ts
 var SUPPORTED_NETWORK_PASSPHRASE = "Standalone Network ; February 2017";
 var SUPPORTED_PROTOCOL_VERSION = 28;
 
 // src/simulation.ts
-var fs2 = __toESM(require("fs"));
-var path3 = __toESM(require("path"));
+var fs3 = __toESM(require("fs"));
+var path4 = __toESM(require("path"));
 var crypto2 = __toESM(require("crypto"));
 var import_child_process = require("child_process");
 var sha2562 = (value) => crypto2.createHash("sha256").update(value).digest("hex");
@@ -69779,9 +69805,9 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
   }
   const override = explicitPath ?? process.env.WEIGHIN_HELPER_PATH;
   if (override) {
-    const file2 = path3.resolve(override);
+    const file2 = path4.resolve(override);
     try {
-      fs2.accessSync(file2, fs2.constants.X_OK);
+      fs3.accessSync(file2, fs3.constants.X_OK);
     } catch {
       throw new Error(`Simulation helper missing or not executable: ${file2}`);
     }
@@ -69792,9 +69818,9 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
       if (customBuild) {
         return customBuild();
       }
-      const directory = path3.resolve(__dirname, "../native/simulation");
-      const manifest = path3.join(directory, "Cargo.toml");
-      if (!fs2.existsSync(manifest))
+      const directory = path4.resolve(__dirname, "../native/simulation");
+      const manifest = path4.join(directory, "Cargo.toml");
+      if (!fs3.existsSync(manifest))
         throw new Error(`Native simulation sources missing: ${manifest}`);
       console.log(
         "Building protocol-28 simulation helper (Rust 1.95.0, locked dependencies)..."
@@ -69811,12 +69837,12 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
           "--target",
           "x86_64-unknown-linux-gnu",
           "--target-dir",
-          path3.join(directory, "target")
+          path4.join(directory, "target")
         ],
         void 0,
         directory
       );
-      return path3.join(
+      return path4.join(
         directory,
         "target/x86_64-unknown-linux-gnu/release/weighin-simulation"
       );
@@ -69833,13 +69859,13 @@ async function resolveSimulationHelper(explicitPath, customBuild) {
 }
 function captureHelperIdentity(helperPath) {
   try {
-    const stats = fs2.statSync(helperPath);
+    const stats = fs3.statSync(helperPath);
     if (!stats.isFile()) {
       throw new Error(
         `Simulation helper at ${helperPath} is not a regular file`
       );
     }
-    const bytes = fs2.readFileSync(helperPath);
+    const bytes = fs3.readFileSync(helperPath);
     return sha2562(bytes);
   } catch (err) {
     if (err instanceof Error && err.message.startsWith("Simulation helper at")) {
@@ -70801,12 +70827,12 @@ function calculateContractId(deployerAddress, salt) {
 }
 async function getOrInitAccount(keyFile, rpcUrl, signal) {
   let keypair;
-  if (fs3.existsSync(keyFile)) {
-    const secret = fs3.readFileSync(keyFile, "utf8").trim();
+  if (fs4.existsSync(keyFile)) {
+    const secret = fs4.readFileSync(keyFile, "utf8").trim();
     keypair = Keypair.fromSecret(secret);
   } else {
     keypair = Keypair.random();
-    fs3.writeFileSync(keyFile, keypair.secret(), { mode: 384 });
+    fs4.writeFileSync(keyFile, keypair.secret(), { mode: 384 });
   }
   await ensureAccountReady(rpcUrl, keypair.publicKey(), signal);
   return keypair;
@@ -71096,8 +71122,8 @@ var WASM_MAGIC = Buffer.from([
   0
 ]);
 function resolveWasmPath(fixturesDir, declaredWasmPath, options) {
-  const wasmPath = path4.resolve(fixturesDir, declaredWasmPath);
-  if (fs3.existsSync(wasmPath)) {
+  const wasmPath = path5.resolve(fixturesDir, declaredWasmPath);
+  if (fs4.existsSync(wasmPath)) {
     return wasmPath;
   }
   const allowOptIn = options?.allowCrossTargetSubstitution ?? (process.env.WEIGHIN_ALLOW_CROSS_TARGET_SUBSTITUTION === "true" || process.env.WEIGHIN_ALLOW_CROSS_TARGET_SUBSTITUTION === "1");
@@ -71108,7 +71134,7 @@ function resolveWasmPath(fixturesDir, declaredWasmPath, options) {
     } else if (wasmPath.includes("wasm32v1-none")) {
       altPath = wasmPath.replace("wasm32v1-none", "wasm32-unknown-unknown");
     }
-    if (altPath && fs3.existsSync(altPath)) {
+    if (altPath && fs4.existsSync(altPath)) {
       console.warn(
         `Warning: declared WASM artifact not found at ${wasmPath}; substituting alternate target artifact at ${altPath}`
       );
@@ -71124,7 +71150,7 @@ function validateWasmArtifact(fixturesDir, declaredWasmPath, options) {
   const resolvedPath = resolveWasmPath(fixturesDir, declaredWasmPath, options);
   let stat;
   try {
-    stat = fs3.statSync(resolvedPath);
+    stat = fs4.statSync(resolvedPath);
   } catch (err) {
     throw new Error(
       `WASM artifact inaccessible at ${resolvedPath}: ${err.message}`
@@ -71133,17 +71159,17 @@ function validateWasmArtifact(fixturesDir, declaredWasmPath, options) {
   if (!stat.isFile()) {
     throw new Error(`WASM artifact at ${resolvedPath} is not a regular file`);
   }
-  const fd = fs3.openSync(resolvedPath, "r");
+  const fd = fs4.openSync(resolvedPath, "r");
   try {
     const buffer = Buffer.alloc(8);
-    const bytesRead = fs3.readSync(fd, buffer, 0, 8, 0);
+    const bytesRead = fs4.readSync(fd, buffer, 0, 8, 0);
     if (bytesRead < 8 || !buffer.equals(WASM_MAGIC)) {
       throw new Error(
         `Invalid WASM header at ${resolvedPath}: expected magic header \\0asm\\x01\\x00\\x00\\x00`
       );
     }
   } finally {
-    fs3.closeSync(fd);
+    fs4.closeSync(fd);
   }
   return { resolvedPath };
 }
@@ -71187,13 +71213,20 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
   if (opts.signal?.aborted) {
     throw opts.signal.reason || new Error("Measurement cancelled by caller");
   }
+  const lease = await acquireDeployerKey(opts.keyFile);
+  try {
+    return await measureWithKeyFile(opts, lease.keyFile);
+  } finally {
+    await lease.release();
+  }
+}
+async function measureWithKeyFile(opts, keyFile) {
   const effectiveRpcUrl = opts.rpcUrl ?? DEFAULT_RPC_URL;
-  const fixturesDir = path4.dirname(path4.resolve(opts.fixturesPath));
-  const keyFile = opts.keyFile ?? path4.join(fixturesDir, ".weighin-temp-key");
-  const rawFixtures = fs3.readFileSync(opts.fixturesPath, "utf8");
+  const fixturesDir = path5.dirname(path5.resolve(opts.fixturesPath));
+  const rawFixtures = fs4.readFileSync(opts.fixturesPath, "utf8");
   const fixturesSpec = parseFixtures(
     rawFixtures,
-    opts.fixtureId ?? path4.relative(process.cwd(), path4.resolve(opts.fixturesPath))
+    opts.fixtureId ?? path5.relative(process.cwd(), path5.resolve(opts.fixturesPath))
   );
   const setupOrder = planSetupOrder(
     fixturesSpec.fixture_id,
@@ -71225,7 +71258,7 @@ async function runMeasurement(fixturesPathOrOptions, gitCommit, sdkVersion, rpcU
   const deployments = /* @__PURE__ */ new Map();
   for (const contractSpec of setupOrder) {
     const wasmPath = resolvedWasmPaths.get(contractSpec.wasm_path);
-    const wasmBytes = fs3.readFileSync(wasmPath);
+    const wasmBytes = fs4.readFileSync(wasmPath);
     const wasmHash = crypto3.createHash("sha256").update(wasmBytes).digest();
     const wasmSha256 = wasmHash.toString("hex");
     console.log(`WASM: ${wasmPath}`);
@@ -72194,9 +72227,9 @@ var core = __toESM(require_core());
 var exec3 = __toESM(require_exec());
 
 // src/build.ts
-var fs4 = __toESM(require("fs"));
-var path5 = __toESM(require("path"));
-var os = __toESM(require("os"));
+var fs5 = __toESM(require("fs"));
+var path6 = __toESM(require("path"));
+var os2 = __toESM(require("os"));
 var import_crypto = require("crypto");
 var exec = __toESM(require_exec());
 var CargoTargetSchema = external_exports.object({
@@ -72222,7 +72255,7 @@ function validateCargoMetadata(raw, manifest) {
   const metadata = result.data;
   const packageMap = /* @__PURE__ */ new Map();
   for (const pkg of metadata.packages) {
-    if (!fs4.existsSync(pkg.manifest_path)) {
+    if (!fs5.existsSync(pkg.manifest_path)) {
       throw new Error(
         `Cargo package ${pkg.name} has unusable manifest_path ${pkg.manifest_path}: file does not exist`
       );
@@ -72239,18 +72272,18 @@ function validateCargoMetadata(raw, manifest) {
   return metadata;
 }
 function getCanonicalPath(filePath) {
-  const normalized = path5.normalize(filePath);
+  const normalized = path6.normalize(filePath);
   let current = normalized;
   const segments = [];
-  while (current && !fs4.existsSync(current)) {
-    const parent = path5.dirname(current);
+  while (current && !fs5.existsSync(current)) {
+    const parent = path6.dirname(current);
     if (parent === current) break;
-    segments.unshift(path5.basename(current));
+    segments.unshift(path6.basename(current));
     current = parent;
   }
   try {
-    const realCurrent = fs4.existsSync(current) ? fs4.realpathSync(current) : current;
-    return segments.length > 0 ? path5.join(realCurrent, ...segments) : realCurrent;
+    const realCurrent = fs5.existsSync(current) ? fs5.realpathSync(current) : current;
+    return segments.length > 0 ? path6.join(realCurrent, ...segments) : realCurrent;
   } catch {
     return normalized;
   }
@@ -72258,19 +72291,19 @@ function getCanonicalPath(filePath) {
 function snapshotContractInputs(packageDir) {
   const hashes2 = /* @__PURE__ */ new Map();
   function scanDir(dir) {
-    if (!fs4.existsSync(dir)) return;
-    const entries = fs4.readdirSync(dir, { withFileTypes: true });
+    if (!fs5.existsSync(dir)) return;
+    const entries = fs5.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.name === "target" || entry.name === "node_modules" || entry.name === ".git") {
         continue;
       }
-      const fullPath = path5.join(dir, entry.name);
+      const fullPath = path6.join(dir, entry.name);
       if (entry.isDirectory()) {
         scanDir(fullPath);
       } else if (entry.isFile()) {
         if (entry.name === "Cargo.toml" || entry.name === "Cargo.lock" || entry.name.endsWith(".rs")) {
           try {
-            const hash3 = (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(fullPath)).digest("hex");
+            const hash3 = (0, import_crypto.createHash)("sha256").update(fs5.readFileSync(fullPath)).digest("hex");
             hashes2.set(fullPath, hash3);
           } catch {
           }
@@ -72279,24 +72312,24 @@ function snapshotContractInputs(packageDir) {
     }
   }
   scanDir(packageDir);
-  let current = path5.dirname(packageDir);
+  let current = path6.dirname(packageDir);
   while (current && current !== packageDir) {
-    const parentToml = path5.join(current, "Cargo.toml");
-    const parentLock = path5.join(current, "Cargo.lock");
-    if (fs4.existsSync(parentToml)) {
+    const parentToml = path6.join(current, "Cargo.toml");
+    const parentLock = path6.join(current, "Cargo.lock");
+    if (fs5.existsSync(parentToml)) {
       hashes2.set(
         parentToml,
-        (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(parentToml)).digest("hex")
+        (0, import_crypto.createHash)("sha256").update(fs5.readFileSync(parentToml)).digest("hex")
       );
     }
-    if (fs4.existsSync(parentLock)) {
+    if (fs5.existsSync(parentLock)) {
       hashes2.set(
         parentLock,
-        (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(parentLock)).digest("hex")
+        (0, import_crypto.createHash)("sha256").update(fs5.readFileSync(parentLock)).digest("hex")
       );
     }
-    if (fs4.existsSync(path5.join(current, ".git"))) break;
-    const parent = path5.dirname(current);
+    if (fs5.existsSync(path6.join(current, ".git"))) break;
+    const parent = path6.dirname(current);
     if (parent === current) break;
     current = parent;
   }
@@ -72304,30 +72337,30 @@ function snapshotContractInputs(packageDir) {
 }
 function assertContractInputsNotMutated(snapshot) {
   for (const [filePath, expectedHash] of snapshot.hashes.entries()) {
-    if (!fs4.existsSync(filePath)) {
+    if (!fs5.existsSync(filePath)) {
       throw new Error(
         `Default contract build mutated tracked inputs: input file was deleted during build: ${filePath}`
       );
     }
-    const currentHash = (0, import_crypto.createHash)("sha256").update(fs4.readFileSync(filePath)).digest("hex");
+    const currentHash = (0, import_crypto.createHash)("sha256").update(fs5.readFileSync(filePath)).digest("hex");
     if (currentHash !== expectedHash) {
       throw new Error(
-        `Default contract build mutated tracked inputs: ${path5.basename(filePath)} was modified during build at ${filePath}`
+        `Default contract build mutated tracked inputs: ${path6.basename(filePath)} was modified during build at ${filePath}`
       );
     }
   }
 }
 function verifyBuildStorage(directory, bytes = 1024 * 1024) {
-  const probePath = path5.join(directory, ".weighin-storage-probe");
+  const probePath = path6.join(directory, ".weighin-storage-probe");
   const expected = Buffer.alloc(bytes, 165);
   let descriptor;
   try {
-    descriptor = fs4.openSync(probePath, "wx", 384);
-    fs4.writeFileSync(descriptor, expected);
-    fs4.fsyncSync(descriptor);
-    fs4.closeSync(descriptor);
+    descriptor = fs5.openSync(probePath, "wx", 384);
+    fs5.writeFileSync(descriptor, expected);
+    fs5.fsyncSync(descriptor);
+    fs5.closeSync(descriptor);
     descriptor = void 0;
-    if (!fs4.readFileSync(probePath).equals(expected))
+    if (!fs5.readFileSync(probePath).equals(expected))
       throw new Error(
         "temporary-file contents did not survive a write/read round trip"
       );
@@ -72336,8 +72369,8 @@ function verifyBuildStorage(directory, bytes = 1024 * 1024) {
       `Build temporary storage is unusable at ${directory}: ${error63.message}. Provide healthy temporary storage (TMPDIR on Unix); refusing to accept optimizer output.`
     );
   } finally {
-    if (descriptor !== void 0) fs4.closeSync(descriptor);
-    fs4.rmSync(probePath, { force: true });
+    if (descriptor !== void 0) fs5.closeSync(descriptor);
+    fs5.rmSync(probePath, { force: true });
   }
 }
 async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchain) {
@@ -72358,29 +72391,29 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
       "Workspace root is required to prevent build escapes; provide an explicit directory"
     );
   }
-  const resolvedRoot = path5.resolve(root);
-  if (!fs4.existsSync(resolvedRoot)) {
+  const resolvedRoot = path6.resolve(root);
+  if (!fs5.existsSync(resolvedRoot)) {
     throw new Error(`Workspace root does not exist: ${root}`);
   }
-  const rootStat = fs4.statSync(resolvedRoot);
+  const rootStat = fs5.statSync(resolvedRoot);
   if (!rootStat.isDirectory()) {
     throw new Error(`Workspace root is not a directory: ${root}`);
   }
-  const canonicalRoot = fs4.realpathSync(resolvedRoot);
-  const resolvedFixturesPath = path5.resolve(canonicalRoot, fixturesPath);
-  if (!fs4.existsSync(resolvedFixturesPath)) {
+  const canonicalRoot = fs5.realpathSync(resolvedRoot);
+  const resolvedFixturesPath = path6.resolve(canonicalRoot, fixturesPath);
+  if (!fs5.existsSync(resolvedFixturesPath)) {
     throw new Error(`Fixtures file not found: ${fixturesPath}`);
   }
-  const canonicalFixturesFile = fs4.realpathSync(resolvedFixturesPath);
-  const relFixtures = path5.relative(canonicalRoot, canonicalFixturesFile);
-  if (relFixtures.startsWith("..") || path5.isAbsolute(relFixtures)) {
+  const canonicalFixturesFile = fs5.realpathSync(resolvedFixturesPath);
+  const relFixtures = path6.relative(canonicalRoot, canonicalFixturesFile);
+  if (relFixtures.startsWith("..") || path6.isAbsolute(relFixtures)) {
     throw new Error(`Fixtures path escapes workspace root: ${fixturesPath}`);
   }
   const fixtures = parseFixtures(
-    fs4.readFileSync(canonicalFixturesFile, "utf8"),
-    path5.basename(canonicalFixturesFile)
+    fs5.readFileSync(canonicalFixturesFile, "utf8"),
+    path6.basename(canonicalFixturesFile)
   );
-  const fixturesDir = path5.dirname(canonicalFixturesFile);
+  const fixturesDir = path6.dirname(canonicalFixturesFile);
   const env = {
     ...process.env,
     ...toolchain ? { RUSTUP_TOOLCHAIN: toolchain } : {}
@@ -72437,20 +72470,20 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
     return version3;
   }
   function validateDestinationPath(destination, contractWasmPath) {
-    const relFromRoot = path5.relative(canonicalRoot, destination);
-    if (relFromRoot.startsWith("..") || path5.isAbsolute(relFromRoot)) {
+    const relFromRoot = path6.relative(canonicalRoot, destination);
+    if (relFromRoot.startsWith("..") || path6.isAbsolute(relFromRoot)) {
       throw new Error(
         `WASM destination escapes workspace root for wasm_path ${contractWasmPath}: ${destination}`
       );
     }
     let check2 = destination;
-    while (check2 !== canonicalRoot && path5.relative(canonicalRoot, check2) !== "") {
+    while (check2 !== canonicalRoot && path6.relative(canonicalRoot, check2) !== "") {
       try {
-        const lstat = fs4.lstatSync(check2);
+        const lstat = fs5.lstatSync(check2);
         if (lstat.isSymbolicLink()) {
-          const canonicalCheck = fs4.realpathSync(check2);
-          const relCheck = path5.relative(canonicalRoot, canonicalCheck);
-          if (relCheck.startsWith("..") || path5.isAbsolute(relCheck)) {
+          const canonicalCheck = fs5.realpathSync(check2);
+          const relCheck = path6.relative(canonicalRoot, canonicalCheck);
+          if (relCheck.startsWith("..") || path6.isAbsolute(relCheck)) {
             throw new Error(
               `WASM destination symlink escapes workspace root for wasm_path ${contractWasmPath}: ${check2} -> ${canonicalCheck}`
             );
@@ -72459,7 +72492,7 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
       } catch (err) {
         if (err.code !== "ENOENT") throw err;
       }
-      const parent = path5.dirname(check2);
+      const parent = path6.dirname(check2);
       if (parent === check2) break;
       check2 = parent;
     }
@@ -72468,34 +72501,34 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
   const metadataCache = /* @__PURE__ */ new Map();
   const destinationOwnership = /* @__PURE__ */ new Map();
   for (const contract of fixtures.contracts) {
-    const destination = path5.normalize(
-      path5.resolve(fixturesDir, contract.wasm_path)
+    const destination = path6.normalize(
+      path6.resolve(fixturesDir, contract.wasm_path)
     );
     const canonicalDestination = getCanonicalPath(destination);
     validateDestinationPath(destination, contract.wasm_path);
-    let dir = path5.dirname(destination);
+    let dir = path6.dirname(destination);
     let manifest = null;
     while (true) {
-      const relDir = path5.relative(canonicalRoot, dir);
-      if (relDir.startsWith("..") || path5.isAbsolute(relDir)) {
+      const relDir = path6.relative(canonicalRoot, dir);
+      if (relDir.startsWith("..") || path6.isAbsolute(relDir)) {
         throw new Error(
           `Manifest search escaped workspace root for wasm_path ${contract.wasm_path}`
         );
       }
-      if (fs4.existsSync(dir)) {
-        const canonicalDir = fs4.realpathSync(dir);
-        const relCanonical = path5.relative(canonicalRoot, canonicalDir);
-        if (relCanonical.startsWith("..") || path5.isAbsolute(relCanonical)) {
+      if (fs5.existsSync(dir)) {
+        const canonicalDir = fs5.realpathSync(dir);
+        const relCanonical = path6.relative(canonicalRoot, canonicalDir);
+        if (relCanonical.startsWith("..") || path6.isAbsolute(relCanonical)) {
           throw new Error(
             `Manifest search traversed symlink escaping workspace root for wasm_path ${contract.wasm_path}`
           );
         }
       }
-      const candidate = path5.join(dir, "Cargo.toml");
-      if (fs4.existsSync(candidate)) {
-        const canonicalManifest = fs4.realpathSync(candidate);
-        const relManifest = path5.relative(canonicalRoot, canonicalManifest);
-        if (relManifest.startsWith("..") || path5.isAbsolute(relManifest)) {
+      const candidate = path6.join(dir, "Cargo.toml");
+      if (fs5.existsSync(candidate)) {
+        const canonicalManifest = fs5.realpathSync(candidate);
+        const relManifest = path6.relative(canonicalRoot, canonicalManifest);
+        if (relManifest.startsWith("..") || path6.isAbsolute(relManifest)) {
           throw new Error(
             `Cargo.toml symlink escapes workspace root for wasm_path ${contract.wasm_path}`
           );
@@ -72503,11 +72536,11 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
         manifest = candidate;
         break;
       }
-      const currentCanonical = fs4.existsSync(dir) ? fs4.realpathSync(dir) : path5.resolve(dir);
-      if (currentCanonical === canonicalRoot || path5.relative(canonicalRoot, currentCanonical) === "") {
+      const currentCanonical = fs5.existsSync(dir) ? fs5.realpathSync(dir) : path6.resolve(dir);
+      if (currentCanonical === canonicalRoot || path6.relative(canonicalRoot, currentCanonical) === "") {
         break;
       }
-      const parent = path5.dirname(dir);
+      const parent = path6.dirname(dir);
       if (parent === dir) {
         break;
       }
@@ -72548,7 +72581,7 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
       );
       metadataCache.set(manifest, packages);
     }
-    const destinationName = path5.basename(destination);
+    const destinationName = path6.basename(destination);
     const matches = [];
     for (const pkg2 of packages) {
       const cdylibTargets = pkg2.targets.filter(
@@ -72574,9 +72607,9 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
         `wasm_path ${contract.wasm_path} must identify exactly one Cargo cdylib package; found ${matches.length}`
       );
     const { pkg, targetName } = matches[0];
-    const canonicalPkgManifest = fs4.realpathSync(pkg.manifest_path);
-    const relPkg = path5.relative(canonicalRoot, canonicalPkgManifest);
-    if (relPkg.startsWith("..") || path5.isAbsolute(relPkg)) {
+    const canonicalPkgManifest = fs5.realpathSync(pkg.manifest_path);
+    const relPkg = path6.relative(canonicalRoot, canonicalPkgManifest);
+    if (relPkg.startsWith("..") || path6.isAbsolute(relPkg)) {
       throw new Error(
         `Cargo package ${pkg.name} manifest escapes workspace root: ${pkg.manifest_path}`
       );
@@ -72594,7 +72627,7 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
         wasm_path: contract.wasm_path
       });
     }
-    const packageDir = path5.dirname(pkg.manifest_path);
+    const packageDir = path6.dirname(pkg.manifest_path);
     await probePackageCompiler(packageDir);
     plans.push({
       destination,
@@ -72614,13 +72647,13 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
     targetName,
     wasmPath
   } of plans) {
-    const packageDir = path5.dirname(pkg.manifest_path);
+    const packageDir = path6.dirname(pkg.manifest_path);
     const rustVersion = await probePackageCompiler(packageDir);
     let wasm = artifacts.get(pkg.manifest_path);
     if (!wasm) {
       let outputDir;
       try {
-        outputDir = fs4.mkdtempSync(path5.join(os.tmpdir(), "weighin-build-"));
+        outputDir = fs5.mkdtempSync(path6.join(os2.tmpdir(), "weighin-build-"));
       } catch (error63) {
         throw new Error(
           `Cannot create build temporary storage: ${error63.message}`
@@ -72629,7 +72662,7 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
       try {
         verifyBuildStorage(outputDir);
         const inputSnapshot = snapshotContractInputs(
-          path5.dirname(pkg.manifest_path)
+          path6.dirname(pkg.manifest_path)
         );
         await command(
           "stellar",
@@ -72645,19 +72678,19 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
             "--out-dir",
             outputDir
           ],
-          path5.dirname(pkg.manifest_path),
+          path6.dirname(pkg.manifest_path),
           { ...env, TMPDIR: outputDir, TMP: outputDir, TEMP: outputDir }
         );
         assertContractInputsNotMutated(inputSnapshot);
-        wasm = fs4.readFileSync(
-          path5.join(outputDir, `${targetName.replace(/-/g, "_")}.wasm`)
+        wasm = fs5.readFileSync(
+          path6.join(outputDir, `${targetName.replace(/-/g, "_")}.wasm`)
         );
         verifyBuildStorage(outputDir, Math.max(1024 * 1024, wasm.length));
         if (!wasm.subarray(0, 8).equals(Buffer.from([0, 97, 115, 109, 1, 0, 0, 0])))
           throw new Error("Stellar build did not produce a valid WASM module");
         artifacts.set(pkg.manifest_path, wasm);
       } finally {
-        fs4.rmSync(outputDir, { recursive: true, force: true });
+        fs5.rmSync(outputDir, { recursive: true, force: true });
       }
     }
     validateDestinationPath(destination, wasmPath);
@@ -72669,8 +72702,8 @@ async function buildContracts(fixturesPathOrOptions, workspaceRoot, rustToolchai
         );
       }
     } else {
-      fs4.mkdirSync(path5.dirname(destination), { recursive: true });
-      fs4.writeFileSync(destination, wasm);
+      fs5.mkdirSync(path6.dirname(destination), { recursive: true });
+      fs5.writeFileSync(destination, wasm);
       writtenDestinations.set(canonicalDestination, wasm);
     }
     const record2 = {
@@ -72719,15 +72752,15 @@ async function buildForRevision(fixturesPath, worktreeRoot, rustToolchain, build
 
 // src/report.ts
 var crypto5 = __toESM(require("crypto"));
-var fs5 = __toESM(require("fs"));
-var path6 = __toESM(require("path"));
+var fs6 = __toESM(require("fs"));
+var path7 = __toESM(require("path"));
 var core2 = __toESM(require_core());
 var TEMPORARY_FILE_ATTEMPTS = 5;
 function temporaryReportPath(targetPath) {
   const unique = `${process.pid.toString(36)}-${crypto5.randomBytes(8).toString("hex")}`;
-  return path6.join(
-    path6.dirname(targetPath),
-    `.${path6.basename(targetPath)}.${unique}.tmp`
+  return path7.join(
+    path7.dirname(targetPath),
+    `.${path7.basename(targetPath)}.${unique}.tmp`
   );
 }
 function createOwnedTemporaryFile(targetPath) {
@@ -72735,7 +72768,7 @@ function createOwnedTemporaryFile(targetPath) {
   for (let attempt = 0; attempt < TEMPORARY_FILE_ATTEMPTS; attempt++) {
     const candidate = temporaryReportPath(targetPath);
     try {
-      const fd = fs5.openSync(candidate, "wx", 438);
+      const fd = fs6.openSync(candidate, "wx", 438);
       return { path: candidate, fd };
     } catch (error63) {
       lastError = error63;
@@ -72746,7 +72779,7 @@ function createOwnedTemporaryFile(targetPath) {
 }
 function removeOwnedTemporaryFile(temporaryPath) {
   try {
-    fs5.unlinkSync(temporaryPath);
+    fs6.unlinkSync(temporaryPath);
   } catch (error63) {
     if (error63?.code === "ENOENT") return;
     core2.warning(
@@ -72758,14 +72791,14 @@ function writeFileAtomically(targetPath, body) {
   const temporary = createOwnedTemporaryFile(targetPath);
   let closed = false;
   try {
-    fs5.writeFileSync(temporary.fd, body, "utf8");
-    fs5.closeSync(temporary.fd);
+    fs6.writeFileSync(temporary.fd, body, "utf8");
+    fs6.closeSync(temporary.fd);
     closed = true;
-    fs5.renameSync(temporary.path, targetPath);
+    fs6.renameSync(temporary.path, targetPath);
   } catch (error63) {
     if (!closed) {
       try {
-        fs5.closeSync(temporary.fd);
+        fs6.closeSync(temporary.fd);
       } catch {
       }
     }
@@ -72775,11 +72808,11 @@ function writeFileAtomically(targetPath, body) {
 }
 function writeReportFile(reportPathInput, headWorkspace, body) {
   if (!reportPathInput) return;
-  const targetPath = path6.resolve(headWorkspace, reportPathInput);
+  const targetPath = path7.resolve(headWorkspace, reportPathInput);
   try {
-    const parentDir = path6.dirname(targetPath);
-    if (!fs5.existsSync(parentDir)) {
-      fs5.mkdirSync(parentDir, { recursive: true });
+    const parentDir = path7.dirname(targetPath);
+    if (!fs6.existsSync(parentDir)) {
+      fs6.mkdirSync(parentDir, { recursive: true });
     }
     writeFileAtomically(targetPath, body);
     core2.info(`Wrote Markdown report to ${targetPath}`);
@@ -72813,19 +72846,19 @@ function generateFailureReport(errorMessage) {
 }
 
 // src/output-paths.ts
-var fs6 = __toESM(require("fs"));
-var path7 = __toESM(require("path"));
+var fs7 = __toESM(require("fs"));
+var path8 = __toESM(require("path"));
 function realTarget(p) {
-  let head = path7.resolve(p);
+  let head = path8.resolve(p);
   const tail = [];
   for (; ; ) {
     try {
-      return path7.join(fs6.realpathSync.native(head), ...tail.reverse());
+      return path8.join(fs7.realpathSync.native(head), ...tail.reverse());
     } catch (e) {
       if (e.code !== "ENOENT" && e.code !== "ENOTDIR") throw e;
-      const parent = path7.dirname(head);
-      if (parent === head) return path7.resolve(p);
-      tail.push(path7.basename(head));
+      const parent = path8.dirname(head);
+      if (parent === head) return path8.resolve(p);
+      tail.push(path8.basename(head));
       head = parent;
     }
   }
@@ -72833,8 +72866,8 @@ function realTarget(p) {
 var fold = (p) => process.platform === "win32" || process.platform === "darwin" ? p.toLowerCase() : p;
 function sameInode(a, b) {
   try {
-    const sa = fs6.statSync(a);
-    const sb = fs6.statSync(b);
+    const sa = fs7.statSync(a);
+    const sb = fs7.statSync(b);
     return sa.ino !== 0 && sa.dev === sb.dev && sa.ino === sb.ino;
   } catch {
     return false;
@@ -72842,7 +72875,7 @@ function sameInode(a, b) {
 }
 function assertDistinctOutputPaths(check2) {
   const entry = (label, raw, output2) => {
-    const abs = path7.resolve(check2.workspace, raw);
+    const abs = path8.resolve(check2.workspace, raw);
     return { label, abs, output: output2, real: fold(realTarget(abs)) };
   };
   const all = [
@@ -72851,7 +72884,7 @@ function assertDistinctOutputPaths(check2) {
   ];
   for (const e of all.filter((x) => x.output)) {
     try {
-      if (fs6.lstatSync(e.abs).isSymbolicLink())
+      if (fs7.lstatSync(e.abs).isSymbolicLink())
         throw new Error(`${e.label} must not be a symbolic link`);
     } catch (err) {
       if (err.code !== "ENOENT" && err.code !== "ENOTDIR") throw err;
@@ -72862,7 +72895,7 @@ function assertDistinctOutputPaths(check2) {
       const a = all[i];
       const b = all[j];
       if (!a.output && !b.output) continue;
-      if (a.real === b.real || a.real.startsWith(b.real + path7.sep) || b.real.startsWith(a.real + path7.sep) || sameInode(a.abs, b.abs)) {
+      if (a.real === b.real || a.real.startsWith(b.real + path8.sep) || b.real.startsWith(a.real + path8.sep) || sameInode(a.abs, b.abs)) {
         throw new Error(
           `${a.label} and ${b.label} must not resolve to the same path`
         );
@@ -72912,9 +72945,9 @@ async function captureRaw(cmd, args, cwd) {
 }
 function parseTrackedChanges(status) {
   return status.split("\n").filter((line) => line.trim() && !line.startsWith("??")).map((line) => {
-    const path9 = line.slice(3).trim();
-    const rename = path9.indexOf(" -> ");
-    return rename === -1 ? path9 : path9.slice(rename + 4);
+    const path10 = line.slice(3).trim();
+    const rename = path10.indexOf(" -> ");
+    return rename === -1 ? path10 : path10.slice(rename + 4);
   });
 }
 async function isWorkspaceClean(dir) {
@@ -73035,31 +73068,31 @@ async function validateBaseRef(repoRoot, ref) {
   }
 }
 function isPathWithin(root, candidate) {
-  const relative4 = path8.relative(root, candidate);
-  return relative4 === "" || relative4 !== ".." && !relative4.startsWith(`..${path8.sep}`) && !path8.isAbsolute(relative4);
+  const relative4 = path9.relative(root, candidate);
+  return relative4 === "" || relative4 !== ".." && !relative4.startsWith(`..${path9.sep}`) && !path9.isAbsolute(relative4);
 }
 function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) {
   const invalidPathMessage = `fixtures-path for ${revision} must be a relative path inside the ${revision} worktree`;
-  if (!fixturesPathInput.trim() || path8.isAbsolute(fixturesPathInput) || path8.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
+  if (!fixturesPathInput.trim() || path9.isAbsolute(fixturesPathInput) || path9.win32.isAbsolute(fixturesPathInput) || /^[A-Za-z]:/.test(fixturesPathInput)) {
     throw new Error(invalidPathMessage);
   }
-  const root = path8.resolve(worktreeRoot);
-  const resolved = path8.resolve(root, fixturesPathInput);
+  const root = path9.resolve(worktreeRoot);
+  const resolved = path9.resolve(root, fixturesPathInput);
   if (!isPathWithin(root, resolved)) throw new Error(invalidPathMessage);
   try {
-    const realRoot = fs7.realpathSync(root);
+    const realRoot = fs8.realpathSync(root);
     let current = root;
-    for (const segment of path8.relative(root, resolved).split(path8.sep)) {
+    for (const segment of path9.relative(root, resolved).split(path9.sep)) {
       if (!segment) continue;
-      current = path8.join(current, segment);
+      current = path9.join(current, segment);
       let currentStats;
       try {
-        currentStats = fs7.lstatSync(current);
+        currentStats = fs8.lstatSync(current);
       } catch (error63) {
         if (error63.code === "ENOENT") break;
         throw error63;
       }
-      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs7.realpathSync(current))) {
+      if (currentStats.isSymbolicLink() && !isPathWithin(realRoot, fs8.realpathSync(current))) {
         throw new Error(invalidPathMessage);
       }
     }
@@ -73072,13 +73105,13 @@ function resolveRevisionFixturesPath(worktreeRoot, fixturesPathInput, revision) 
 }
 async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
   if (!trustedRef && !trustedPath) {
-    const configPath = path8.resolve(repoDir, configPathRel || "weighin.toml");
-    const content2 = fs7.existsSync(configPath) ? fs7.readFileSync(configPath, "utf8") : "";
+    const configPath = path9.resolve(repoDir, configPathRel || "weighin.toml");
+    const content2 = fs8.existsSync(configPath) ? fs8.readFileSync(configPath, "utf8") : "";
     return {
       config: content2 ? loadConfigContent(content2, configPath) : null,
       origin: {
         mode: "head",
-        path: path8.relative(repoDir, configPath),
+        path: path9.relative(repoDir, configPath),
         revision: await getHeadSha(repoDir),
         content_sha256: policyContentSha256(content2)
       }
@@ -73116,10 +73149,10 @@ async function loadPolicy(repoDir, configPathRel, trustedRef, trustedPath) {
 }
 function getSdkVersion(repoDir) {
   for (const rel of ["Cargo.lock", "contract/Cargo.lock"]) {
-    const lockPath = path8.join(repoDir, rel);
+    const lockPath = path9.join(repoDir, rel);
     try {
-      if (fs7.existsSync(lockPath)) {
-        const lock = fs7.readFileSync(lockPath, "utf8");
+      if (fs8.existsSync(lockPath)) {
+        const lock = fs8.readFileSync(lockPath, "utf8");
         const m = lock.match(/name = "soroban-sdk"\nversion = "([^"]+)"/);
         if (m) return m[1];
       }
@@ -73132,7 +73165,7 @@ async function checkoutRef(repoRoot, ref, label) {
   await exec7.exec("git", ["fetch", "--depth=1", "origin", ref], {
     cwd: repoRoot
   });
-  const dir = fs7.mkdtempSync(path8.join(os2.tmpdir(), `weighin-${label}-`));
+  const dir = fs8.mkdtempSync(path9.join(os3.tmpdir(), `weighin-${label}-`));
   core3.info(`Checking out ${ref} into ${dir}`);
   try {
     await exec7.exec("git", ["worktree", "add", "--detach", dir, "FETCH_HEAD"], {
@@ -73195,9 +73228,9 @@ async function run() {
     }
     const baseRef = baseRefInput.trim() || context2.payload.pull_request?.base?.ref || "main";
     await validateBaseRef(headWorkspace, baseRef);
-    keyDir = fs7.mkdtempSync(path8.join(os2.tmpdir(), "weighin-key-"));
-    fs7.chmodSync(keyDir, 448);
-    sharedKeyFile = path8.join(keyDir, "weighin-deployer.key");
+    keyDir = fs8.mkdtempSync(path9.join(os3.tmpdir(), "weighin-key-"));
+    fs8.chmodSync(keyDir, 448);
+    sharedKeyFile = path9.join(keyDir, "weighin-deployer.key");
     core3.info(`Base ref:   ${baseRef}`);
     core3.info(`RPC URL:    ${sanitizeEndpoint(rpcUrl)}`);
     core3.info(`Fixtures:   ${fixturesPathRel}`);
@@ -73208,7 +73241,7 @@ async function run() {
       fixturesPathRel,
       "HEAD"
     );
-    const fixtureId = path8.relative(path8.resolve(headWorkspace), headFixturesPath).split(path8.sep).join("/");
+    const fixtureId = path9.relative(path9.resolve(headWorkspace), headFixturesPath).split(path9.sep).join("/");
     outputPathsRejected = true;
     assertDistinctOutputPaths({
       workspace: headWorkspace,
@@ -73229,7 +73262,7 @@ async function run() {
       trustedPolicyPath
     );
     const config3 = policy.config;
-    if (!fs7.existsSync(headFixturesPath)) {
+    if (!fs8.existsSync(headFixturesPath)) {
       throw new Error(`fixtures-path not found: ${headFixturesPath}`);
     }
     core3.startGroup("Building + measuring HEAD");
@@ -73288,7 +73321,7 @@ Commit or stash changes before running benchmarks.`
         fixturesPathRel,
         "BASE"
       );
-      if (!fs7.existsSync(baseFixturesPath)) {
+      if (!fs8.existsSync(baseFixturesPath)) {
         throw new Error("fixtures-path not found in base ref");
       } else {
         await buildForRevision(
@@ -73372,11 +73405,11 @@ Commit or stash changes before running benchmarks.`
     if (metadataPathInput) {
       const prNumber = context2.payload.pull_request?.number;
       if (prNumber) {
-        const destination = path8.resolve(headWorkspace, metadataPathInput);
-        fs7.mkdirSync(path8.dirname(destination), { recursive: true });
+        const destination = path9.resolve(headWorkspace, metadataPathInput);
+        fs8.mkdirSync(path9.dirname(destination), { recursive: true });
         const { owner, repo } = context2.repo;
         const metadata = buildPrMetadata(`${owner}/${repo}`, prNumber, headSha);
-        fs7.writeFileSync(
+        fs8.writeFileSync(
           destination,
           JSON.stringify(metadata, null, 2),
           "utf8"
@@ -73401,7 +73434,7 @@ Commit or stash changes before running benchmarks.`
   } finally {
     if (keyDir) {
       try {
-        fs7.rmSync(keyDir, { recursive: true, force: true });
+        fs8.rmSync(keyDir, { recursive: true, force: true });
         core3.info(`Removed owned deployer key directory: ${keyDir}`);
       } catch (err) {
         core3.warning(
