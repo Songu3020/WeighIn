@@ -179,6 +179,8 @@ another repository and malformed PR-number/SHA fields all fail before mutation.
 These checks only validate the artifact shape and repository identity; they do
 not prove the run belongs to the PR.
 
+**Stale reports are skipped.** After validating the metadata, the consumer compares three revisions before it touches any comment. The *producer* revision is `workflow_run.head_sha` from the trusted `workflow_run` event, which for a `pull_request` run is the pull request head the report was measured at. The *metadata* revision is `headSha` from the artifact; because `actions/checkout` checks out the synthetic merge commit on `pull_request` events, it must be either the producer revision or a merge commit that has it as a parent, and anything else is rejected before mutation. The *current* revision is the live pull request head read from the API. When the producer revision is not the current head, the consumer exits successfully without creating or updating a comment and reports `Skipped stale report` as a job warning and summary entry, so an older job that finishes late never overwrites a newer result. A missing or malformed event revision, or a failing lookup, fails before mutation. The consumer reads the pull request and a commit, so its job needs `contents: read` in addition to `pull-requests: write`. The immutable pin in `weighin-comment.yml` predates this check and only gains it when moved to a revision that includes it.
+
 Producer and consumer versions must be paired. **Producer v1 (this revision)
 requires consumer v1 (this revision), and the v1 consumer rejects legacy
 unversioned metadata; it never infers a missing repository.** The previously
@@ -291,7 +293,6 @@ revisions, enforce thresholds or post comments. Provision the native helper/RPC,
 then run `node dist/cli.js <fixtures.json> --rpc-url <standalone-rpc> --output <results.json>`
 from a built checkout. See [native provisioning](docs/native-measurement.md).
 
-<<<<<<< HEAD
 SDK metadata is reported per contract from the Cargo workspace/lock owning each
 fixture WASM (`contract/Cargo.lock` or a root workspace `Cargo.lock`), or
 `"unknown"` when no owning lock can be established; multiple declared versions

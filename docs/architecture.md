@@ -186,6 +186,8 @@ PR number and 40-character hexadecimal SHA before any API mutation. Legacy
 unversioned metadata is explicitly rejected rather than inferred, so producer and
 consumer versions must be paired.
 
+Before posting, the consumer (`src/comment-action.ts`, using `src/pr-freshness.ts`) compares the trusted `workflow_run.head_sha` with the live pull request head and skips a stale report with a visible reason. The artifact's `headSha` is only a consistency check: on `pull_request` events the producer measures the synthetic merge commit, so it must equal the run head or be a merge commit having it as a parent. It is never the trust anchor.
+
 The Action emits `result` and `diff-json` before failing a valid policy violation.
 It retains a validated diff if a later report-file or job-summary write fails,
 while preserving the delivery error as the failure diagnostic. Failures before a
