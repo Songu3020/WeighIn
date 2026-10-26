@@ -4,6 +4,7 @@ import * as crypto from "crypto";
 import { parseFixtures } from "./identity";
 import { discoverSdkVersion } from "./sdk-version";
 import { ensureAccountReady } from "./account";
+import { acquireDeployerKey } from "./deployer-key";
 import { redactEndpointSecrets, sanitizeEndpoint } from "./endpoint";
 import { validateLargeInt } from "./config";
 import { SUPPORTED_NETWORK_PASSPHRASE } from "./network";
@@ -817,9 +818,10 @@ export interface RunMeasurementOptions {
   /** Soroban RPC endpoint. Defaults to localhost:8000/rpc. */
   rpcUrl?: string;
   /**
-   * Absolute path to a file used to persist the deployer keypair between
-   * base and head runs so both use the same funded on-chain account.
-   * Defaults to <fixturesDir>/.weighin-temp-key
+   * Absolute path to a reusable file that persists the deployer keypair
+   * between base and head runs so both use the same funded on-chain account.
+   * Caller-supplied files are never deleted. When omitted, the run uses a
+   * private temporary key that is removed when the run finishes or fails.
    */
   keyFile?: string;
   /** Executable override; otherwise build the bundled pinned helper on Linux x64. */
@@ -986,9 +988,20 @@ export async function runMeasurement(
     throw opts.signal.reason || new Error("Measurement cancelled by caller");
   }
 
+  const lease = await acquireDeployerKey(opts.keyFile);
+  try {
+    return await measureWithKeyFile(opts, lease.keyFile);
+  } finally {
+    await lease.release();
+  }
+}
+
+async function measureWithKeyFile(
+  opts: RunMeasurementOptions,
+  keyFile: string,
+): Promise<ContractBenchmark[]> {
   const effectiveRpcUrl = opts.rpcUrl ?? DEFAULT_RPC_URL;
   const fixturesDir = path.dirname(path.resolve(opts.fixturesPath));
-  const keyFile = opts.keyFile ?? path.join(fixturesDir, ".weighin-temp-key");
 
   const rawFixtures = fs.readFileSync(opts.fixturesPath, "utf8");
   const fixturesSpec = parseFixtures(

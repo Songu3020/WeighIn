@@ -15113,21 +15113,21 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/undici@6.28.1",
+      "bom-ref": "pkg:npm/undici@6.29.1",
       "name": "undici",
-      "version": "6.28.1",
-      "purl": "pkg:npm/undici@6.28.1",
+      "version": "6.29.1",
+      "purl": "pkg:npm/undici@6.29.1",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cd6a5d4d50f9e07e3c088c9b2f4ad6437ba4a5bf5ddb7c0cede1f946d7dd99e3fbd1c587363b5fa3b3f8bd95fee42a0370ee772783eee6e5e9ee535f8dce8344"
+          "content": "12f46552dfd0a8012f5dd41e44c6147f0390b1fce90f3b7292b1b6a3018413fac1381a18bfdb85dfd673b0d0e1e254c51e14ebd973998ca91882e783d7666618"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/undici/-/undici-6.28.1.tgz"
+          "url": "https://registry.npmjs.org/undici/-/undici-6.29.1.tgz"
         }
       ],
       "properties": [
@@ -15149,7 +15149,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA=="
+          "value": "sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA=="
         },
         {
           "name": "weighin:lockfile",
@@ -15157,7 +15157,7 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/undici/-/undici-6.28.1.tgz"
+          "value": "https://registry.npmjs.org/undici/-/undici-6.29.1.tgz"
         }
       ]
     },
@@ -15381,21 +15381,21 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/zod@3.25.76",
+      "bom-ref": "pkg:npm/zod@4.6.7",
       "name": "zod",
-      "version": "3.25.76",
-      "purl": "pkg:npm/zod@3.25.76",
+      "version": "4.6.7",
+      "purl": "pkg:npm/zod@4.6.7",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "83352dfeab7cd675ec14628815c0b76277c4031e4d92e9c27e70e5bee0524854b4d9b717bb82e679ad001485306cb5b158fc7777da7c4b94286ae8ca70d43171"
+          "content": "83c5b60f6914e9af2e9ed734e777d7d6e5412b333bcaa0315bfdf3c24f37fba472176f9228eb95f9cd30043854c335753da19aa66647fab99c5333dffb7086c2"
         }
       ],
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://registry.npmjs.org/zod/-/zod-3.25.76.tgz"
+          "url": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz"
         }
       ],
       "properties": [
@@ -15413,7 +15413,7 @@
         },
         {
           "name": "weighin:lock-integrity",
-          "value": "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="
+          "value": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg=="
         },
         {
           "name": "weighin:lockfile",
@@ -15421,7 +15421,7 @@
         },
         {
           "name": "weighin:resolved-source",
-          "value": "https://registry.npmjs.org/zod/-/zod-3.25.76.tgz"
+          "value": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz"
         }
       ]
     }
@@ -16444,14 +16444,14 @@
         "pkg:npm/%40octokit/plugin-rest-endpoint-methods@17.0.0",
         "pkg:npm/%40octokit/request-error@7.1.2",
         "pkg:npm/%40octokit/request@10.0.16",
-        "pkg:npm/undici@6.28.1"
+        "pkg:npm/undici@6.29.1"
       ]
     },
     {
       "ref": "pkg:npm/%40actions/http-client@3.0.2",
       "dependsOn": [
         "pkg:npm/tunnel@0.0.6",
-        "pkg:npm/undici@6.28.1"
+        "pkg:npm/undici@6.29.1"
       ]
     },
     {
@@ -17409,7 +17409,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/undici@6.28.1",
+      "ref": "pkg:npm/undici@6.29.1",
       "dependsOn": []
     },
     {
@@ -17469,7 +17469,7 @@
         "pkg:npm/vite@7.3.7",
         "pkg:npm/vitest@4.1.12",
         "pkg:npm/yaml@2.9.1",
-        "pkg:npm/zod@3.25.76"
+        "pkg:npm/zod@4.6.7"
       ]
     },
     {
@@ -17484,7 +17484,7 @@
       "dependsOn": []
     },
     {
-      "ref": "pkg:npm/zod@3.25.76",
+      "ref": "pkg:npm/zod@4.6.7",
       "dependsOn": []
     }
   ]

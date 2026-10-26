@@ -131,7 +131,7 @@ Measurement and helper operations accept an optional `signal?: AbortSignal` acro
 - **RPC calls and polling**: `callRpc`, `waitForTransaction`, and `submitAndConfirm` link the caller's cancellation signal with internal timeouts via `AbortSignal.any`. Polling intervals abort promptly on signal trigger.
 - **Native helper execution**: `simulateSnapshot` and `execute` pass `signal` to Node's `execFile`, which terminates the spawned native helper child process promptly (`SIGTERM` / `SIGKILL`) on abort.
 - **Simulation and transient recovery**: `measureInvocation` aborts transient captive-core retry delays immediately upon cancellation and halts retry loops.
-- **Resource protection**: Caller-provided key files (`keyFile`) are preserved on cancellation; temporary deployment keys and scratch files are cleaned up.
+- **Resource protection**: Caller-provided key files (`keyFile`) are never created, modified or deleted by the API, whether a run succeeds, fails or is cancelled. When no `keyFile` is given, the API creates a private temporary directory for the deployer key and removes it when the run finishes, fails or is cancelled, so each such run uses a fresh deployer account. Scratch files are cleaned up.
 - **Fail-closed guarantees**: Cancelled measurements throw explicit cancellation errors (`AbortError`) and never produce synthetic zero or fallback benchmarks.
 
 ## Schema migration
