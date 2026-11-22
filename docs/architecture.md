@@ -6,6 +6,53 @@ benchmarks between a fetched BASE revision and its existing HEAD checkout.
 The CLI only measures existing WASMs. [Evidence](EVIDENCE.md) records tested
 behavior; [limitations](KNOWN_LIMITATIONS.md) defines the supported scope.
 
+## Baseline versus HEAD simulation flow
+
+Each revision is prepared and measured independently, but reports use the
+stable logical identities declared by fixtures rather than runtime contract
+addresses.
+
+```mermaid
+flowchart TD
+    A[GitHub Action start] --> B[Validate inputs, policy and fixtures]
+    B --> C{Trusted policy ref?}
+    C -->|Yes| D[Load policy from trusted ref]
+    C -->|No| E[Load policy from HEAD]
+    D --> F[Resolve and fetch BASE ref]
+    E --> F
+    F --> G[Create temporary BASE worktree]
+
+    G --> H[HEAD revision]
+    G --> I[BASE revision]
+
+    H --> J[Build configured HEAD contracts]
+    I --> K[Build configured BASE contracts]
+    J --> L[Deploy HEAD setup and WASMs]
+    K --> M[Deploy BASE setup and WASMs]
+    L --> N[Capture HEAD RPC state]
+    M --> O[Capture BASE RPC state]
+    N --> P[Run protocol-matched HEAD native replay]
+    O --> Q[Run protocol-matched BASE native replay]
+    P --> R[Record HEAD measurements and provenance]
+    Q --> S[Record BASE measurements and provenance]
+
+    R --> T[Pair benchmarks by logical identity]
+    S --> T
+    T --> U[Calculate HEAD minus BASE deltas]
+    U --> V[Enforce thresholds and absolute caps]
+    V --> W[Write Markdown report and outputs]
+    W --> X{Policy violation?}
+    X -->|Yes| Y[Exit failure]
+    X -->|No| Z[Exit success]
+```
+
+The BASE and HEAD setup use separate revision declarations and deploy their own
+WASM instances. Captured RPC state and protocol-matched native replay produce
+resource measurements for each revision. The comparison layer joins matching
+logical fixture, contract, function and case identities, then calculates
+`HEAD - BASE` deltas. Runtime addresses may differ and are retained for
+diagnostics, but they are not the comparison key.
+
 ## Entry point and configuration
 
 `action.yml` executes `bundled/index.js` on Node 24. `src/action.ts::run` reads
